@@ -1,0 +1,65 @@
+
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: white;
+    padding: 12px 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%;
+  }
+  
+  .navbarLeft {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .brandName {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .navbarCenter {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+  }
+  
+  .navLink {
+    text-decoration: none;
+    color: #555;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  
+  .navLink:hover {
+    color: #007bff;
+  }
+  
+  .navbarRight {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .icon {
+    font-size: 1.2rem;
+    color: #555;
+    cursor: pointer;
+  }
+  
+  .icon:hover {
+    color: #007bff;
+  }
+  
+  .messenger {
+    color: #1877f2; /* Facebook Messenger Blue */
+  }
+  
+  .separator {
+    color: #555;
+  }
+  

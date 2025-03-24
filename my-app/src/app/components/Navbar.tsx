@@ -1,30 +1,33 @@
 import Image from "next/image";
+import Link from "next/link";
 import { FaUser, FaBell, FaFacebookMessenger } from "react-icons/fa";
+import styles from "./Navbar.module.css"; // Import CSS module
+// import styles from "./Navbar.module.css";
 
 const Navbar = () => {
   return (
-    <nav className="flex items-center justify-between bg-white p-4 shadow-md w-full">
+    <nav className={styles.navbar}>
       {/* Left Side - Logo and Brand Name */}
-      <div className="flex items-center space-x-3">
-        <Image src="/logo.png" alt="Travelwish Logo" width={50} height={50} />
-        <span className="text-xl font-bold">Travelwish</span>
+      <div className={styles.navbarLeft}>
+        <Image src="/logo.png" alt="Travelwish Logo" width={50} height={50}  priority unoptimized />
+        <span className={styles.brandName}>Travelwish</span>
       </div>
 
       {/* Center - Navigation Links */}
-      <div className="flex space-x-6">
-        <a href="#" className="text-gray-700 hover:text-blue-500">Become a Service Provider</a>
-        <a href="#" className="text-gray-700 hover:text-blue-500">Categories</a>
-        <a href="#" className="text-gray-700 hover:text-blue-500">About</a>
+      <div className={styles.navbarCenter}>
+        <Link href="#" className={styles.navLink}>Become a Service Provider</Link>
+        <Link href="#" className={styles.navLink}>Categories</Link>
+        <Link href="#" className={styles.navLink}>About</Link>
       </div>
 
       {/* Right Side - Icons and Login/Signup */}
-      <div className="flex items-center space-x-4">
-        <FaUser className="text-gray-700 text-xl" />
-        <span className="text-gray-700">Log in</span>
-        <span className="text-gray-700">|</span>
-        <span className="text-gray-700">Sign up</span>
-        <FaBell className="text-gray-700 text-xl" />
-        <FaFacebookMessenger className="text-blue-600 text-xl" />
+      <div className={styles.navbarRight}>
+        <FaUser className={styles.icon} />
+        <span className={styles.navLink}>Log in</span>
+        <span className={styles.separator}>|</span>
+        <span className={styles.navLink}>Sign up</span>
+        <FaBell className={styles.icon} />
+        <FaFacebookMessenger className={`${styles.icon} ${styles.messenger}`} />
       </div>
     </nav>
   );
