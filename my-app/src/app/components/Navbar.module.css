@@ -1,13 +1,18 @@
 
 .navbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background-color: white;
-    padding: 12px 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    width: 100%;
-  }
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(to bottom, #0953ba, #3da6f1 ,#8fc0f5); /* Light transparent white */
+  padding: 12px 20px;
+  width: 100%;
+  position: fixed; /* Keep navbar at the top */
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  backdrop-filter: blur(10px); /* Adds a blur effect */
+}
+
   
   .navbarLeft {
     display: flex;
@@ -16,9 +21,10 @@
   }
   
   .brandName {
-    font-size: 1.25rem;
+    font-size: 3rem;
     font-weight: bold;
-    color: #333;
+    color: #000000;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
   }
   
   .navbarCenter {
@@ -26,17 +32,24 @@
     display: flex;
     justify-content: center;
     gap: 20px;
+    padding-right: 20px;
+    font-weight: bold;
+    font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    
   }
   
   .navLink {
     text-decoration: none;
-    color: #555;
+    color: #000000;
     font-size: 1rem;
     cursor: pointer;
+    padding-right: 30px;
+    font-weight: bold;
+    font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
   }
   
   .navLink:hover {
-    color: #007bff;
+    color: #ffffff;
   }
   
   .navbarRight {
@@ -47,7 +60,7 @@
   
   .icon {
     font-size: 1.2rem;
-    color: #555;
+    color: #000000;
     cursor: pointer;
   }
   
@@ -60,6 +73,6 @@
   }
   
   .separator {
-    color: #555;
+    color: #000000;
   }
   
