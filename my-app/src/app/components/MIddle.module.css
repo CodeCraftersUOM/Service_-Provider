@@ -1,0 +1,20 @@
+.txt {
+    display: grid;
+    justify-content: center;
+    padding-top: 100px;
+    padding-left: 100px;
+    text-align: center;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    font-size: 140px;
+    color: white;
+}
+
+
+.subText {
+    font-size: 25px;
+    position: absolute;  /* Allows precise positioning */
+    right: 50px; /* Adjust distance from the right side */
+    top: 57%; /* Adjust as needed to align with the main text */
+    transform: translateY(-50%); /* Keeps it vertically centered */
+    color: white; /* Ensures text is visible */
+}

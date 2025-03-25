@@ -3,6 +3,8 @@ import { Inter } from "next/font/google"; // Use a valid Google font
 import "./globals.css";
 import Navbar from "@/app/components/Navbar";
 
+
+
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
@@ -21,9 +23,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} antialiased`}>
-        <Navbar />
-        {children}
+        <div>
+          <Navbar />
+          {children}
+        </div>
       </body>
     </html>
   );
 }
+

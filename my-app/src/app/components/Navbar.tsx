@@ -15,7 +15,7 @@ const Navbar = () => {
 
       {/* Center - Navigation Links */}
       <div className={styles.navbarCenter}>
-        <Link href="#" className={styles.navLink}>Become a Service Provider </Link>
+        <Link href="#" className={styles.navLink}>Become a <br></br> service Provider </Link>
         <Link href="#" className={styles.navLink}>Categories</Link>
         <Link href="#" className={styles.navLink}>About</Link>
       </div>
