@@ -7,7 +7,7 @@ nav {
 
   /* globals.css */
 body {
-  background-image: url('/propic.png'); /* Path to your image */
+   /* Path to your image */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
