@@ -27,7 +27,7 @@ const Navbar = () => {
         <span className={styles.separator}>|</span>
         <span className={styles.navLink}>Sign up</span>
         <FaBell className={styles.icon} />
-        <FaFacebookMessenger className={`${styles.icon} ${styles.messenger}`} />
+
       </div>
     </nav>
   );
