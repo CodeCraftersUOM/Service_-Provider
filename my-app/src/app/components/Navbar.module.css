@@ -6,7 +6,7 @@
   justify-content: space-between;
   background: linear-gradient(to bottom, #0953ba, #3da6f1 ,#8fc0f5); /* Light transparent white */
   padding: 12px 20px;
-  width: 80%;
+  width: 95%;
   height: 40px;
   position: fixed; /* Keep navbar at the top */
   top: 0;
@@ -15,7 +15,7 @@
   backdrop-filter: blur(10px); 
   z-index: 1000;
   border-radius: 25px;
-  left : 10%;
+  left : 1%;
   top : 2%;
   
 
