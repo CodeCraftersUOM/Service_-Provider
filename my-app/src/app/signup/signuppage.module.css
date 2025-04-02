@@ -1,0 +1,71 @@
+.container {
+    background-image: url('/background04.png'); /* Replace with your actual image */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; 
+    padding-left: 50px; 
+  }
+  
+    
+    .card {
+      background: #ffffff;
+      padding: 50px;
+      width: 600px;
+      text-align: center;
+      
+    }
+    
+    .title {
+      font-size: 40px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    
+    .subtitle {
+      color: #666;
+      margin-bottom: 40px;
+    }
+    
+    .input {
+      width: 60%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 20px;
+      font-size: 16px;
+    }
+    
+    .button {
+      width: 40%;
+      background-color: #007bff;
+      color: white;
+      padding: 10px;
+      border: none;
+      border-radius: 25px;
+      font-size: 16px;
+      cursor: pointer;
+      margin: 10px;
+    }
+    
+    .button:hover {
+      background-color: #0056b3;
+    }
+    
+    .footer {
+      margin-top: 15px;
+      color: #666;
+    }
+    
+    .link {
+      color: #007bff;
+      text-decoration: none;
+    }
+    
+    .link:hover {
+      text-decoration: underline;
+    }
+    
