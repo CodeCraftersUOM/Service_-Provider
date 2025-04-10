@@ -1,29 +1,42 @@
+// pages/other-services.tsx
+
 import React from 'react';
+import Head from 'next/head';
 import styles from './otherservices.module.css';
 
-const OtherServiceForm: React.FC = () => {
+const OtherServices = () => {
   return (
-    <div className={styles.wrapper}>
-         <h2 className="text-xl
-    font-bold
-    mb-
-    text-align: center;
-    color: #333;
-    margin-top: 300px;">Other Services</h2> 
+    <>
+      <Head>
+        <title>Other Services</title>
+      </Head>
       <div className={styles.container}>
-       
         <form className={styles.form}>
-          <input className={styles.input} type="text" placeholder="Business Name" />
-          <input className={styles.input} type="text" placeholder="Owner/Representative Name" />
-          <input className={styles.input} type="email" placeholder="Business Email" />
-          <input className={styles.input} type="tel" placeholder="Business Phone Number" />
-          <input className={styles.input} type="text" placeholder="Business Address" />
-          <input className={styles.input} type="url" placeholder="Your business Web Site Link" />
-          <input className={styles.input} type="text" placeholder="Business Type" />
+          <h1 className={styles.title}>Other Services</h1>
+
+          <label htmlFor="businessName">Business Name</label>
+          <input className={styles.input} type="text" id="businessName" placeholder="Enter Business Name" />
+
+          <label htmlFor="ownerName">Owner/Representative Name</label>
+          <input className={styles.input} type="text" id="ownerName" placeholder="Enter Name" />
+
+          <label htmlFor="email">Business Email</label>
+          <input className={styles.input} type="email" id="email" placeholder="Enter Email Address" />
+
+          <label htmlFor="phone">Business Phone Number</label>
+          <input className={styles.input} type="tel" id="phone" placeholder="Enter Phone Number" />
+
+          <label htmlFor="address">Business Address</label>
+          <input className={styles.input} type="text" id="address" placeholder="Enter Address" />
+
+          <label htmlFor="website">Business Website Link</label>
+          <input className={styles.input} type="url" id="website" placeholder="Enter Website URL" />
+
+          <button className={styles.submitButton} type="submit">Submit</button>
         </form>
       </div>
-    </div>
+    </>
   );
 };
 
-export default OtherServiceForm;
+export default OtherServices;
