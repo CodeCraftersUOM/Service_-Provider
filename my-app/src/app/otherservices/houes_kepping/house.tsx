@@ -27,7 +27,7 @@ const OtherServices = () => {
           <input className={styles.input} type="text" id="Rates/Pricing" placeholder="Enter your Rates/Pricing" />
 
           <label htmlFor="Promotions">Promotions</label>
-          <input className={styles.input} type="url" id="Promotions" placeholder="Enter Promotions" />
+          <input className={styles.input} type="text" id="Promotions" placeholder="Enter Promotions" />
 
           <button className={styles.submitButton} type="submit">Submit</button>
         </form>
