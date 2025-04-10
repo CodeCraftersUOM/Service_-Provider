@@ -1,10 +1,10 @@
 import React from 'react';
-import Auto from './auto';
+import Service from './service';
 
 function Page() {
   return (
     <div>
-      <Auto />
+      <Service />
     </div>
   );
 }
