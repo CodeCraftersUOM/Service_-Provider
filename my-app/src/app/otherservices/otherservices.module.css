@@ -50,14 +50,15 @@
 
 .form label {
   font-weight: 500;
-  color: #333;
-  font-size: 14px;
+  color: #080707;
+  font-size: 18px;
   margin-top: 5px;
+  font-weight: bold;
 }
 
 .input {
   background-color: #b3e5fc;
-  border: none;
+  border: 2px solid #0cabf4; 
   border-radius: 12px;
   padding: 10px 15px;
   font-size: 14px;
@@ -71,6 +72,7 @@
 
 .input:focus {
   background-color: #81d4fa;
+  border-color: #0288d1
 }
 
 .submitButton {
