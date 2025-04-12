@@ -1,15 +1,18 @@
 .wrapper {
   display: flex;
-  min-height: 100vh;
+  height: 100vh; /* full height */
   font-family: sans-serif;
   background-color: #f5f6fa;
+  overflow: hidden; /* no outer scroll */
 }
 
 .sidebar {
-  width: 220px;
-  background-color: white;
+  width: 200px;
+  background-color: rgb(10, 10, 150);
   border-right: 1px solid #ddd;
-  padding: 2rem 1rem;
+  padding-top: 90px;
+  overflow-y: auto; /* scrollable sidebar */
+  height: 100vh;
 }
 
 .sidebar ul {
@@ -18,15 +21,15 @@
 }
 
 .sidebar li {
-  padding: 12px 10px;
+  padding: 8px;
   cursor: pointer;
-  color: #555;
+  color: #ffffff;
   border-radius: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .sidebar li:hover {
-  background-color: #f0f0f0;
+  background-color: #1472d7;
 }
 
 .sidebar .active {
@@ -42,6 +45,8 @@
 .content {
   flex: 1;
   padding: 2rem;
+  overflow-y: auto; /* scrollable content */
+  height: 100vh;
 }
 
 .content h2 {
@@ -52,6 +57,7 @@
 .infoCard {
   background: white;
   padding: 1.5rem;
+  margin-top: 40px;
   border-radius: 12px;
   margin-bottom: 1.5rem;
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
@@ -117,4 +123,16 @@
   margin-top: 4px;
   font-weight: 500;
   color: #333;
+}
+
+/* Optional: Customize scrollbars */
+.sidebar::-webkit-scrollbar,
+.content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-thumb,
+.content::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 4px;
 }
