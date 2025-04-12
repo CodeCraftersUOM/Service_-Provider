@@ -1,8 +1,8 @@
-// pages/other-services.tsx
+"use client";
 
-import React from 'react';
+import React, { useState, ChangeEvent } from 'react';
 import Head from 'next/head';
-import styles from './guide02.module.css';
+import styles from './guide03.module.css';
 
 const OtherServices = () => {
   return (
