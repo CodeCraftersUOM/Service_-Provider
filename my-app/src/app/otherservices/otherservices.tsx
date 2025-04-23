@@ -1,17 +1,29 @@
-// pages/other-services.tsx
+'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import Head from 'next/head';
 import styles from './otherservices.module.css';
 
 const OtherServices = () => {
+  const router = useRouter();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // You can handle form data here (e.g., send to backend)
+
+    // Navigate to the service selection page
+    router.push('/otherservices/servicesilection');
+  };
+
   return (
     <>
       <Head>
         <title>Other Services</title>
       </Head>
       <div className={styles.container}>
-        <form className={styles.form}>
+        <form className={styles.form} onSubmit={handleSubmit}>
           <h1 className={styles.title}>Other Services</h1>
 
           <label htmlFor="businessName">Business Name</label>
