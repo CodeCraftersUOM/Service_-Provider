@@ -1,17 +1,21 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import styles from "./signuppage.module.css";
 
-// Your component code...
-
-export default function LoginPage() {
+export default function SignupPage() {
   const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const router = useRouter();
 
-  const handleLogin = () => {
-    console.log('Logging in with:', { username, password });
+  const handleSignup = () => {
+    console.log('Signing up with:', { username, email, password });
+
+    // After sign up logic, redirect to login or dashboard
+    router.push("/login"); // Or replace with "/dashboard"
   };
 
   return (
@@ -28,10 +32,10 @@ export default function LoginPage() {
           className={styles.input}
         />
         <input
-          type="Email"
+          type="email"
           placeholder="Email"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           className={styles.input}
         />
         <input
@@ -42,10 +46,10 @@ export default function LoginPage() {
           className={styles.input}
         />
 
-        <button onClick={handleLogin} className={styles.button}>LOG IN</button>
+        <button onClick={handleSignup} className={styles.button}>SIGN UP</button>
 
         <p className={styles.footer}>
-          Don't have an account? <Link href="/signup" className={styles.link}>Sign up</Link>
+          Already have an account? <Link href="/login" className={styles.link}>Log in</Link>
         </p>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import React from "react";
 import Image from "next/image";
+import Link from "next/link";
 import styles from "./services.module.css";
 
 const ServiceSelector: React.FC = () => {
@@ -19,6 +20,15 @@ const ServiceSelector: React.FC = () => {
     "Restaurant",
     "Public Transport",
     "Other"
+  ];
+
+  const serviceLinks: string[] = [
+    "/guide",
+    "/health",
+    "/accommodation",
+    "/restaurant",
+    "/public-transport",
+    "/otherservices"
   ];
 
   return (
@@ -63,18 +73,20 @@ const ServiceSelector: React.FC = () => {
           <h1>What service do you hope to provide?</h1>
           <div className={styles.grid}>
             {serviceIcons.map((icon, index) => (
-              <div className={styles.serviceCard} key={index}>
-                <div style={{ textAlign: "center" }}>
-                  <p className={styles.serviceLabel}>{serviceNames[index]}</p>
-                  <Image
-                    src={icon}
-                    alt={`Service icon ${index + 1}`}
-                    width={150}
-                    height={150}
-                    className={styles.serviceImage}
-                  />
+              <Link href={serviceLinks[index]} key={index}>
+                <div className={styles.serviceCard}>
+                  <div style={{ textAlign: "center" }}>
+                    <p className={styles.serviceLabel}>{serviceNames[index]}</p>
+                    <Image
+                      src={icon}
+                      alt={serviceNames[index]}
+                      width={150}
+                      height={150}
+                      className={styles.serviceImage}
+                    />
+                  </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
