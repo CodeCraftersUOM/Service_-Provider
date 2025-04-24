@@ -1,7 +1,7 @@
 .txt {
     display: grid;
     justify-content: center;
-    padding-top: 100px;
+    margin-top: 180px;
     padding-left: 100px;
     text-align: center;
     font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
@@ -17,4 +17,5 @@
     top: 57%; /* Adjust as needed to align with the main text */
     transform: translateY(-50%); /* Keeps it vertically centered */
     color: white; /* Ensures text is visible */
+    padding-top: 80px;
 }
