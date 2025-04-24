@@ -1,0 +1,146 @@
+.container {
+    display: flex;
+    height: calc(100vh - 70px); /* Adjusted for top margin */
+    font-family: sans-serif;
+    margin-top: 70px;
+    overflow: hidden;
+  }
+  
+  .sidebar {
+    width: 230px;
+    background-color: #fdfdfd;
+    padding: 16px;
+    border-right: 1px solid #a0c4ff;
+    height: 100%; /* Not full viewport */
+    flex-shrink: 0;
+    overflow: hidden; /* Prevent scrolling */
+    position: sticky; /* Optional: sticky behavior */
+    top: 0;
+  }
+  
+  .user {
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  
+  .menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .menu li {
+    padding: 10px 5px;
+    cursor: pointer;
+    color: #003366;
+    transition: background-color 0.2s;
+  }
+  
+  .menu li:hover {
+    background-color: #fcfcfc;
+    border-radius: 6px;
+  }
+  
+  .contentArea {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto; /* Only content scrolls */
+  }
+  
+  .wrapper {
+    background-color: #ffffff;
+    padding: 40px 20px;
+    text-align: center;
+  }
+  
+  .wrapper h2 {
+    font-size: 20px;
+    font-weight: bold;
+    color: #000;
+    margin-bottom: 40px;
+    line-height: 1.5;
+  }
+  
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    align-items: center;
+  }
+  
+  .stepBox {
+    width: 80%;
+    max-width: 600px;
+    height: 90px;
+    background-color: #1669ad;
+    border-radius: 8px;
+  }
+  
+  .mainContent {
+    padding: 32px;
+    background-color: #f0f8ff;
+  }
+  
+  .mainContent h1 {
+    font-size: 24px;
+    color: #003366;
+    margin-bottom: 32px;
+  }
+  
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  
+  .serviceCard {
+    background-color: #b3ddff;
+    border-radius: 20px;
+    width: 180px;
+    height: 220px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.3s;
+    text-align: center;
+  }
+  
+  .serviceCard:hover {
+    background-color: #99ccff;
+  }
+  
+  .serviceLabel {
+    margin-bottom: 8px;
+    font-size: 20px;
+    font-weight: bolder;
+    color: #003366;
+    font-weight: 500;
+  }
+  
+  .helpText {
+    margin: 40px auto;
+    font-size: 14px;
+    color: #333;
+    text-align: center;
+  }
+  
+  .helpText a {
+    color: #1669ad;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  
+  .serviceImage {
+    border-radius: 50%;          /* Makes image round */
+    border: 2px solid #1669ad;   /* Adds a border */
+    padding: 5px;                /* Adds space inside the border */
+    background-color: #fff;      /* Optional background */
+    transition: transform 0.3s ease;
+  }
+  
+  .serviceImage:hover {
+    transform: scale(1.1);       /* Zoom effect on hover */
+  }
+  
