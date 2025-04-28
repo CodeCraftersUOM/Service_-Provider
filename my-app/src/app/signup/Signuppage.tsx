@@ -6,16 +6,29 @@ import Link from "next/link";
 import styles from "./signuppage.module.css";
 
 export default function SignupPage() {
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+    password: '',
+  });
+
   const router = useRouter();
 
-  const handleSignup = () => {
-    console.log('Signing up with:', { username, email, password });
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
 
-    // After sign up logic, redirect to login or dashboard
-    router.push("/login"); // Or replace with "/dashboard"
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    console.log('Signing up with:', formData);
+
+    // TODO: Add signup API integration here
+
+    router.push("/login"); // After successful signup
   };
 
   return (
@@ -24,32 +37,48 @@ export default function SignupPage() {
         <h2 className={styles.title}>Welcome</h2>
         <p className={styles.subtitle}>Create your account</p>
 
-        <input
-          type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          className={styles.input}
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className={styles.input}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className={styles.input}
-        />
+        <form onSubmit={handleSubmit} noValidate>
+          <input
+            type="text"
+            name="username"
+            placeholder="Username"
+            value={formData.username}
+            onChange={handleChange}
+            className={styles.input}
+            required
+            autoComplete="username"
+          />
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={formData.email}
+            onChange={handleChange}
+            className={styles.input}
+            required
+            autoComplete="email"
+          />
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={handleChange}
+            className={styles.input}
+            required
+            autoComplete="new-password"
+          />
 
-        <button onClick={handleSignup} className={styles.button}>SIGN UP</button>
+          <button type="submit" className={styles.button}>
+            Sign Up
+          </button>
+        </form>
 
         <p className={styles.footer}>
-          Already have an account? <Link href="/login" className={styles.link}>Log in</Link>
+          Already have an account?
+          <Link href="/login" className={styles.link}>
+            Log in
+          </Link>
         </p>
       </div>
     </div>
