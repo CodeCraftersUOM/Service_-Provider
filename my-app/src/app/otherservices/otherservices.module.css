@@ -1,95 +1,116 @@
+/* Container with subtle gradient background and centered content */
 .container {
-  background-image: url('/background04.png'); /* Ensure this file is in the public/ folder */
+  /* Gradient overlay + your background image */
+  background: 
+    url('/background04.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  background-attachment: fixed; /* Keeps background fixed */
-  height: 100vh;
+  background-attachment: fixed;
+  min-height: 100vh;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  margin-left: 200px;
+  margin-top: 30px;
   padding: 40px 20px;
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
 }
 
+/* Form card with white translucent background, rounded corners, and shadow */
 .form {
-  background-color: rgba(255, 255, 255, 0.9);
-  padding: 30px;
-  border-radius: 16px;
-  margin-left: -750px;
-  margin-top: 100px;
-  max-width: 500px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
+  border-radius: 24px;
+  padding: 40px 32px;
+  max-width: 620px;
   width: 100%;
-  max-height: 100%; /* Limit form height */
-  overflow-y: auto;  /* Enable scroll inside form */
   display: flex;
   flex-direction: column;
-  gap: 15px;
- 
+  gap: 24px;
+  transition: box-shadow 0.3s ease;
 }
 
-/* Optional: Nice scrollbar styling */
-.form::-webkit-scrollbar {
-  width: 0.0000001px;
-}
-.form::-webkit-scrollbar-thumb {
-  background-color: #0cabf4;
-  border-radius: 10px;
-  
-}
-.form::-webkit-scrollbar-thumb:hover {
-  background-color: #555;
+.form:hover {
+  box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.22);
 }
 
+/* Title styling */
 .title {
   text-align: center;
-  font-size: 40px;
-  font-weight: bold;
-  color: #000004;
-  margin-bottom: 10px;
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #1a237e;
+  margin-bottom: 8px;
+  letter-spacing: 1px;
 }
 
+/* Label styling */
 .form label {
-  font-weight: 500;
-  color: #080707;
-  font-size: 18px;
-  margin-top: 5px;
-  font-weight: bold;
+  font-weight: 600;
+  color: #333;
+  font-size: 1rem;
+  margin-bottom: 6px;
+  display: block;
 }
 
+/* Input fields styling */
 .input {
-  background-color: #b3e5fc;
-  border: 2px solid #0cabf4; 
+  background: #f5f7fa;
+  border: 1.5px solid #bdbdbd;
   border-radius: 12px;
-  padding: 10px 15px;
-  font-size: 14px;
+  padding: 12px 16px;
+  font-size: 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
   outline: none;
-  transition: background-color 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .input::placeholder {
-  color: #555;
+  color: #9e9e9e;
+  opacity: 1;
 }
 
 .input:focus {
-  background-color: #81d4fa;
-  border-color: #0288d1
+  border-color: #1976d2;
+  box-shadow: 0 0 0 3px #1976d220;
+  background: #e3f2fd;
 }
 
+/* Submit button styling */
 .submitButton {
-  margin-top: 10px;
-  padding: 10px;
-  width: 150px;
-  background-color: #0d1feb;
-  color: white;
-  font-size: 16px;
-  font-weight: bold;
+  margin-top: 16px;
+  padding: 14px 0;
+  width: 100%;
+  background: linear-gradient(90deg, #1976d2 0%, #0cabf4 100%);
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 700;
   border: none;
-  margin-left: 100px;
-  border-radius: 40px;
+  border-radius: 32px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  box-shadow: 0 2px 8px rgba(11, 56, 110, 0.12);
+  transition: background 0.25s ease, transform 0.15s ease;
 }
 
-.submitButton:hover {
-  background-color: #0a0db0;
+.submitButton:hover,
+.submitButton:focus {
+  background: linear-gradient(90deg, #0cabf4 0%, #1976d2 100%);
+  transform: translateY(-2px) scale(1.03);
+  outline: none;
+}
+
+/* Hide scrollbar for the form (if overflow occurs) */
+.form::-webkit-scrollbar {
+  width: 0.0000001px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .form {
+    padding: 24px 16px;
+    max-width: 95vw;
+  }
+  .container {
+    padding: 16px 8px;
+  }
 }
