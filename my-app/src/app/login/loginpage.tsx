@@ -6,15 +6,38 @@ import Link from "next/link";
 import styles from "./loginpage.module.css";
 
 export default function LoginPage() {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const router = useRouter(); // <-- Initialize router
+  const [error, setError] = useState('');
+  const router = useRouter();
 
-  const handleLogin = () => {
-    console.log('Logging in with:', { username, password });
+  const handleLogin = async () => {
+    try {
+      const response = await fetch("http://localhost:2000/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include", // send cookies if using auth with cookies
+        body: JSON.stringify({ email, password }),
+      });
 
-    // Navigate to /services page
-    router.push("/Services_home"); // <-- Change this to your actual services route
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log("Login successful:", data);
+
+        // Optional: Save user/token in localStorage if needed
+        // localStorage.setItem("token", data.token);
+
+        router.push("/Services_home"); // Navigate to Services_home
+      } else {
+        setError(data.message || "Login failed");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("An error occurred. Please try again.");
+    }
   };
 
   return (
@@ -24,10 +47,10 @@ export default function LoginPage() {
         <p className={styles.subtitle}>Login to your account</p>
 
         <input
-          type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           className={styles.input}
         />
         <input
@@ -38,10 +61,13 @@ export default function LoginPage() {
           className={styles.input}
         />
 
+        {error && <p className={styles.error}>{error}</p>}
+
         <button onClick={handleLogin} className={styles.button}>LOG IN</button>
 
         <p className={styles.footer}>
-          Don't have an account? <Link href="/signup" className={styles.link}>Sign up</Link>
+          Don't have an account?{" "}
+          <Link href="/signup" className={styles.link}>Sign up</Link>
         </p>
       </div>
     </div>
