@@ -10,10 +10,6 @@ const OtherServices = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    // You can handle form data here (e.g., send to backend)
-
-    // Navigate to the service selection page
     router.push('/otherservices/servicesilection');
   };
 
@@ -21,30 +17,104 @@ const OtherServices = () => {
     <>
       <Head>
         <title>Other Services</title>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+          rel="stylesheet"
+        />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
       <div className={styles.container}>
-        <form className={styles.form} onSubmit={handleSubmit}>
+        <form className={styles.form} onSubmit={handleSubmit} autoComplete="on" noValidate>
           <h1 className={styles.title}>Other Services</h1>
 
-          <label htmlFor="businessName">Business Name</label>
-          <input className={styles.input} type="text" id="businessName" placeholder="Enter Business Name" />
+          <div className={styles.columnsContainer}>
+            {/* First column with 4 fields */}
+            <div className={styles.column}>
+              <div className={styles.formGroup}>
+                <label htmlFor="businessName">Business Name</label>
+                <input
+                  className={styles.input}
+                  type="text"
+                  id="businessName"
+                  name="businessName"
+                  placeholder="Enter Business Name"
+                  required
+                  autoComplete="organization"
+                />
+              </div>
 
-          <label htmlFor="ownerName">Owner/Representative Name</label>
-          <input className={styles.input} type="text" id="ownerName" placeholder="Enter Name" />
+              <div className={styles.formGroup}>
+                <label htmlFor="ownerName">Owner/Representative Name</label>
+                <input
+                  className={styles.input}
+                  type="text"
+                  id="ownerName"
+                  name="ownerName"
+                  placeholder="Enter Name"
+                  required
+                  autoComplete="name"
+                />
+              </div>
 
-          <label htmlFor="email">Business Email</label>
-          <input className={styles.input} type="email" id="email" placeholder="Enter Email Address" />
+              <div className={styles.formGroup}>
+                <label htmlFor="email">Business Email</label>
+                <input
+                  className={styles.input}
+                  type="email"
+                  id="email"
+                  name="email"
+                  placeholder="Enter Email Address"
+                  required
+                  autoComplete="email"
+                />
+              </div>
 
-          <label htmlFor="phone">Business Phone Number</label>
-          <input className={styles.input} type="tel" id="phone" placeholder="Enter Phone Number" />
+              <div className={styles.formGroup}>
+                <label htmlFor="phone">Business Phone Number</label>
+                <input
+                  className={styles.input}
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  placeholder="Enter Phone Number"
+                  required
+                  autoComplete="tel"
+                />
+              </div>
+            </div>
 
-          <label htmlFor="address">Business Address</label>
-          <input className={styles.input} type="text" id="address" placeholder="Enter Address" />
+            {/* Second column with 2 fields */}
+            <div className={styles.column}>
+              <div className={styles.formGroup}>
+                <label htmlFor="address">Business Address</label>
+                <input
+                  className={styles.input}
+                  type="text"
+                  id="address"
+                  name="address"
+                  placeholder="Enter Address"
+                  required
+                  autoComplete="street-address"
+                />
+              </div>
 
-          <label htmlFor="website">Business Website Link</label>
-          <input className={styles.input} type="url" id="website" placeholder="Enter Website URL" />
+              <div className={styles.formGroup}>
+                <label htmlFor="website">Business Website Link</label>
+                <input
+                  className={styles.input}
+                  type="url"
+                  id="website"
+                  name="website"
+                  placeholder="Enter Website URL"
+                  autoComplete="url"
+                />
+              </div>
+            </div>
+          </div>
 
-          <button className={styles.submitButton} type="submit">Submit</button>
+          <button className={styles.submitButton} type="submit">
+            Submit
+          </button>
         </form>
       </div>
     </>
