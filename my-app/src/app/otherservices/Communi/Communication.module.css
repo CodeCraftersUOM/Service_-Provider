@@ -1,17 +1,146 @@
+/* Base Styles */
 .container {
-    background-image: url('/background04.png'); /* Ensure this file is in the public/ folder */
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed; /* Keeps background fixed */
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 40px 20px;
-  }
-  
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  margin-left: 50px;
+  margin-top: 20px;
+  padding: 1rem;
+  background-image: url('/background04.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.form {
+  background: rgba(255, 255, 255, 0.98);
+  border-radius: 16px;
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 900px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  margin: 2rem 0;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a237e;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  text-align: center;
+  color: #4b5563;
+  margin-bottom: 2rem;
+  font-size: 1rem;
+}
+
+/* Form Grid Layout */
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.formColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Form Elements */
+.formGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.formGroup label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.input {
+  padding: 0.75rem 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  transition: all 0.2s ease;
+  background-color: #f9fafb;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  background-color: #fff;
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.inputHelp {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+
+/* Form Footer */
+.formFooter {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.submitButton {
+  padding: 0.875rem 2rem;
+  background-color: #1e40af;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.submitButton:hover {
+  background-color: #1e3a8a;
+  transform: translateY(-1px);
+}
+
+.submitButton:active {
+  transform: translateY(0);
+}
+
+.buttonIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.formNote {
+  margin-top: 1rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-align: center;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
   .form {
+<<<<<<< HEAD
     background-color: rgba(255, 255, 255, 0.9);
     padding: 30px;
     border-radius: 16px;
@@ -25,28 +154,19 @@
     flex-direction: column;
     gap: 15px;
    
+=======
+    padding: 1.75rem;
+>>>>>>> a71baaee6724e7c18db792d281c13246e3278451
   }
   
-  /* Optional: Nice scrollbar styling */
-  .form::-webkit-scrollbar {
-    width: 0.0000001px;
-  }
-  .form::-webkit-scrollbar-thumb {
-    background-color: #0cabf4;
-    border-radius: 10px;
-    
-  }
-  .form::-webkit-scrollbar-thumb:hover {
-    background-color: #555;
+  .formGrid {
+    grid-template-columns: 1fr;
   }
   
   .title {
-    text-align: center;
-    font-size: 40px;
-    font-weight: bold;
-    color: #000004;
-    margin-bottom: 10px;
+    font-size: 1.75rem;
   }
+<<<<<<< HEAD
   
   .title {
     text-align: center;
@@ -83,23 +203,31 @@
   
   .input:focus {
     background-color: #81d4fa;
+=======
+}
+
+@media (max-width: 480px) {
+  .form {
+    padding: 1.5rem;
+    border-radius: 12px;
+  }
+  
+  .title {
+    font-size: 1.5rem;
+>>>>>>> a71baaee6724e7c18db792d281c13246e3278451
   }
   .submitButton {
-    margin-top: 10px;
-    padding: 10px;
-    width: 200px;
-    background-color: #0d1feb;
-    color: white;
-    font-size: 16px;
-    font-weight: bold;
-    border: none;
-    margin-left: 100px;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+    width: 100%;
+    padding: 0.875rem 1rem;
   }
-  
-  .submitButton:hover {
-    background-color: #0a0db0;
-  }
-  
+}
+
+/* Animation for better interactivity */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.form {
+  animation: fadeIn 0.3s ease-out forwards;
+}

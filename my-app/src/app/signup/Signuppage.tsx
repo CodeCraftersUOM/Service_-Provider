@@ -5,30 +5,36 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import styles from "./signuppage.module.css";
 
-export default function SignupPage() {
-  const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    password: '',
-  });
-
+const SignupPage: React.FC = () => {
+  const [username, setUsername] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [error, setError] = useState<string>('');
   const router = useRouter();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
+  const handleSignup = async () => {
+    try {
+      const res = await fetch("http://localhost:2000/api/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ username, email, password }),
+      });
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    console.log('Signing up with:', formData);
+      const data = await res.json();
 
-    // TODO: Add signup API integration here
+      if (!res.ok) {
+        setError(data.message || "Signup failed");
+        return;
+      }
 
-    router.push("/login"); // After successful signup
+      console.log("Signup successful:", data);
+      router.push("/login");
+    } catch (err) {
+      console.error("Error during signup:", err);
+      setError("An error occurred. Please try again.");
+    }
   };
 
   return (
@@ -37,50 +43,41 @@ export default function SignupPage() {
         <h2 className={styles.title}>Welcome</h2>
         <p className={styles.subtitle}>Create your account</p>
 
-        <form onSubmit={handleSubmit} noValidate>
-          <input
-            type="text"
-            name="username"
-            placeholder="Username"
-            value={formData.username}
-            onChange={handleChange}
-            className={styles.input}
-            required
-            autoComplete="username"
-          />
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            value={formData.email}
-            onChange={handleChange}
-            className={styles.input}
-            required
-            autoComplete="email"
-          />
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={formData.password}
-            onChange={handleChange}
-            className={styles.input}
-            required
-            autoComplete="new-password"
-          />
+        {error && <p className={styles.error}>{error}</p>}
 
-          <button type="submit" className={styles.button}>
-            Sign Up
-          </button>
-        </form>
+        <input
+          type="text"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          className={styles.input}
+        />
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className={styles.input}
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className={styles.input}
+        />
+
+        <button onClick={handleSignup} className={styles.button}>
+          SIGN UP
+        </button>
 
         <p className={styles.footer}>
-          Already have an account?
-          <Link href="/login" className={styles.link}>
-            Log in
-          </Link>
+          Already have an account?{" "}
+          <Link href="/login" className={styles.link}>Log in</Link>
         </p>
       </div>
     </div>
   );
-}
+};
+
+export default SignupPage;

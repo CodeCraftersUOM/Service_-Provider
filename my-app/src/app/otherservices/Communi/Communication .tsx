@@ -1,48 +1,120 @@
-// pages/other-services.tsx
+'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import Head from 'next/head';
 import styles from './Communication.module.css';
 
-const OtherServices = () => {
+const CommunicationService = () => {
+  const router = useRouter();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Form submission logic here
+    router.push('/communication/confirmation');
+  };
+
   return (
     <>
       <Head>
-        <title>Communication Service</title>
+        <title>Communication Services | Professional Connectivity Solutions</title>
+        <meta name="description" content="Register your communication services with our professional network" />
+        <link rel="icon" href="/favicon.ico" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+          rel="stylesheet"
+        />
       </Head>
+      
       <div className={styles.container}>
-        <form className={styles.form}>
-          <h1 className={styles.title}>Communication Service</h1>
+        <form className={styles.form} onSubmit={handleSubmit}>
+          <h1 className={styles.title}>Communication Services</h1>
+          <p className={styles.subtitle}>Register your communication service provider details</p>
 
-          <label htmlFor="Service Types Offered">Service Types Offered </label>
-          <input className={styles.input} type="text" id="Service" placeholder="(Internet, phone, TV services, etc.)" />
+          <div className={styles.formGrid}>
+            {/* Left Column */}
+            <div className={styles.formColumn}>
+              <div className={styles.formGroup}>
+                <label htmlFor="serviceTypes">Service Types Offered*</label>
+                <input
+                  type="text"
+                  id="serviceTypes"
+                  className={styles.input}
+                  placeholder="Internet, phone, TV services, etc."
+                  required
+                />
+                <span className={styles.inputHelp}>List all services you provide</span>
+              </div>
 
-          <label htmlFor="Service Coverage Area">Service Coverage Area</label>
-          <input className={styles.input} type="text" id="Service Area" placeholder=" Enter the Which regions or areas the service covers" />
+              <div className={styles.formGroup}>
+                <label htmlFor="coverageArea">Service Coverage Area*</label>
+                <input
+                  type="text"
+                  id="coverageArea"
+                  className={styles.input}
+                  placeholder="Cities, regions or areas covered"
+                  required
+                />
+              </div>
 
-          <label htmlFor="Pricing Details">Pricing Details</label>
-          <input className={styles.input} type="text" id="Pricing Details" placeholder="Rates for common repairs and services" />
+              <div className={styles.formGroup}>
+                <label htmlFor="pricing">Pricing Details*</label>
+                <input
+                  type="text"
+                  id="pricing"
+                  className={styles.input}
+                  placeholder="Monthly rates, package costs"
+                  required
+                />
+              </div>
+            </div>
 
-          <label htmlFor="Special Equipment">Special Equipment</label>
-          <input className={styles.input} type="text" id="Special Equipment" placeholder="Enter your  specialized repair work" />
+            {/* Right Column */}
+            <div className={styles.formColumn}>
+              <div className={styles.formGroup}>
+                <label htmlFor="serviceSpeed">Service Speed*</label>
+                <input
+                  type="text"
+                  id="serviceSpeed"
+                  className={styles.input}
+                  placeholder="Download/upload speeds, call quality"
+                  required
+                />
+              </div>
 
-          <label htmlFor="Service Speed">Service Speed</label>
-          <input className={styles.input} type="text" id="Service Speed" placeholder="Internet speed, call quality, etc." />
+              <div className={styles.formGroup}>
+                <label htmlFor="paymentMethods">Payment Methods*</label>
+                <select id="paymentMethods" className={styles.input} required>
+                  <option value="">Select payment methods</option>
+                  <option value="credit">Credit/Debit Cards</option>
+                  <option value="bank">Bank Transfer</option>
+                  <option value="digital">Digital Wallets</option>
+                  <option value="cash">Cash</option>
+                </select>
+              </div>
 
-          <label htmlFor="Payment Methods">Payment Methods</label>
-          <input className={styles.input} type="text" id="Payment Methods" placeholder="Enter Payment Methods" />
+              <div className={styles.formGroup}>
+                <label htmlFor="promotions">Current Promotions</label>
+                <textarea
+                  id="promotions"
+                  className={`${styles.input} ${styles.textarea}`}
+                  placeholder="Special offers, discounts, or bundles"
+                  rows={3}
+                ></textarea>
+              </div>
+            </div>
+          </div>
 
-          <label htmlFor="Promotions">Promotions</label>
-          <input className={styles.input} type="text" id="Promotions" placeholder="Enter Promotions" />
-
-          
-
-
-          <button className={styles.submitButton} type="submit">Submit</button>
+          <div className={styles.formFooter}>
+            <button type="submit" className={styles.submitButton}>
+              Submit 
+            </button>
+          </div>
         </form>
       </div>
     </>
   );
 };
 
-export default OtherServices;
+export default CommunicationService;
