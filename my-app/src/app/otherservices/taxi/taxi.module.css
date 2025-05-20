@@ -1,94 +1,240 @@
 .container {
-    background-image: url('/background04.png'); /* Ensure this file is in the public/ folder */
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed; /* Keeps background fixed */
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 40px 20px;
+  background-image: url('/background04.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.form {
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: 2.5rem;
+  border-radius: 1.25rem;
+  width: 100%;
+  max-width: 950px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.title {
+  text-align: center;
+  margin-bottom: 2.5rem;
+  color: #2c3e50;
+}
+
+.titleMain {
+  display: block;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #000004;
+  line-height: 1.2;
+}
+
+.titleSub {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 400;
+  color: #7f8c8d;
+  margin-top: 0.5rem;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.inputGroup label {
+  font-weight: 600;
+  color: #34495e;
+  font-size: 0.95rem;
+}
+
+.input {
+  background-color: #b3e5fc;
+  border: 2px solid #81d4fa;
+  border-radius: 0.75rem;
+  padding: 0.875rem 1.25rem;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  outline: none;
+  color: #495057;
+}
+
+.input:focus {
+  background-color: #81d4fa;
+  border-color: #4fc3f7;
+  box-shadow: 0 0 0 3px rgba(79, 195, 247, 0.2);
+}
+
+.inputHint {
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin-top: 0.25rem;
+}
+
+.radioGroup, .checkboxGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.radioLabel, .checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: #495057;
+  position: relative;
+}
+
+.radioInput, .checkboxInput {
+  position: absolute;
+  opacity: 0;
+}
+
+.radioCustom {
+  display: inline-block;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid #adb5bd;
+  border-radius: 50%;
+  position: relative;
+}
+
+.radioCustom::after {
+  content: '';
+  position: absolute;
+  width: 0.75rem;
+  height: 0.75rem;
+  background: #0d1feb;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0.2s ease;
+}
+
+.radioInput:checked + .radioCustom::after {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.radioInput:checked + .radioCustom {
+  border-color: #0d1feb;
+}
+
+.checkboxCustom {
+  display: inline-block;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid #adb5bd;
+  border-radius: 0.25rem;
+  position: relative;
+}
+
+.checkboxCustom::after {
+  content: '✓';
+  position: absolute;
+  color: white;
+  font-size: 0.75rem;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0.2s ease;
+}
+
+.checkboxInput:checked + .checkboxCustom {
+  background: #0d1feb;
+  border-color: #0d1feb;
+}
+
+.checkboxInput:checked + .checkboxCustom::after {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.buttonWrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.submitButton {
+  padding: 1rem 2.5rem;
+  background-color: #0d1feb;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.submitButton:hover {
+  background-color: #0a0db0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.buttonIcon {
+  font-size: 1.2rem;
+  transition: transform 0.3s ease;
+}
+
+.submitButton:hover .buttonIcon {
+  transform: translateX(3px);
+}
+
+@media (max-width: 768px) {
+  .formGrid {
+    grid-template-columns: 1fr;
   }
   
   .form {
-    background-color: rgba(255, 255, 255, 0.9);
-    padding: 30px;
-    border-radius: 16px;
-    margin-left: -750px;
-    margin-top: 100px;
-    max-width: 500px;
-    width: 100%;
-    max-height: 100%; /* Limit form height */
-    overflow-y: auto;  /* Enable scroll inside form */
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-   
+    padding: 1.5rem;
   }
   
-  /* Optional: Nice scrollbar styling */
-  .form::-webkit-scrollbar {
-    width: 0.0000001px;
-  }
-  .form::-webkit-scrollbar-thumb {
-    background-color: #0cabf4;
-    border-radius: 10px;
-    
-  }
-  .form::-webkit-scrollbar-thumb:hover {
-    background-color: #555;
+  .titleMain {
+    font-size: 2rem;
   }
   
-  .title {
-    text-align: center;
-    font-size: 40px;
-    font-weight: bold;
-    color: #000004;
-    margin-bottom: 10px;
+  .titleSub {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 1rem;
   }
   
-  .form label {
-    font-weight: 500;
-    color: #333;
-    font-size: 14px;
-    margin-top: 5px;
-  }
-  
-  .input {
-    background-color: #b3e5fc;
-    border: none;
-    border-radius: 12px;
-    padding: 10px 15px;
-    font-size: 14px;
-    outline: none;
-    transition: background-color 0.3s ease;
-  }
-  
-  .input::placeholder {
-    color: #555;
-  }
-  
-  .input:focus {
-    background-color: #81d4fa;
+  .form {
+    padding: 1.25rem;
   }
   
   .submitButton {
-    margin-top: 10px;
-    padding: 10px;
-    width: 200px;
-    background-color: #0d1feb;
-    color: white;
-    font-size: 16px;
-    font-weight: bold;
-    border: none;
-    margin-left: 100px;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+    width: 100%;
+    justify-content: center;
   }
-  
-  .submitButton:hover {
-    background-color: #0a0db0;
-  }
-  
+}
