@@ -1,10 +1,10 @@
 import React from 'react';
-import Auto_repair from './auto_repair';
+import Repair from './repair';
 
 function Page() {
   return (
     <div>
-      <Auto_repair />
+      <Repair />
     </div>
   );
 }
