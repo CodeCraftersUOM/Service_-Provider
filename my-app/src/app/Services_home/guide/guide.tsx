@@ -1,270 +1,349 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Head from 'next/head';
 import styles from './guide.module.css';
 
-type GuideFormData = {
-  name: string;
-  gender: string;
-  dob: string;
-  nic: string;
-  contact: string;
-  email: string;
-  coveredLocations: string[];
-  availability: string[];
-  languages: string[];
-  experiences: string;
-  description: string;
+const initialState = {
+  name: '',
+  gender: '',
+  dob: '',
+  nic: '',
+  contact: '',
+  email: '',
+  coveredLocations: [] as string[],
+  availability: [] as string[],
+  languages: [] as string[],
+  experiences: '',
+  description: '',
 };
 
-const GuideForm = () => {
-  const router = useRouter();
-  const [formData, setFormData] = useState<GuideFormData>({
-    name: '',
-    gender: 'Male',
-    dob: '',
-    nic: '',
-    contact: '',
-    email: '',
-    coveredLocations: [],
-    availability: [],
-    languages: ['English'],
-    experiences: '',
-    description: '',
-  });
-  const [error, setError] = useState<string | null>(null);
+const locations = [
+  'Colombo', 'Gampaha', 'Kalutara', 'Kandy', 'Matale', 'Nuwara Eliya',
+  'Galle', 'Matara', 'Hambantota', 'Jaffna', 'Kilinochchi', 'Mannar',
+  'Vavuniya', 'Mullaitivu', 'Batticaloa', 'Ampara', 'Trincomalee',
+  'Kurunegala', 'Puttalam', 'Anuradhapura', 'Polonnaruwa', 'Badulla',
+  'Monaragala', 'Ratnapura', 'Kegalle'
+];
 
-  const handleInputChange = (
+const availabilityOptions = ['Weekdays', 'Weekends'];
+
+const languageOptions = [
+  'English', 'Sinhala', 'Tamil', 'Japanese', 'German', 'French'
+];
+
+const ModernGuideForm: React.FC = () => {
+  const [formData, setFormData] = useState(initialState);
+  const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState<'success' | 'error' | 'pending' | ''>('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [step, setStep] = useState(1);
+  const [selectedTags, setSelectedTags] = useState<{
+    languages: string[],
+    availability: string[],
+    coveredLocations: string[]
+  }>({
+    languages: [],
+    availability: [],
+    coveredLocations: []
+  });
+
+  const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleCheckboxChange = (name: keyof GuideFormData, value: string) => {
-    setFormData(prev => {
-      const currentValues = prev[name] as string[];
-      return {
-        ...prev,
-        [name]: currentValues.includes(value)
-          ? currentValues.filter(item => item !== value)
-          : [...currentValues, value]
-      };
+  const toggleTag = (type: 'languages' | 'availability' | 'coveredLocations', value: string) => {
+    setSelectedTags(prev => {
+      const newTags = {...prev};
+      if (newTags[type].includes(value)) {
+        // Remove tag if already selected
+        newTags[type] = newTags[type].filter(tag => tag !== value);
+      } else {
+        // Add tag if not selected
+        newTags[type] = [...newTags[type], value];
+      }
+      
+      // Update formData as well
+      setFormData(prevForm => ({
+        ...prevForm,
+        [type]: newTags[type]
+      }));
+      
+      return newTags;
     });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
+    setIsSubmitting(true);
+    setMessage('Submitting...');
+    setMessageType('pending');
 
     try {
-      const response = await fetch('http://localhost:2000/api/addGuide', {
+      const res = await fetch('http://localhost:2000/api/addGuide', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to submit form');
+      if (res.ok) {
+        setMessage('Guide added successfully!');
+        setMessageType('success');
+        setFormData(initialState);
+        setSelectedTags({
+          languages: [],
+          availability: [],
+          coveredLocations: []
+        });
+      } else {
+        const data = await res.json();
+        setMessage(`Error: ${data.message || 'Failed to add guide'}`);
+        setMessageType('error');
       }
-
-      router.push('/submission-success');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unexpected error occurred');
+    } catch {
+      setMessage('Error: Could not connect to the server.');
+      setMessageType('error');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const locations = [
-    'Colombo', 'Gampaha', 'Kalutara', 'Kandy', 'Matale', 'Nuwara Eliya',
-    'Galle', 'Matara', 'Hambantota', 'Jaffna', 'Kilinochchi', 'Mannar',
-    'Vavuniya', 'Mullaitivu', 'Batticaloa', 'Ampara', 'Trincomalee',
-    'Kurunegala', 'Puttalam', 'Anuradhapura', 'Polonnaruwa', 'Badulla',
-    'Monaragala', 'Ratnapura', 'Kegalle'
-  ];
+  const nextStep = () => {
+    setStep(step + 1);
+  };
+
+  const prevStep = () => {
+    setStep(step - 1);
+  };
 
   return (
-    <>
-      <Head>
-        <title>Guide Registration</title>
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
-          rel="stylesheet"
-        />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      </Head>
-      <div className={styles.container}>
-        <form className={styles.form} onSubmit={handleSubmit} autoComplete="on" noValidate>
-          <h1 className={styles.title}>Guide Registration</h1>
-          {error && <div className={styles.error}>{error}</div>}
+    <div className={styles.container}>
+      <div className={styles.formWrapper}>
+        <h2 className={styles.heading}>Guide Registration</h2>
+        
+        <div className={styles.progressBar}>
+          <div className={styles.progressStep}>
+            <div className={`${styles.stepCircle} ${step >= 1 ? styles.active : ''}`}>1</div>
+            <span>Personal Info</span>
+          </div>
+          <div className={styles.progressLine}></div>
+          <div className={styles.progressStep}>
+            <div className={`${styles.stepCircle} ${step >= 2 ? styles.active : ''}`}>2</div>
+            <span>Coverage & Skills</span>
+          </div>
+          <div className={styles.progressLine}></div>
+          <div className={styles.progressStep}>
+            <div className={`${styles.stepCircle} ${step >= 3 ? styles.active : ''}`}>3</div>
+            <span>Experience</span>
+          </div>
+        </div>
 
-          <div className={styles.columnsContainer}>
-            {/* Personal Information Column */}
-            <div className={styles.column}>
+        <form className={styles.form} onSubmit={handleSubmit}>
+          {step === 1 && (
+            <div className={styles.formStep}>
               <div className={styles.formGroup}>
                 <label htmlFor="name">Full Name</label>
                 <input
-                  className={styles.input}
-                  type="text"
                   id="name"
+                  className={styles.input}
                   name="name"
+                  placeholder="Enter your full name"
                   value={formData.name}
-                  onChange={handleInputChange}
+                  onChange={handleChange}
                   required
                 />
               </div>
+
               <div className={styles.formGroup}>
                 <label htmlFor="gender">Gender</label>
                 <select
-                  className={styles.input}
                   id="gender"
+                  className={styles.select}
                   name="gender"
                   value={formData.gender}
-                  onChange={handleInputChange}
+                  onChange={handleChange}
                   required
                 >
+                  <option value="">Select Gender</option>
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
                   <option value="Other">Other</option>
                 </select>
               </div>
+
               <div className={styles.formGroup}>
                 <label htmlFor="dob">Date of Birth</label>
                 <input
+                  id="dob"
                   className={styles.input}
                   type="date"
-                  id="dob"
                   name="dob"
                   value={formData.dob}
-                  onChange={handleInputChange}
+                  onChange={handleChange}
                   required
                 />
               </div>
+
               <div className={styles.formGroup}>
-                <label htmlFor="nic">NIC Number</label>
+                <label htmlFor="nic">National ID Number</label>
                 <input
-                  className={styles.input}
-                  type="text"
                   id="nic"
+                  className={styles.input}
                   name="nic"
+                  placeholder="Enter your NIC number"
                   value={formData.nic}
-                  onChange={handleInputChange}
-                  pattern="^(?:\d{9}[vVxX]|\d{12})$"
-                  title="Sri Lankan NIC format (old or new)"
+                  onChange={handleChange}
                   required
                 />
               </div>
-            </div>
-            {/* Contact Information Column */}
-            <div className={styles.column}>
+
               <div className={styles.formGroup}>
                 <label htmlFor="contact">Contact Number</label>
                 <input
-                  className={styles.input}
-                  type="tel"
                   id="contact"
+                  className={styles.input}
                   name="contact"
+                  placeholder="Enter your contact number"
                   value={formData.contact}
-                  onChange={handleInputChange}
-                  pattern="^(?:\+94|0)[1-9]\d{8}$"
-                  title="Sri Lankan phone number format"
+                  onChange={handleChange}
                   required
                 />
               </div>
+
               <div className={styles.formGroup}>
                 <label htmlFor="email">Email Address</label>
                 <input
-                  className={styles.input}
-                  type="email"
                   id="email"
+                  className={styles.input}
                   name="email"
+                  type="email"
+                  placeholder="Enter your email address"
                   value={formData.email}
-                  onChange={handleInputChange}
+                  onChange={handleChange}
                   required
                 />
               </div>
-              <div className={styles.formGroup}>
-                <label>Availability</label>
-                <div className={styles.checkboxGroup}>
-                  {['Weekdays', 'Weekends'].map(option => (
-                    <label key={option}>
-                      <input
-                        type="checkbox"
-                        checked={formData.availability.includes(option)}
-                        onChange={() => handleCheckboxChange('availability', option)}
-                      />
-                      {option}
-                    </label>
-                  ))}
-                </div>
+
+              <div className={styles.buttonContainer}>
+                <button type="button" className={styles.nextButton} onClick={nextStep}>
+                  Next <span className={styles.buttonIcon}>→</span>
+                </button>
               </div>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div className={styles.formStep}>
               <div className={styles.formGroup}>
                 <label>Languages</label>
-                <div className={styles.checkboxGroup}>
-                  {['English', 'Sinhala', 'Tamil', 'Japanese', 'German', 'French'].map(lang => (
-                    <label key={lang}>
-                      <input
-                        type="checkbox"
-                        checked={formData.languages.includes(lang)}
-                        onChange={() => handleCheckboxChange('languages', lang)}
-                      />
+                <div className={styles.tagContainer}>
+                  {languageOptions.map(lang => (
+                    <div 
+                      key={lang}
+                      className={`${styles.tag} ${selectedTags.languages.includes(lang) ? styles.tagSelected : ''}`}
+                      onClick={() => toggleTag('languages', lang)}
+                    >
                       {lang}
-                    </label>
+                    </div>
                   ))}
                 </div>
               </div>
+
+              <div className={styles.formGroup}>
+                <label>Availability</label>
+                <div className={styles.tagContainer}>
+                  {availabilityOptions.map(option => (
+                    <div 
+                      key={option}
+                      className={`${styles.tag} ${selectedTags.availability.includes(option) ? styles.tagSelected : ''}`}
+                      onClick={() => toggleTag('availability', option)}
+                    >
+                      {option}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>Covered Locations</label>
+                <div className={styles.tagContainer}>
+                  {locations.map(location => (
+                    <div 
+                      key={location}
+                      className={`${styles.tag} ${selectedTags.coveredLocations.includes(location) ? styles.tagSelected : ''}`}
+                      onClick={() => toggleTag('coveredLocations', location)}
+                    >
+                      {location}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <div className={styles.buttonContainer}>
+                <button type="button" className={styles.backButton} onClick={prevStep}>
+                  <span className={styles.buttonIcon}>←</span> Back
+                </button>
+                <button type="button" className={styles.nextButton} onClick={nextStep}>
+                  Next <span className={styles.buttonIcon}>→</span>
+                </button>
+              </div>
             </div>
-          </div>
-          {/* Locations Section */}
-          <div className={styles.formGroup}>
-            <label>Covered Locations</label>
-            <div className={styles.locationsGrid}>
-              {locations.map(location => (
-                <label key={location} className={styles.locationCheckbox}>
-                  <input
-                    type="checkbox"
-                    checked={formData.coveredLocations.includes(location)}
-                    onChange={() => handleCheckboxChange('coveredLocations', location)}
-                  />
-                  {location}
-                </label>
-              ))}
+          )}
+
+          {step === 3 && (
+            <div className={styles.formStep}>
+              <div className={styles.formGroup}>
+                <label htmlFor="experiences">Professional Experience</label>
+                <textarea
+                  id="experiences"
+                  className={styles.textarea}
+                  name="experiences"
+                  placeholder="Describe your professional experience, certifications, and qualifications"
+                  value={formData.experiences}
+                  onChange={handleChange}
+                  rows={5}
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label htmlFor="description">About You</label>
+                <textarea
+                  id="description"
+                  className={styles.textarea}
+                  name="description"
+                  placeholder="Tell us about yourself, your guiding style, and what travelers can expect"
+                  value={formData.description}
+                  onChange={handleChange}
+                  rows={5}
+                />
+              </div>
+
+              <div className={styles.buttonContainer}>
+                <button type="button" className={styles.backButton} onClick={prevStep}>
+                  <span className={styles.buttonIcon}>←</span> Back
+                </button>
+                <button 
+                  type="submit" 
+                  className={styles.submitButton}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Submitting...' : 'Submit Application'}
+                </button>
+              </div>
             </div>
-          </div>
-          {/* Experiences and Description */}
-          <div className={styles.formGroup}>
-            <label htmlFor="experiences">Experiences</label>
-            <textarea
-              className={styles.textarea}
-              id="experiences"
-              name="experiences"
-              value={formData.experiences}
-              onChange={handleInputChange}
-              rows={4}
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label htmlFor="description">Description</label>
-            <textarea
-              className={styles.textarea}
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleInputChange}
-              rows={4}
-            />
-          </div>
-          <button className={styles.submitButton} type="submit">
-            Register as Guide
-          </button>
+          )}
         </form>
+
+        {message && (
+          <div className={`${styles.message} ${styles[messageType]}`}>
+            {message}
+          </div>
+        )}
       </div>
-    </>
+    </div>
   );
 };
-
-export default GuideForm;
+ 
+export default ModernGuideForm;
