@@ -1,83 +1,564 @@
-import React from 'react';
-import Head from 'next/head';
+'use client';
+
+import React, { useState } from 'react';
 import styles from './house.module.css';
 
-const OtherServices = () => {
-  return (
-    <>
-      <Head>
-        <title>House Keeping</title>
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
-          rel="stylesheet"
+interface FormData {
+  // Basic Information
+  businessName: string;
+  ownerFullName: string;
+  contactPhone: string;
+  contactEmail: string;
+  alternatePhone: string;
+  websiteUrl: string;
+  businessDescription: string;
+  
+  // Service Details
+  serviceTypes: string[];
+  pricingMethod: string;
+  serviceArea: string;
+  addressOrLandmark: string;
+  googleMapsLink: string;
+  
+  // Availability & Legal
+  daysAvailable: string[];
+  timeSlot: string;
+  emergencyServiceAvailable: boolean;
+  businessRegistrationNumber: string;
+  licensesCertificates: File[];
+  termsAgreed: boolean;
+}
+
+const HousekeepingRegistrationForm: React.FC = () => {
+  const [currentStep, setCurrentStep] = useState<number>(1);
+  const [formData, setFormData] = useState<FormData>({
+    businessName: '',
+    ownerFullName: '',
+    contactPhone: '',
+    contactEmail: '',
+    alternatePhone: '',
+    websiteUrl: '',
+    businessDescription: '',
+    serviceTypes: [],
+    pricingMethod: '',
+    serviceArea: '',
+    addressOrLandmark: '',
+    googleMapsLink: '',
+    daysAvailable: [],
+    timeSlot: '',
+    emergencyServiceAvailable: false,
+    businessRegistrationNumber: '',
+    licensesCertificates: [],
+    termsAgreed: false,
+  });
+
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const serviceTypeOptions = [
+    'Housekeeping (Home/Office)',
+    'Deep Cleaning',
+    'Carpet Cleaning',
+    'Window Cleaning',
+    'Laundry & Ironing',
+    'Dry Cleaning',
+    'Sofa/Chair Cleaning',
+    'Disinfection & Sanitization',
+  ];
+
+  const pricingMethodOptions = [
+    'Per Hour',
+    'Per Square Foot',
+    'Per Visit',
+    'Custom Quote',
+  ];
+
+  const dayOptions = [
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
+  ];
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value, type } = e.target;
+    
+    if (type === 'checkbox') {
+      const checked = (e.target as HTMLInputElement).checked;
+      setFormData(prev => ({
+        ...prev,
+        [name]: checked,
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+    
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: '',
+      }));
+    }
+  };
+
+  const handleCheckboxGroupChange = (name: string, value: string) => {
+    setFormData(prev => {
+      const currentArray = prev[name as keyof FormData] as string[];
+      const updatedArray = currentArray.includes(value)
+        ? currentArray.filter(item => item !== value)
+        : [...currentArray, value];
+      
+      return {
+        ...prev,
+        [name]: updatedArray,
+      };
+    });
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      setFormData(prev => ({
+        ...prev,
+        licensesCertificates: Array.from(files),
+      }));
+    }
+  };
+
+  const validateStep = (step: number): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    if (step === 1) {
+      if (!formData.businessName.trim()) newErrors.businessName = 'Business name is required';
+      if (!formData.ownerFullName.trim()) newErrors.ownerFullName = 'Owner full name is required';
+      if (!formData.contactPhone.trim()) newErrors.contactPhone = 'Contact phone is required';
+      if (!formData.contactEmail.trim()) newErrors.contactEmail = 'Contact email is required';
+      if (formData.contactEmail && !/\S+@\S+\.\S+/.test(formData.contactEmail)) {
+        newErrors.contactEmail = 'Please enter a valid email address';
+      }
+    }
+
+    if (step === 2) {
+      if (formData.serviceTypes.length === 0) newErrors.serviceTypes = 'Please select at least one service type';
+      if (!formData.pricingMethod) newErrors.pricingMethod = 'Please select a pricing method';
+      if (!formData.serviceArea.trim()) newErrors.serviceArea = 'Service area is required';
+    }
+
+    if (step === 3) {
+      if (formData.daysAvailable.length === 0) newErrors.daysAvailable = 'Please select at least one day';
+      if (!formData.timeSlot.trim()) newErrors.timeSlot = 'Time slot is required';
+      if (!formData.termsAgreed) newErrors.termsAgreed = 'You must agree to the terms and conditions';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleNext = () => {
+    if (validateStep(currentStep)) {
+      setCurrentStep(prev => Math.min(prev + 1, 3));
+    }
+  };
+
+  const handlePrev = () => {
+    setCurrentStep(prev => Math.max(prev - 1, 1));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (validateStep(3)) {
+      try {
+        // Here you would typically send the data to your API
+        console.log('Form submitted:', formData);
+        alert('Registration submitted successfully!');
+      } catch (error) {
+        console.error('Error submitting form:', error);
+        alert('Error submitting registration. Please try again.');
+      }
+    }
+  };
+
+  const renderStep1 = () => (
+    <div className={styles.stepContent}>
+      
+      
+      <div className={styles.formGroup}>
+        <label htmlFor="businessName" className={styles.label}>
+          Business Name *
+        </label>
+        <input
+          type="text"
+          id="businessName"
+          name="businessName"
+          value={formData.businessName}
+          onChange={handleInputChange}
+          className={`${styles.input} ${errors.businessName ? styles.inputError : ''}`}
+          placeholder="Enter your business name"
         />
-      </Head>
-      <div className={styles.container}>
-        <form className={styles.form} autoComplete="on" noValidate>
-          <h1 className={styles.title}>House Keeping</h1>
+        {errors.businessName && <span className={styles.errorText}>{errors.businessName}</span>}
+      </div>
 
-          <div className={styles.formColumns}>
-            <div className={styles.leftColumn}>
-              <label htmlFor="serviceType">Service Type</label>
+      <div className={styles.formGroup}>
+        <label htmlFor="ownerFullName" className={styles.label}>
+          Owner Full Name *
+        </label>
+        <input
+          type="text"
+          id="ownerFullName"
+          name="ownerFullName"
+          value={formData.ownerFullName}
+          onChange={handleInputChange}
+          className={`${styles.input} ${errors.ownerFullName ? styles.inputError : ''}`}
+          placeholder="Enter owner's full name"
+        />
+        {errors.ownerFullName && <span className={styles.errorText}>{errors.ownerFullName}</span>}
+      </div>
+
+      <div className={styles.formRow}>
+        <div className={styles.formGroup}>
+          <label htmlFor="contactPhone" className={styles.label}>
+            Contact Phone *
+          </label>
+          <input
+            type="tel"
+            id="contactPhone"
+            name="contactPhone"
+            value={formData.contactPhone}
+            onChange={handleInputChange}
+            className={`${styles.input} ${errors.contactPhone ? styles.inputError : ''}`}
+            placeholder="Enter contact phone"
+          />
+          {errors.contactPhone && <span className={styles.errorText}>{errors.contactPhone}</span>}
+        </div>
+
+        <div className={styles.formGroup}>
+          <label htmlFor="alternatePhone" className={styles.label}>
+            Alternate Phone
+          </label>
+          <input
+            type="tel"
+            id="alternatePhone"
+            name="alternatePhone"
+            value={formData.alternatePhone}
+            onChange={handleInputChange}
+            className={styles.input}
+            placeholder="Enter alternate phone"
+          />
+        </div>
+      </div>
+
+      <div className={styles.formGroup}>
+        <label htmlFor="contactEmail" className={styles.label}>
+          Contact Email *
+        </label>
+        <input
+          type="email"
+          id="contactEmail"
+          name="contactEmail"
+          value={formData.contactEmail}
+          onChange={handleInputChange}
+          className={`${styles.input} ${errors.contactEmail ? styles.inputError : ''}`}
+          placeholder="Enter contact email"
+        />
+        {errors.contactEmail && <span className={styles.errorText}>{errors.contactEmail}</span>}
+      </div>
+
+      <div className={styles.formGroup}>
+        <label htmlFor="websiteUrl" className={styles.label}>
+          Website URL
+        </label>
+        <input
+          type="url"
+          id="websiteUrl"
+          name="websiteUrl"
+          value={formData.websiteUrl}
+          onChange={handleInputChange}
+          className={styles.input}
+          placeholder="Enter website URL"
+        />
+      </div>
+
+      <div className={styles.formGroup}>
+        <label htmlFor="businessDescription" className={styles.label}>
+          Business Description
+        </label>
+        <textarea
+          id="businessDescription"
+          name="businessDescription"
+          value={formData.businessDescription}
+          onChange={handleInputChange}
+          className={styles.textarea}
+          rows={4}
+          placeholder="Describe your business and services"
+        />
+      </div>
+    </div>
+  );
+
+  const renderStep2 = () => (
+    <div className={styles.stepContent}>
+      <h2 className={styles.stepTitle}>Service Details</h2>
+      
+      <div className={styles.formGroup}>
+        <label className={styles.label}>Service Types *</label>
+        <div className={styles.checkboxGrid}>
+          {serviceTypeOptions.map((service) => (
+            <label key={service} className={styles.checkboxLabel}>
               <input
-                className={styles.input}
-                type="text"
-                id="serviceType"
-                name="serviceType"
-                placeholder="e.g., Cleaning, Laundry, etc."
-                required
+                type="checkbox"
+                checked={formData.serviceTypes.includes(service)}
+                onChange={() => handleCheckboxGroupChange('serviceTypes', service)}
+                className={styles.checkbox}
               />
+              <span className={styles.checkboxText}>{service}</span>
+            </label>
+          ))}
+        </div>
+        {errors.serviceTypes && <span className={styles.errorText}>{errors.serviceTypes}</span>}
+      </div>
 
-              <label htmlFor="serviceArea">Service Area</label>
+      <div className={styles.formGroup}>
+        <label htmlFor="pricingMethod" className={styles.label}>
+          Pricing Method *
+        </label>
+        <select
+          id="pricingMethod"
+          name="pricingMethod"
+          value={formData.pricingMethod}
+          onChange={handleInputChange}
+          className={`${styles.select} ${errors.pricingMethod ? styles.inputError : ''}`}
+        >
+          <option value="">Select pricing method</option>
+          {pricingMethodOptions.map((method) => (
+            <option key={method} value={method}>
+              {method}
+            </option>
+          ))}
+        </select>
+        {errors.pricingMethod && <span className={styles.errorText}>{errors.pricingMethod}</span>}
+      </div>
+
+      <div className={styles.formGroup}>
+        <label htmlFor="serviceArea" className={styles.label}>
+          Service Area *
+        </label>
+        <input
+          type="text"
+          id="serviceArea"
+          name="serviceArea"
+          value={formData.serviceArea}
+          onChange={handleInputChange}
+          className={`${styles.input} ${errors.serviceArea ? styles.inputError : ''}`}
+          placeholder="Enter service area (e.g., Downtown, North Zone)"
+        />
+        {errors.serviceArea && <span className={styles.errorText}>{errors.serviceArea}</span>}
+      </div>
+
+      <div className={styles.formGroup}>
+        <label htmlFor="addressOrLandmark" className={styles.label}>
+          Address or Landmark
+        </label>
+        <input
+          type="text"
+          id="addressOrLandmark"
+          name="addressOrLandmark"
+          value={formData.addressOrLandmark}
+          onChange={handleInputChange}
+          className={styles.input}
+          placeholder="Enter address or nearby landmark"
+        />
+      </div>
+
+      <div className={styles.formGroup}>
+        <label htmlFor="googleMapsLink" className={styles.label}>
+          Google Maps Link
+        </label>
+        <input
+          type="url"
+          id="googleMapsLink"
+          name="googleMapsLink"
+          value={formData.googleMapsLink}
+          onChange={handleInputChange}
+          className={styles.input}
+          placeholder="Enter Google Maps link"
+        />
+      </div>
+    </div>
+  );
+
+  const renderStep3 = () => (
+    <div className={styles.stepContent}>
+      <h2 className={styles.stepTitle}>Availability & Legal</h2>
+      
+      <div className={styles.formGroup}>
+        <label className={styles.label}>Days Available *</label>
+        <div className={styles.checkboxGrid}>
+          {dayOptions.map((day) => (
+            <label key={day} className={styles.checkboxLabel}>
               <input
-                className={styles.input}
-                type="text"
-                id="serviceArea"
-                name="serviceArea"
-                placeholder="Enter the Service Area"
-                required
+                type="checkbox"
+                checked={formData.daysAvailable.includes(day)}
+                onChange={() => handleCheckboxGroupChange('daysAvailable', day)}
+                className={styles.checkbox}
               />
+              <span className={styles.checkboxText}>{day}</span>
+            </label>
+          ))}
+        </div>
+        {errors.daysAvailable && <span className={styles.errorText}>{errors.daysAvailable}</span>}
+      </div>
 
-              <label htmlFor="languagesSpoken">Languages Spoken</label>
-              <input
-                className={styles.input}
-                type="text"
-                id="languagesSpoken"
-                name="languagesSpoken"
-                placeholder="Enter Languages"
-                required
+      <div className={styles.formGroup}>
+        <label htmlFor="timeSlot" className={styles.label}>
+          Time Slot *
+        </label>
+        <input
+          type="text"
+          id="timeSlot"
+          name="timeSlot"
+          value={formData.timeSlot}
+          onChange={handleInputChange}
+          className={`${styles.input} ${errors.timeSlot ? styles.inputError : ''}`}
+          placeholder="e.g., 9:00 AM - 5:00 PM"
+        />
+        {errors.timeSlot && <span className={styles.errorText}>{errors.timeSlot}</span>}
+      </div>
+
+      <div className={styles.formGroup}>
+        <label className={styles.checkboxLabel}>
+          <input
+            type="checkbox"
+            name="emergencyServiceAvailable"
+            checked={formData.emergencyServiceAvailable}
+            onChange={handleInputChange}
+            className={styles.checkbox}
+          />
+          <span className={styles.checkboxText}>Emergency Service Available</span>
+        </label>
+      </div>
+
+      <div className={styles.formGroup}>
+        <label htmlFor="businessRegistrationNumber" className={styles.label}>
+          Business Registration Number
+        </label>
+        <input
+          type="text"
+          id="businessRegistrationNumber"
+          name="businessRegistrationNumber"
+          value={formData.businessRegistrationNumber}
+          onChange={handleInputChange}
+          className={styles.input}
+          placeholder="Enter business registration number"
+        />
+      </div>
+
+      <div className={styles.formGroup}>
+        <label htmlFor="licensesCertificates" className={styles.label}>
+          Licenses & Certificates
+        </label>
+        <input
+          type="file"
+          id="licensesCertificates"
+          name="licensesCertificates"
+          onChange={handleFileChange}
+          className={styles.fileInput}
+          multiple
+          accept=".pdf,.jpg,.jpeg,.png"
+        />
+        <small className={styles.helperText}>
+          Upload licenses, certificates, or other relevant documents (PDF, JPG, PNG)
+        </small>
+      </div>
+
+      <div className={styles.formGroup}>
+        <label className={`${styles.checkboxLabel} ${errors.termsAgreed ? styles.labelError : ''}`}>
+          <input
+            type="checkbox"
+            name="termsAgreed"
+            checked={formData.termsAgreed}
+            onChange={handleInputChange}
+            className={styles.checkbox}
+          />
+          <span className={styles.checkboxText}>
+            I agree to the terms and conditions *
+          </span>
+        </label>
+        {errors.termsAgreed && <span className={styles.errorText}>{errors.termsAgreed}</span>}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className={styles.container}>
+      <div className={styles.formContainer}>
+        <div className={styles.header}>
+          <h1 className={styles.title}>Houes Keeping Service  Registration</h1>
+          <div className={styles.progressBar}>
+            <div className={styles.progressTrack}>
+              <div 
+                className={styles.progressFill}
+                style={{ width: `${(currentStep / 3) * 100}%` }}
               />
             </div>
-
-            <div className={styles.rightColumn}>
-              <label htmlFor="ratesPricing">Rates/Pricing</label>
-              <input
-                className={styles.input}
-                type="text"
-                id="ratesPricing"
-                name="ratesPricing"
-                placeholder="Enter your Rates/Pricing"
-                required
-              />
-
-              <label htmlFor="promotions">Promotions</label>
-              <input
-                className={styles.input}
-                type="text"
-                id="promotions"
-                name="promotions"
-                placeholder="Enter Promotions"
-              />
+            <div className={styles.stepIndicators}>
+              {[1, 2, 3].map((step) => (
+                <div
+                  key={step}
+                  className={`${styles.stepIndicator} ${
+                    currentStep >= step ? styles.stepActive : ''
+                  }`}
+                >
+                  {step}
+                </div>
+              ))}
             </div>
           </div>
+        </div>
 
-          <button className={styles.submitButton} type="submit">
-            Submit
-          </button>
+        <form onSubmit={handleSubmit}>
+          {currentStep === 1 && renderStep1()}
+          {currentStep === 2 && renderStep2()}
+          {currentStep === 3 && renderStep3()}
+
+          <div className={styles.buttonGroup}>
+            {currentStep > 1 && (
+              <button
+                type="button"
+                onClick={handlePrev}
+                className={styles.buttonSecondary}
+              >
+                Previous
+              </button>
+            )}
+            {currentStep < 3 ? (
+              <button
+                type="button"
+                onClick={handleNext}
+                className={styles.buttonPrimary}
+              >
+                Next
+              </button>
+            ) : (
+              <button
+                type="submit"
+                className={styles.buttonPrimary}
+              >
+                Submit Registration
+              </button>
+            )}
+          </div>
         </form>
       </div>
-    </>
+    </div>
   );
 };
 
-export default OtherServices;
+export default HousekeepingRegistrationForm;

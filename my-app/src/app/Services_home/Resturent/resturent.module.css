@@ -1,4 +1,4 @@
- .container {
+.container {
   min-height: 100vh;
   background-image: url('/background04.png');
   background-size: cover;
@@ -8,9 +8,10 @@
   position: relative;
   padding: 2rem 1rem;
   display: flex;
- margin-top: 60px;
- margin-left: 30px;
+  margin-top: 60px;
+  
 }
+
 
 .formWrapper,
 .successWrapper {
@@ -553,4 +554,4 @@
 .stepIndicator,
 .progressFill {
   transition: all 0.3s ease;
-} 
+}
