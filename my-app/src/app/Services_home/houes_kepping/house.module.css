@@ -1,135 +1,370 @@
+/* Container and Layout */
 .container {
-  background:
-    url('/background04.png');
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+  background-image:url('/background04.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  background-attachment: fixed; /* Keeps background fixed */
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  padding: 40px 20px;
-  margin-left: 20px;
-  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+  background-attachment: fixed;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #333;
+  margin-top: 80px;
+   margin-left: -1000px;
 }
 
-.form {
-  background-color: rgba(255, 255, 255, 0.9);
-  padding: 30px;
-  border-radius: 16px;
-  margin-left: -750px;
-  margin-top: 100px;
-  max-width: 500px;
+.formContainer {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
   width: 100%;
-  max-height: 100%; /* Limit form height */
-  overflow-y: auto;  /* Enable scroll inside form */
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
- 
+  max-width: 800px;
+  margin: 0 auto;
 }
 
-/* Optional: Nice scrollbar styling */
-.form::-webkit-scrollbar {
-  width: 0.0000001px;
-}
-.form::-webkit-scrollbar-thumb {
-  background-color: #0cabf4;
-  border-radius: 10px;
-  
-}
-.form::-webkit-scrollbar-thumb:hover {
-  background-color: #555;
+/* Header */
+.header {
+  margin-bottom: 2rem;
+  text-align: center;
 }
 
 .title {
+  color: #2563eb;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
   text-align: center;
-  font-size: 40px;
-  font-weight: bold;
-  color: #000004;
-  margin-bottom: 10px;
 }
 
-.form label {
-  font-weight: 500;
-  color: #333;
-  font-size: 14px;
-  margin-top: 5px;
+/* Progress Bar */
+.progressBar {
+  margin-bottom: 2rem;
 }
 
-.input {
-  background-color: #b3e5fc;
-  border: none;
-  border-radius: 12px;
-  padding: 10px 15px;
-  font-size: 14px;
-  outline: none;
-  transition: background-color 0.3s ease;
+.progressTrack {
+  background-color: #e5e7eb;
+  height: 6px;
+  border-radius: 3px;
+  margin-bottom: 1rem;
+  overflow: hidden;
 }
 
-.input::placeholder {
-  color: #555;
+.progressFill {
+  background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease;
 }
 
-.input:focus {
-  border-color: #1976d2;
-  box-shadow: 0 0 0 2px #1976d220;
-  background: #e3f2fd;
+.stepIndicators {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
 }
-.submitButton {
-  margin-top: 10px;
-  padding: 10px;
-  width: 200px;
-  background-color: #0d1feb;
+
+.stepIndicator {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #e5e7eb;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+}
+
+.stepActive {
+  background-color: #3b82f6;
   color: white;
-  font-size: 16px;
-  font-weight: bold;
-  border: none;
-  margin-left: 100px;
-  border-radius: 12px;
+  transform: scale(1.1);
+}
+
+/* Step Content */
+.stepContent {
+  margin-bottom: 2rem;
+}
+
+.stepTitle {
+  color: #1f2937;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+/* Form Elements */
+.formGroup {
+  margin-bottom: 1.5rem;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.label {
+  display: block;
+  color: #374151;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.labelError {
+  color: #dc2626;
+}
+
+.input, .textarea, .select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+  background-color: white;
+}
+
+.input:focus, .textarea:focus, .select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.inputError {
+  border-color: #dc2626;
+}
+
+.textarea {
+  resize: vertical;
+  font-family: inherit;
+}
+
+.select {
   cursor: pointer;
+}
+
+.fileInput {
+  width: 100%;
+  padding: 0.5rem;
+  border: 2px dashed #d1d5db;
+  border-radius: 8px;
+  background-color: #f9fafb;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.fileInput:hover {
+  border-color: #3b82f6;
+  background-color: #eff6ff;
+}
+
+/* Checkbox Styles */
+.checkboxGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 6px;
   transition: background-color 0.3s ease;
 }
 
-/* Responsive */
-@media (max-width: 600px) {
-  .form {
-    padding: 24px 16px;
-  }
+.checkboxLabel:hover {
+  background-color: #f3f4f6;
+}
 
-  .formColumns {
+.checkbox {
+  width: 18px;
+  height: 18px;
+  margin-right: 0.75rem;
+  accent-color: #3b82f6;
+  cursor: pointer;
+}
+
+.checkboxText {
+  font-size: 0.875rem;
+  color: #374151;
+  user-select: none;
+}
+
+/* Helper Text */
+.helperText {
+  display: block;
+  color: #6b7280;
+  font-size: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+/* Error Text */
+.errorText {
+  display: block;
+  color: #dc2626;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  font-weight: 500;
+}
+
+/* Buttons */
+.buttonGroup {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.buttonPrimary, .buttonSecondary {
+  padding: 0.875rem 2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  min-width: 120px;
+}
+
+.buttonPrimary {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+  margin-left: auto;
+}
+
+.buttonPrimary:hover {
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.buttonSecondary {
+  background-color: #f3f4f6;
+  color: #374151;
+  border: 2px solid #d1d5db;
+}
+
+.buttonSecondary:hover {
+  background-color: #e5e7eb;
+  border-color: #9ca3af;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem 0.5rem;
+  }
+  
+  .formContainer {
+    padding: 1.5rem;
+    margin: 0;
+    border-radius: 8px;
+  }
+  
+  .title {
+    font-size: 1.5rem;
+  }
+  
+  .formRow {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  
+  .checkboxGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .buttonGroup {
     flex-direction: column;
   }
-}
-
-/* === Responsive Styles === */
-@media screen and (max-width: 768px) {
-  .title {
-    font-size: 28px;
-  }
-
-  .form {
-    padding: 20px;
-    margin: 0 10px;
-  }
-
-  .submitButton {
-    width: 100%;
+  
+  .buttonPrimary {
     margin-left: 0;
+    order: 2;
+  }
+  
+  .buttonSecondary {
+    order: 1;
+  }
+  
+  .stepIndicators {
+    margin: 0 1rem;
+  }
+  
+  .stepIndicator {
+    width: 35px;
+    height: 35px;
+    font-size: 0.75rem;
   }
 }
 
-@media screen and (max-width: 480px) {
+@media (max-width: 480px) {
+  .formContainer {
+    padding: 1rem;
+  }
+  
   .title {
-    font-size: 24px;
+    font-size: 1.25rem;
   }
+  
+  .stepTitle {
+    font-size: 1.25rem;
+  }
+  
+  .progressBar {
+    margin-bottom: 1.5rem;
+  }
+}
 
-  .input {
-    font-size: 13px;
-    padding: 8px 12px;
-  }
+/* Animation for smooth transitions */
+.stepContent {
+  animation: fadeIn 0.3s ease-in-out;
+}
 
-  .form label {
-    font-size: 13px;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
   }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Focus styles for accessibility */
+.checkbox:focus,
+.input:focus,
+.textarea:focus,
+.select:focus,
+.buttonPrimary:focus,
+.buttonSecondary:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Loading state (optional) */
+.buttonPrimary:disabled,
+.buttonSecondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.buttonPrimary:disabled:hover,
+.buttonSecondary:disabled:hover {
+  transform: none;
+  box-shadow: none;
 }
