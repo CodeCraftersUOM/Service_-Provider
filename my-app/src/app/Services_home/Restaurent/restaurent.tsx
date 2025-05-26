@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import styles from './resturent.module.css';
+import styles from './restaurent.module.css';
 
 interface RestaurantFormData {
   restaurantName: string;

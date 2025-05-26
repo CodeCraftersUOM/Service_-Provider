@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import styles from './helth.module.css';
+import styles from './health.module.css';
 
 interface DoctorFormData {
   fullName: string;

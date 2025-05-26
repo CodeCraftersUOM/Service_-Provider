@@ -31,15 +31,15 @@ const serviceNames: string[] = [
 ];
 
 const serviceLinks: string[] = [
-  "/guide",
-  "/health",
-  "/accommodation",
-  "/restaurant",
-  "/vehicle-service",
-  "/taxi",
-  "/communication",
-  "/house-keeping",
-  "/other-services"
+  "Services_home/guide",
+  "Services_home/health",
+  "Services_home/accommodation",
+  "Services_home/Restaurent",
+  "Services_home/Vehicle_repair",
+  "Services_home/taxi",
+  "Services_home/Communi",
+  "Services_home/houes_kepping",
+  "Services_home/other"
 ];
 
 const ServiceSelector: React.FC = () => {
