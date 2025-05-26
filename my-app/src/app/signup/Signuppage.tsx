@@ -6,10 +6,13 @@ import Link from "next/link";
 import styles from "./signuppage.module.css";
 
 const SignupPage: React.FC = () => {
-  const [username, setUsername] = useState<string>('');
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [error, setError] = useState<string>('');
+  const [username, setUsername] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [dateOfBirth, setDateOfBirth] = useState('');
+  const [gender, setGender] = useState('male');
+  const [error, setError] = useState('');
   const router = useRouter();
 
   const handleSignup = async () => {
@@ -19,7 +22,7 @@ const SignupPage: React.FC = () => {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ username, email, password }),
+        body: JSON.stringify({ username, email, password, fullName, dateOfBirth, gender }),
       });
 
       const data = await res.json();
@@ -52,6 +55,15 @@ const SignupPage: React.FC = () => {
           onChange={(e) => setUsername(e.target.value)}
           className={styles.input}
         />
+
+        <input
+          type="text"
+          placeholder="Full Name"
+          value={fullName}
+          onChange={(e) => setFullName(e.target.value)}
+          className={styles.input}
+        />
+
         <input
           type="email"
           placeholder="Email"
@@ -59,6 +71,7 @@ const SignupPage: React.FC = () => {
           onChange={(e) => setEmail(e.target.value)}
           className={styles.input}
         />
+
         <input
           type="password"
           placeholder="Password"
@@ -66,6 +79,24 @@ const SignupPage: React.FC = () => {
           onChange={(e) => setPassword(e.target.value)}
           className={styles.input}
         />
+
+        <input
+          type="date"
+          value={dateOfBirth}
+          onChange={(e) => setDateOfBirth(e.target.value)}
+          className={styles.input}
+        />
+
+        <select
+          value={gender}
+          onChange={(e) => setGender(e.target.value)}
+          className={styles.input}
+        >
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+          <option value="other">Other</option>
+          <option value="prefer-not-to-say">Prefer not to say</option>
+        </select>
 
         <button onClick={handleSignup} className={styles.button}>
           SIGN UP
