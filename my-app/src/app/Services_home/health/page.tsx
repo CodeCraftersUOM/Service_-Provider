@@ -1,10 +1,10 @@
 import React from 'react';
-import Resturent from './resturent'; // Ensure correct import
+import Helth from './health'; // Ensure correct import
 
 function Page() { 
   return (
     <div>
-      <Resturent /> 
+      <Helth /> 
     </div>
   );
 }
