@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import styles from './guide.module.css';
+import { useRouter } from 'next/navigation';
 
 interface GuideFormData {
   name: string;
@@ -36,6 +37,7 @@ const GuideRegistrationForm: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const router = useRouter();
 
   const locations = [
     'Colombo', 'Gampaha', 'Kalutara', 'Kandy', 'Matale', 'Nuwara Eliya',
@@ -121,7 +123,9 @@ const GuideRegistrationForm: React.FC = () => {
       setLoading(false);
     }
   };
-
+const redirectDashboard=()=>{
+    router.push('/Dashboard');
+  }
   const resetForm = () => {
     setIsSuccess(false);
     setCurrentStep(1);
@@ -162,6 +166,10 @@ const GuideRegistrationForm: React.FC = () => {
           </div>
           <button onClick={resetForm} className={styles.newRegistrationButton}>
             Register Another Guide
+          </button>
+      
+          <button onClick={redirectDashboard} className={styles.newRegistrationButton}>
+            Go to Dashboard
           </button>
         </div>
       </div>

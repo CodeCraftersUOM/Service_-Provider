@@ -47,7 +47,7 @@ const ServiceSelector: React.FC = () => {
   const router = useRouter();
 
   const menuItems = [
-    { name: 'My Profile', icon: '👤' },
+    { name: 'Dash Board', icon: '👤' },
     { name: 'Notification', icon: '🔔' },
     { name: 'Help', icon: '❓' },
     { name: 'Orders', icon: '📦' },
@@ -158,12 +158,7 @@ const ServiceSelector: React.FC = () => {
           </button>
         </div>
         
-        <div className={styles.userInfo}>
-          <div className={styles.userAvatar}>
-            <span className={styles.userInitial}>U</span>
-          </div>
-          <span className={styles.userName}>User Name</span>
-        </div>
+      
         
         <nav className={styles.sidebarNav}>
           {menuItems.map((item) => (

@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import Head from 'next/head';
 import styles from './Communication.module.css';
+import { useRouter } from 'next/navigation';
+
 
 interface CommunicationFormData {
   serviceTypesOffered: string;
@@ -47,6 +49,7 @@ const CommunicationService: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const router = useRouter();
 
   const paymentMethods = [
     'Cash', 'Credit Card', 'Debit Card', 'Bank Transfer', 
@@ -136,6 +139,9 @@ const CommunicationService: React.FC = () => {
     }
   };
 
+  const redirectDashboard=()=>{
+    router.push('/Dashboard');
+  }
   const resetForm = () => {
     setIsSuccess(false);
     setCurrentStep(1);
@@ -185,6 +191,9 @@ const CommunicationService: React.FC = () => {
             </div>
             <button onClick={resetForm} className={styles.newRegistrationButton}>
               Register Another Service
+            </button>
+            <button onClick={redirectDashboard} className={styles.newRegistrationButton}>
+              Go to Dashboard
             </button>
           </div>
         </div>

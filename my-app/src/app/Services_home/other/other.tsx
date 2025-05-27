@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import styles from './other.module.css';
+import { useRouter } from 'next/navigation';
 
 interface ServiceFormData {
   fullNameOrBusinessName: string;
@@ -50,6 +51,7 @@ const ServiceRegistrationForm: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const router = useRouter()
 
   const serviceTypes = [
     'Cleaning Services', 'Plumbing', 'Electrical', 'Carpentry', 'Painting',
@@ -161,7 +163,9 @@ const ServiceRegistrationForm: React.FC = () => {
       setLoading(false);
     }
   };
-
+const redirectDashboard=()=>{
+    router.push('/Dashboard');
+  }
   const resetForm = () => {
     setIsSuccess(false);
     setCurrentStep(1);
@@ -210,6 +214,10 @@ const ServiceRegistrationForm: React.FC = () => {
           <button onClick={resetForm} className={styles.newRegistrationButton}>
             Register Another Service
           </button>
+           
+            <button onClick={redirectDashboard} className={styles.newRegistrationButton}>
+              Go to Dashboard
+            </button>
         </div>
       </div>
     );
