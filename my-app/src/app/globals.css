@@ -1,6 +1,7 @@
-@import "tailwindcss";
 
-
+body {
+  font-family: 'Poppins', sans-serif;
+}
 
 nav {
   width: 100%;

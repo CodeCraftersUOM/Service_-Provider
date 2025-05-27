@@ -19,24 +19,25 @@ const Navbar = () => {
       {/* Navigation Links */}
       <div className={styles.navbarCenter}>
 
-        <Link href="#" className={styles.navLink}>Become a<br />Service Provider</Link>
+        <Link href="/Services_home" className={styles.navLink}>Register Services</Link>
 
-        <Link href="#" className={styles.navLink}>Categories</Link>
-        <Link href="#" className={styles.navLink}>About</Link>
+        <Link href="#" className={styles.navLink}>About Us</Link>
+        <Link href="#" className={styles.navLink}>Contact Us</Link>
       </div>
 
 
       {/* User Actions */}
-      <div className={styles.navbarRight}>
-        <button className={styles.iconButton} aria-label="Profile">
-          <FaUser />
-        </button>
-        <Link href="#" className={styles.loginBtn}>Log in</Link>
-        <Link href="#" className={styles.signupBtn}>Sign up</Link>
-        <button className={styles.iconButton} aria-label="Notifications">
-          <FaBell />
-        </button>
+          <div className={styles.navbarRight}>
+               <Link href="/Dashboard" className={styles.iconButton} aria-label="Profile">
+            <FaUser />
+                </Link>
 
+             <Link href="/login" className={styles.loginBtn}>Log in</Link>
+             <Link href="/signup" className={styles.signupBtn}>Sign up</Link>
+  
+            <button className={styles.iconButton} aria-label="Notifications">
+              <FaBell />
+             </button>
       </div>
     </nav>
   );
