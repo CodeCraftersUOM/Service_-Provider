@@ -30,7 +30,7 @@ export default function LoginPage() {
         // Optional: Save user/token in localStorage if needed
         // localStorage.setItem("token", data.token);
 
-        router.push("/Services_home"); // Navigate to Services_home
+        router.push("/Dashboard"); // Navigate to Services_home
       } else {
         setError(data.message || "Login failed");
       }
