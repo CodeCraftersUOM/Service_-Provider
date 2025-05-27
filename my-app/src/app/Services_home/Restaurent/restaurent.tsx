@@ -188,6 +188,7 @@ const RestaurantRegistrationForm: React.FC = () => {
 
       if (response.ok) {
         setIsSuccess(true);
+        
       } else {
         const errorData = await response.json();
         setMessage(`Error: ${errorData.message || 'Failed to register restaurant'}`);
@@ -297,7 +298,7 @@ const RestaurantRegistrationForm: React.FC = () => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className={styles.form}>
+        <form  className={styles.form}>
           {/* Step 1: Basic Information */}
           {currentStep === 1 && (
             <div className={styles.step}>
@@ -657,9 +658,10 @@ const RestaurantRegistrationForm: React.FC = () => {
               </button>
             ) : (
               <button
-                type="submit"
+                type="button"
                 className={styles.submitButton}
                 disabled={loading}
+                onClick={handleSubmit}
               >
                 {loading ? 'Registering...' : 'Register Restaurant'}
               </button>
