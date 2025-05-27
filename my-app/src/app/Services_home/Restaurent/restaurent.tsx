@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import styles from './restaurent.module.css';
-
+import { useRouter } from 'next/navigation';
 interface RestaurantFormData {
   restaurantName: string;
   ownerFullName: string;
@@ -70,6 +70,7 @@ const RestaurantRegistrationForm: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const router = useRouter();
 
   const businessTypes = ['Dine-in', 'Takeaway', 'Delivery Only', 'Cloud Kitchen', 'Cafe/Bakery'];
   const cuisineOptions = [
@@ -188,6 +189,7 @@ const RestaurantRegistrationForm: React.FC = () => {
 
       if (response.ok) {
         setIsSuccess(true);
+        
       } else {
         const errorData = await response.json();
         setMessage(`Error: ${errorData.message || 'Failed to register restaurant'}`);
@@ -198,7 +200,9 @@ const RestaurantRegistrationForm: React.FC = () => {
       setLoading(false);
     }
   };
-
+const redirectDashboard=()=>{
+    router.push('/Dashboard');
+  }
   const resetForm = () => {
     setIsSuccess(false);
     setCurrentStep(1);
@@ -256,6 +260,10 @@ const RestaurantRegistrationForm: React.FC = () => {
           <button onClick={resetForm} className={styles.newRegistrationButton}>
             Register Another Restaurant
           </button>
+          <button onClick={redirectDashboard} className={styles.newRegistrationButton}>
+              Go to Dashboard
+            </button>
+          
         </div>
       </div>
     );
@@ -297,7 +305,7 @@ const RestaurantRegistrationForm: React.FC = () => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className={styles.form}>
+        <form  className={styles.form}>
           {/* Step 1: Basic Information */}
           {currentStep === 1 && (
             <div className={styles.step}>
@@ -657,9 +665,10 @@ const RestaurantRegistrationForm: React.FC = () => {
               </button>
             ) : (
               <button
-                type="submit"
+                type="button"
                 className={styles.submitButton}
                 disabled={loading}
+                onClick={handleSubmit}
               >
                 {loading ? 'Registering...' : 'Register Restaurant'}
               </button>
