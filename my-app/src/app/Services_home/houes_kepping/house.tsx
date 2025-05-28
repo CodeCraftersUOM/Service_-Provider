@@ -1,7 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
+import Head from 'next/head';
 import styles from './house.module.css';
+import { useRouter } from 'next/navigation';
 
 interface FormData {
   // Basic Information
@@ -31,6 +33,11 @@ interface FormData {
 
 const HousekeepingRegistrationForm: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<number>(1);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+  const router = useRouter();
+
   const [formData, setFormData] = useState<FormData>({
     businessName: '',
     ownerFullName: '',
@@ -107,6 +114,7 @@ const HousekeepingRegistrationForm: React.FC = () => {
         [name]: '',
       }));
     }
+    setMessage('');
   };
 
   const handleCheckboxGroupChange = (name: string, value: string) => {
@@ -165,30 +173,123 @@ const HousekeepingRegistrationForm: React.FC = () => {
   const handleNext = () => {
     if (validateStep(currentStep)) {
       setCurrentStep(prev => Math.min(prev + 1, 3));
+      setMessage('');
+    } else {
+      setMessage('Please fill in all required fields before proceeding.');
     }
   };
 
   const handlePrev = () => {
     setCurrentStep(prev => Math.max(prev - 1, 1));
+    setMessage('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+    setMessage('');
+
     if (validateStep(3)) {
+      // Prepare payload for API submission
+      const payload = {
+        ...formData,
+        // Convert file array to file names or handle file uploads separately
+        licensesCertificates: formData.licensesCertificates.map(file => file.name),
+      };
+
       try {
-        // Here you would typically send the data to your API
-        console.log('Form submitted:', formData);
-        alert('Registration submitted successfully!');
-      } catch (error) {
-        console.error('Error submitting form:', error);
-        alert('Error submitting registration. Please try again.');
-      }
+        const res = await fetch('http://localhost:2000/api/addHelth', {//send the form data to backend server
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (res.ok) {
+          setIsSuccess(true);
+        } else {
+          const data = await res.json();
+          setMessage(`Error: ${data?.message || 'Failed to submit form'}`);
+        }//checks if the response is ok, if not, it sets an error message
+      } catch (err) {
+        setMessage('Error: Failed to connect to server');
+      } finally {
+        setLoading(false);
+      }//reset the loading state
     }
   };
 
+  const redirectDashboard = () => {
+    router.push('/Dashboard');
+  }//redirects to the dashboard page
+
+  const resetForm = () => {
+    setIsSuccess(false);
+    setCurrentStep(1);
+    setFormData({
+      businessName: '',
+      ownerFullName: '',
+      contactPhone: '',
+      contactEmail: '',
+      alternatePhone: '',
+      websiteUrl: '',
+      businessDescription: '',
+      serviceTypes: [],
+      pricingMethod: '',
+      serviceArea: '',
+      addressOrLandmark: '',
+      googleMapsLink: '',
+      daysAvailable: [],
+      timeSlot: '',
+      emergencyServiceAvailable: false,
+      businessRegistrationNumber: '',
+      licensesCertificates: [],
+      termsAgreed: false,
+    });//reset the form data
+    setErrors({});
+    setMessage('');
+  };
+
+  if (isSuccess) {
+    return (
+      <>
+        <Head>
+          <title>Housekeeping Services | Success</title>
+        </Head>
+        <div className={styles.container}>
+          <div className={styles.successWrapper}>
+            <div className={styles.successIcon}>
+              <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22,4 12,14.01 9,11.01"></polyline>
+              </svg>
+            </div>
+            <h1 className={styles.successTitle}>Service Successfully Registered!</h1>
+            <p className={styles.successMessage}>
+              Congratulations! Your housekeeping service <strong>{formData.businessName}</strong> has been successfully registered in our system.
+            </p>
+            <div className={styles.successDetails}>
+              <p><strong>Business:</strong> {formData.businessName}</p>
+              <p><strong>Owner:</strong> {formData.ownerFullName}</p>
+              <p><strong>Service Types:</strong> {formData.serviceTypes.join(', ')}</p>
+              <p><strong>Email:</strong> {formData.contactEmail}</p>
+            </div>
+            <button onClick={resetForm} className={styles.newRegistrationButton}>
+              Register Another Service
+            </button>
+            <button onClick={redirectDashboard} className={styles.newRegistrationButton}>
+              Go to Dashboard
+            </button>
+          </div>
+        </div>
+      </>
+    );
+  }
+
   const renderStep1 = () => (
     <div className={styles.stepContent}>
-      
+      <h2 className={styles.stepTitle}>Basic Information</h2>
       
       <div className={styles.formGroup}>
         <label htmlFor="businessName" className={styles.label}>
@@ -497,67 +598,82 @@ const HousekeepingRegistrationForm: React.FC = () => {
   );
 
   return (
-    <div className={styles.container}>
-      <div className={styles.formContainer}>
-        <div className={styles.header}>
-          <h1 className={styles.title}>Houes Keeping Service  Registration</h1>
-          <div className={styles.progressBar}>
-            <div className={styles.progressTrack}>
-              <div 
-                className={styles.progressFill}
-                style={{ width: `${(currentStep / 3) * 100}%` }}
-              />
+    <>
+      <Head>
+        <title>Housekeeping Services | Professional Registration</title>
+        <meta name="description" content="Register your housekeeping services with our professional network" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+
+      <div className={styles.container}>
+        <div className={styles.formContainer}>
+          <div className={styles.header}>
+            <h1 className={styles.title}>Housekeeping Service Registration</h1>
+            <div className={styles.progressBar}>
+              <div className={styles.progressTrack}>
+                <div 
+                  className={styles.progressFill}
+                  style={{ width: `${(currentStep / 3) * 100}%` }}
+                />
+              </div>
+              <div className={styles.stepIndicators}>
+                {[1, 2, 3].map((step) => (
+                  <div
+                    key={step}
+                    className={`${styles.stepIndicator} ${
+                      currentStep >= step ? styles.stepActive : ''
+                    }`}
+                  >
+                    {step}
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className={styles.stepIndicators}>
-              {[1, 2, 3].map((step) => (
-                <div
-                  key={step}
-                  className={`${styles.stepIndicator} ${
-                    currentStep >= step ? styles.stepActive : ''
-                  }`}
+          </div>
+
+          {message && (
+            <div className={`${styles.message} ${message.includes('Error') ? styles.error : styles.warning}`}>
+              {message}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit}>
+            {currentStep === 1 && renderStep1()}
+            {currentStep === 2 && renderStep2()}
+            {currentStep === 3 && renderStep3()}
+
+            <div className={styles.buttonGroup}>
+              {currentStep > 1 && (
+                <button
+                  type="button"
+                  onClick={handlePrev}
+                  className={styles.buttonSecondary}
                 >
-                  {step}
-                </div>
-              ))}
+                  Previous
+                </button>
+              )}
+              {currentStep < 3 ? (
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  className={styles.buttonPrimary}
+                >
+                  Next
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  className={styles.buttonPrimary}
+                  disabled={loading}
+                >
+                  {loading ? 'Registering...' : 'Submit Registration'}
+                </button>
+              )}
             </div>
-          </div>
+          </form>
         </div>
-
-        <form onSubmit={handleSubmit}>
-          {currentStep === 1 && renderStep1()}
-          {currentStep === 2 && renderStep2()}
-          {currentStep === 3 && renderStep3()}
-
-          <div className={styles.buttonGroup}>
-            {currentStep > 1 && (
-              <button
-                type="button"
-                onClick={handlePrev}
-                className={styles.buttonSecondary}
-              >
-                Previous
-              </button>
-            )}
-            {currentStep < 3 ? (
-              <button
-                type="button"
-                onClick={handleNext}
-                className={styles.buttonPrimary}
-              >
-                Next
-              </button>
-            ) : (
-              <button
-                type="submit"
-                className={styles.buttonPrimary}
-              >
-                Submit Registration
-              </button>
-            )}
-          </div>
-        </form>
       </div>
-    </div>
+    </>
   );
 };
 
