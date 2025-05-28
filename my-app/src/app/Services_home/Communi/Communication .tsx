@@ -23,7 +23,7 @@ interface CommunicationFormData {
   installationTime: string;
   contractTerms: string;
   specialFeatures: string;
-}
+}//secure the data type
 
 const CommunicationService: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -45,21 +45,21 @@ const CommunicationService: React.FC = () => {
     installationTime: '',
     contractTerms: '',
     specialFeatures: '',
-  });
+  });//stores the form data
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-  const router = useRouter();
+  const router = useRouter();//programmatically navigate 
 
   const paymentMethods = [
     'Cash', 'Credit Card', 'Debit Card', 'Bank Transfer', 
     'Online Payment', 'Mobile Payment', 'Cryptocurrency'
-  ];
+  ];//options for dropdown/select inputs
 
   const serviceTypes = [
     'Internet Service', 'Mobile Phone', 'Landline Phone', 'Cable TV',
     'Satellite TV', 'VoIP Services', 'Data Centers', 'Cloud Services'
-  ];
+  ];//options for dropdown/select inputs
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
@@ -76,7 +76,7 @@ const CommunicationService: React.FC = () => {
       }));
     }
     setMessage('');
-  };
+  };//update the values
 
   const validateStep = (step: number): boolean => {
     switch (step) {
@@ -89,7 +89,7 @@ const CommunicationService: React.FC = () => {
       default:
         return false;
     }
-  };
+  };// validates that the required fields are not empty for each step
 
   const nextStep = () => {
     if (validateStep(currentStep)) {
@@ -98,14 +98,14 @@ const CommunicationService: React.FC = () => {
     } else {
       setMessage('Please fill in all required fields before proceeding.');
     }
-  };
+  };//moves to the next step if the current step is valid
 
   const prevStep = () => {
     setCurrentStep(prev => Math.max(prev - 1, 1));
     setMessage('');
-  };
+  };//moves to the previous step
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {//handle form submission
     e.preventDefault();
     setLoading(true);
     setMessage('');
@@ -118,7 +118,7 @@ const CommunicationService: React.FC = () => {
     };
 
     try {
-      const res = await fetch('http://localhost:2000/api/addCommuni', {
+      const res = await fetch('http://localhost:2000/api/addCommuni', {//send the form data to backend server
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -131,17 +131,17 @@ const CommunicationService: React.FC = () => {
       } else {
         const data = await res.json();
         setMessage(`Error: ${data?.message || 'Failed to submit form'}`);
-      }
+      }//checks if the response is ok, if not, it sets an error message
     } catch (err) {
       setMessage('Error: Failed to connect to server');
     } finally {
       setLoading(false);
-    }
+    }//reset the loading state
   };
 
   const redirectDashboard=()=>{
     router.push('/Dashboard');
-  }
+  }//redirects to the dashboard page
   const resetForm = () => {
     setIsSuccess(false);
     setCurrentStep(1);
@@ -162,7 +162,7 @@ const CommunicationService: React.FC = () => {
       installationTime: '',
       contractTerms: '',
       specialFeatures: '',
-    });
+    });//reset the form data
   };
 
   if (isSuccess) {
