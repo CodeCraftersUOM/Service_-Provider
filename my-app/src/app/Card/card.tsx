@@ -20,7 +20,7 @@ const OtherServices = () => {
           <label htmlFor="Card Number"> Card Number</label>
           <input className={styles.input} type="number" id=" Number" placeholder=" Enter card Number" />
 
-          <label htmlFor="expair date">Expair Date</label>
+          <label htmlFor="expair date">Expire Date</label>
           <input className={styles.input} type="number" id="Service Area" placeholder="Enter Expair date" />
 
           <label htmlFor="Cvv">Cvv</label>
