@@ -9,10 +9,11 @@
   padding: 2rem 1rem;
   display: flex;
   margin-top: 60px;
-  margin-left: 30px;
+  
 }
 
-.formCard,
+
+.formWrapper,
 .successWrapper {
   position: relative;
   z-index: 2;
@@ -22,8 +23,8 @@
   box-shadow: 0 25px 50px rgba(30, 58, 138, 0.3);
   padding: 3rem;
   width: 100%;
-  max-width: 700px;
-  margin: 2rem 0;
+  max-width: 900px;
+  margin: 2rem auto 2rem 1%; /* Centered the form wrapper */
   border: 1px solid rgba(59, 130, 246, 0.2);
 }
 
@@ -156,10 +157,6 @@
   }
 }
 
-.stepContent {
-  min-height: 400px;
-}
-
 .stepTitle {
   color: #1e40af;
   font-size: 1.75rem;
@@ -173,14 +170,14 @@
   background-clip: text;
 }
 
-.formRow {
+.row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2rem;
   margin-bottom: 1.5rem;
 }
 
-.formGroup {
+.field {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -217,15 +214,6 @@
 .textarea {
   resize: vertical;
   min-height: 100px;
-}
-
-.select {
-  cursor: pointer;
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
-  background-position: right 12px center;
-  background-repeat: no-repeat;
-  background-size: 16px;
-  padding-right: 40px;
 }
 
 .checkboxGrid {
@@ -271,7 +259,7 @@
 }
 
 /* Button Styles */
-.buttonGroup {
+.buttonContainer {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -279,8 +267,9 @@
   gap: 1rem;
 }
 
-.buttonSecondary,
-.buttonPrimary {
+.prevButton,
+.nextButton,
+.submitButton {
   padding: 1rem 2rem;
   border-radius: 12px;
   font-size: 1.1rem;
@@ -291,30 +280,32 @@
   min-width: 150px;
 }
 
-.buttonSecondary {
+.prevButton {
   background: #f8fafc;
   color: #64748b;
   border: 2px solid #e2e8f0;
 }
 
-.buttonSecondary:hover {
+.prevButton:hover {
   background: #e2e8f0;
   transform: translateY(-2px);
   box-shadow: 0 4px 15px rgba(100, 116, 139, 0.2);
 }
 
-.buttonPrimary {
+.nextButton,
+.submitButton {
   background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
   color: white;
   box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
 }
 
-.buttonPrimary:hover:not(:disabled) {
+.nextButton:hover:not(:disabled),
+.submitButton:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
 }
 
-.buttonPrimary:disabled {
+.submitButton:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
@@ -410,7 +401,6 @@
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
-  margin: 0.5rem;
 }
 
 .newRegistrationButton:hover {
@@ -419,7 +409,7 @@
 }
 
 /* Loading Animation */
-.buttonPrimary:disabled::after {
+.submitButton:disabled::after {
   content: '';
   display: inline-block;
   width: 20px;
@@ -451,28 +441,13 @@
   border-color: #059669;
 }
 
-/* Error styling for inputs */
-.inputError {
-  border-color: #ef4444 !important;
-  box-shadow: 0 0 0 1px #ef4444;
-}
-
-/* Error message styling */
-.fieldError {
-  color: #ef4444;
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
-  margin-bottom: 0.5rem;
-  display: block;
-}
-
 /* Responsive Design */
 @media (max-width: 768px) {
   .container {
     padding: 1rem;
   }
 
-  .formCard,
+  .formWrapper,
   .successWrapper {
     padding: 2rem 1.5rem;
     margin: 1rem 0;
@@ -487,7 +462,7 @@
     font-size: 1.5rem;
   }
 
-  .formRow {
+  .row {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
@@ -501,13 +476,14 @@
     gap: 1rem;
   }
 
-  .buttonGroup {
+  .buttonContainer {
     flex-direction: column;
     gap: 1rem;
   }
 
-  .buttonSecondary,
-  .buttonPrimary {
+  .prevButton,
+  .nextButton,
+  .submitButton {
     width: 100%;
   }
 
@@ -527,7 +503,7 @@
 }
 
 @media (max-width: 480px) {
-  .formCard,
+  .formWrapper,
   .successWrapper {
     padding: 1.5rem 1rem;
   }
@@ -557,8 +533,9 @@
 .select:focus-visible,
 .textarea:focus-visible,
 .checkbox:focus-visible,
-.buttonSecondary:focus-visible,
-.buttonPrimary:focus-visible,
+.prevButton:focus-visible,
+.nextButton:focus-visible,
+.submitButton:focus-visible,
 .newRegistrationButton:focus-visible {
   outline: 2px solid #3b82f6;
   outline-offset: 2px;
@@ -570,8 +547,9 @@
 .textarea,
 .checkbox,
 .checkboxLabel,
-.buttonSecondary,
-.buttonPrimary,
+.prevButton,
+.nextButton,
+.submitButton,
 .newRegistrationButton,
 .stepIndicator,
 .progressFill {
