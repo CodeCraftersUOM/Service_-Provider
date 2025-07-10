@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import styles from './health.module.css';
+import { useRouter } from 'next/navigation';
 
 interface DoctorFormData {
   fullName: string;
@@ -19,8 +20,13 @@ interface DoctorFormData {
   certifications: string;
 }
 
+interface FieldErrors {
+  [key: string]: string;
+}
+
 const DoctorRegistration: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(1);
+  const [isSuccess, setIsSuccess] = useState(false);
   const [formData, setFormData] = useState<DoctorFormData>({
     fullName: '',
     specialty: '',
@@ -37,8 +43,159 @@ const DoctorRegistration: React.FC = () => {
     certifications: '',
   });
 
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const router = useRouter();
+
+  // Validation functions
+  const validateFullName = (name: string): string => {
+    if (!name.trim()) return "Full name is required";
+    if (name.length < 2) return "Name must be at least 2 characters";
+    if (name.length > 50) return "Name must be less than 50 characters";
+    if (!/^[a-zA-Z\s.]+$/.test(name)) return "Name can only contain letters, spaces, and periods";
+    return "";
+  };
+
+  const validateSpecialty = (specialty: string): string => {
+    if (!specialty) return "Medical specialty is required";
+    return "";
+  };
+
+  const validateExperienceYears = (years: string): string => {
+    if (!years) return "Years of experience is required";
+    const numYears = parseInt(years);
+    if (isNaN(numYears)) return "Please enter a valid number";
+    if (numYears < 0) return "Experience years cannot be negative";
+    if (numYears > 60) return "Please enter a valid number of years";
+    return "";
+  };
+
+  const validateLicenseNumber = (license: string): string => {
+    if (!license.trim()) return "License number is required";
+    if (license.length < 5) return "License number must be at least 5 characters";
+    if (license.length > 20) return "License number must be less than 20 characters";
+    if (!/^[a-zA-Z0-9-]+$/.test(license)) return "License number can only contain letters, numbers, and hyphens";
+    return "";
+  };
+
+  const validateEmail = (email: string): string => {
+    if (!email.trim()) return "Email is required";
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) return "Please enter a valid email address";
+    return "";
+  };
+
+  const validatePhone = (phone: string): string => {
+    if (!phone.trim()) return "Phone number is required";
+    // General phone number validation (allows various formats)
+    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+    const cleanPhone = phone.replace(/[\s\-\(\)\.]/g, '');
+    if (!phoneRegex.test(cleanPhone)) return "Please enter a valid phone number";
+    if (cleanPhone.length < 10) return "Phone number must be at least 10 digits";
+    return "";
+  };
+
+  const validateAddress = (address: string): string => {
+    if (!address.trim()) return "Address is required";
+    if (address.length < 5) return "Address must be at least 5 characters";
+    if (address.length > 100) return "Address must be less than 100 characters";
+    return "";
+  };
+
+  const validateCity = (city: string): string => {
+    if (!city.trim()) return "City is required";
+    if (city.length < 2) return "City must be at least 2 characters";
+    if (city.length > 50) return "City must be less than 50 characters";
+    if (!/^[a-zA-Z\s.]+$/.test(city)) return "City can only contain letters, spaces, and periods";
+    return "";
+  };
+
+  const validateState = (state: string): string => {
+    if (!state.trim()) return "State is required";
+    if (state.length < 2) return "State must be at least 2 characters";
+    if (state.length > 50) return "State must be less than 50 characters";
+    if (!/^[a-zA-Z\s.]+$/.test(state)) return "State can only contain letters, spaces, and periods";
+    return "";
+  };
+
+  const validateZipCode = (zipCode: string): string => {
+    if (!zipCode.trim()) return "ZIP code is required";
+    // Supports various ZIP code formats (US, UK, Canada, etc.)
+    const zipRegex = /^[a-zA-Z0-9\s-]{3,10}$/;
+    if (!zipRegex.test(zipCode)) return "Please enter a valid ZIP code";
+    return "";
+  };
+
+  const validateMedicalSchool = (school: string): string => {
+    if (!school.trim()) return "Medical school is required";
+    if (school.length < 3) return "Medical school name must be at least 3 characters";
+    if (school.length > 100) return "Medical school name must be less than 100 characters";
+    return "";
+  };
+
+  const validateGraduationYear = (year: string): string => {
+    if (!year) return "Graduation year is required";
+    const numYear = parseInt(year);
+    const currentYear = new Date().getFullYear();
+    if (isNaN(numYear)) return "Please enter a valid year";
+    if (numYear < 1950) return "Graduation year cannot be before 1950";
+    if (numYear > currentYear) return "Graduation year cannot be in the future";
+    if (numYear > currentYear - 3) return "Must have graduated at least 3 years ago to practice";
+    return "";
+  };
+
+  const validateCertifications = (certifications: string): string => {
+    if (certifications.trim() && certifications.length > 1000) {
+      return "Certifications description must be less than 1000 characters";
+    }
+    return "";
+  };
+
+  const validateStep = (step: number): FieldErrors => {
+    const errors: FieldErrors = {};
+    
+    switch (step) {
+      case 1:
+        errors.fullName = validateFullName(formData.fullName);
+        errors.specialty = validateSpecialty(formData.specialty);
+        errors.experienceYears = validateExperienceYears(formData.experienceYears);
+        errors.licenseNumber = validateLicenseNumber(formData.licenseNumber);
+        break;
+      case 2:
+        errors.email = validateEmail(formData.email);
+        errors.phone = validatePhone(formData.phone);
+        errors.address = validateAddress(formData.address);
+        errors.city = validateCity(formData.city);
+        errors.state = validateState(formData.state);
+        errors.zipCode = validateZipCode(formData.zipCode);
+        break;
+      case 3:
+        errors.medicalSchool = validateMedicalSchool(formData.medicalSchool);
+        errors.graduationYear = validateGraduationYear(formData.graduationYear);
+        errors.certifications = validateCertifications(formData.certifications);
+        break;
+    }
+    
+    // Remove empty errors
+    Object.keys(errors).forEach(key => {
+      if (!errors[key]) delete errors[key];
+    });
+    
+    return errors;
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+    
+    // Clear field error when user starts typing
+    if (fieldErrors[name]) {
+      setFieldErrors(prev => ({
+        ...prev,
+        [name]: ""
+      }));
+    }
+    
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -46,27 +203,127 @@ const DoctorRegistration: React.FC = () => {
   };
 
   const handleNext = () => {
-    if (currentStep < 3) {
-      setCurrentStep(currentStep + 1);
+    const errors = validateStep(currentStep);
+    setFieldErrors(errors);
+    
+    if (Object.keys(errors).length === 0) {
+      setCurrentStep(prev => Math.min(prev + 1, 3));
+      setMessage('');
+    } else {
+      setMessage('Please fix the errors below before proceeding.');
     }
   };
 
   const handlePrevious = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
+    setCurrentStep(prev => Math.max(prev - 1, 1));
+    setMessage('');
+    setFieldErrors({});
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validate all steps
+    const step1Errors = validateStep(1);
+    const step2Errors = validateStep(2);
+    const step3Errors = validateStep(3);
+    const allErrors = { ...step1Errors, ...step2Errors, ...step3Errors };
+    
+    setFieldErrors(allErrors);
+    
+    if (Object.keys(allErrors).length > 0) {
+      setMessage('Please fix all errors before submitting.');
+      return;
+    }
+    
+    setLoading(true);
+    setMessage('');
+
+    try {
+      const response = await fetch('http://localhost:2000/api/addDoctor', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        setIsSuccess(true);
+      } else {
+        const errorData = await response.json();
+        setMessage(`Error: ${errorData.message || 'Failed to register doctor'}`);
+      }
+    } catch (error) {
+      setMessage('Error: Failed to connect to server');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Form submitted:', formData);
-    // Handle form submission logic here
-    alert('Registration submitted successfully!');
+  const redirectDashboard = () => {
+    router.push('/Dashboard');
+  }
+
+  const resetForm = () => {
+    setIsSuccess(false);
+    setCurrentStep(1);
+    setFieldErrors({});
+    setMessage('');
+    setFormData({
+      fullName: '',
+      specialty: '',
+      experienceYears: '',
+      licenseNumber: '',
+      email: '',
+      phone: '',
+      address: '',
+      city: '',
+      state: '',
+      zipCode: '',
+      medicalSchool: '',
+      graduationYear: '',
+      certifications: '',
+    });
   };
+
+  if (isSuccess) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.successWrapper}>
+          <div className={styles.successIcon}>
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22,4 12,14.01 9,11.01"></polyline>
+            </svg>
+          </div>
+          <h1 className={styles.successTitle}>Doctor Successfully Registered!</h1>
+          <p className={styles.successMessage}>
+            Congratulations! <strong>Dr. {formData.fullName}</strong> has been successfully registered in our healthcare system.
+          </p>
+          <div className={styles.successDetails}>
+            <p><strong>Name:</strong> Dr. {formData.fullName}</p>
+            <p><strong>Specialty:</strong> {formData.specialty}</p>
+            <p><strong>Email:</strong> {formData.email}</p>
+            <p><strong>Experience:</strong> {formData.experienceYears} years</p>
+            <p><strong>License:</strong> {formData.licenseNumber}</p>
+          </div>
+          <button onClick={resetForm} className={styles.newRegistrationButton}>
+            Register Another Doctor
+          </button>
+      
+          <button onClick={redirectDashboard} className={styles.newRegistrationButton}>
+            Go to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const renderStep1 = () => (
     <div className={styles.stepContent}>
       <h2 className={styles.stepTitle}>Personal Information</h2>
+      
       <div className={styles.formGroup}>
         <label className={styles.label} htmlFor="fullName">Full Name *</label>
         <input
@@ -75,9 +332,10 @@ const DoctorRegistration: React.FC = () => {
           name="fullName"
           value={formData.fullName}
           onChange={handleInputChange}
-          className={styles.input}
-          required
+          className={`${styles.input} ${fieldErrors.fullName ? styles.inputError : ''}`}
+          placeholder="Enter full name"
         />
+        {fieldErrors.fullName && <p className={styles.fieldError}>{fieldErrors.fullName}</p>}
       </div>
       
       <div className={styles.formGroup}>
@@ -87,8 +345,7 @@ const DoctorRegistration: React.FC = () => {
           name="specialty"
           value={formData.specialty}
           onChange={handleInputChange}
-          className={styles.select}
-          required
+          className={`${styles.select} ${fieldErrors.specialty ? styles.inputError : ''}`}
         >
           <option value="">Select Specialty</option>
           <option value="Cardiology">Cardiology</option>
@@ -101,7 +358,12 @@ const DoctorRegistration: React.FC = () => {
           <option value="Pediatrics">Pediatrics</option>
           <option value="Psychiatry">Psychiatry</option>
           <option value="Surgery">Surgery</option>
+          <option value="Gynecology">Gynecology</option>
+          <option value="Oncology">Oncology</option>
+          <option value="Radiology">Radiology</option>
+          <option value="Anesthesiology">Anesthesiology</option>
         </select>
+        {fieldErrors.specialty && <p className={styles.fieldError}>{fieldErrors.specialty}</p>}
       </div>
 
       <div className={styles.formRow}>
@@ -113,10 +375,12 @@ const DoctorRegistration: React.FC = () => {
             name="experienceYears"
             value={formData.experienceYears}
             onChange={handleInputChange}
-            className={styles.input}
+            className={`${styles.input} ${fieldErrors.experienceYears ? styles.inputError : ''}`}
             min="0"
-            required
+            max="60"
+            placeholder="Enter years of experience"
           />
+          {fieldErrors.experienceYears && <p className={styles.fieldError}>{fieldErrors.experienceYears}</p>}
         </div>
 
         <div className={styles.formGroup}>
@@ -127,9 +391,10 @@ const DoctorRegistration: React.FC = () => {
             name="licenseNumber"
             value={formData.licenseNumber}
             onChange={handleInputChange}
-            className={styles.input}
-            required
+            className={`${styles.input} ${fieldErrors.licenseNumber ? styles.inputError : ''}`}
+            placeholder="Enter medical license number"
           />
+          {fieldErrors.licenseNumber && <p className={styles.fieldError}>{fieldErrors.licenseNumber}</p>}
         </div>
       </div>
     </div>
@@ -138,6 +403,7 @@ const DoctorRegistration: React.FC = () => {
   const renderStep2 = () => (
     <div className={styles.stepContent}>
       <h2 className={styles.stepTitle}>Contact Information</h2>
+      
       <div className={styles.formGroup}>
         <label className={styles.label} htmlFor="email">Email Address *</label>
         <input
@@ -146,9 +412,10 @@ const DoctorRegistration: React.FC = () => {
           name="email"
           value={formData.email}
           onChange={handleInputChange}
-          className={styles.input}
-          required
+          className={`${styles.input} ${fieldErrors.email ? styles.inputError : ''}`}
+          placeholder="Enter email address"
         />
+        {fieldErrors.email && <p className={styles.fieldError}>{fieldErrors.email}</p>}
       </div>
 
       <div className={styles.formGroup}>
@@ -159,9 +426,10 @@ const DoctorRegistration: React.FC = () => {
           name="phone"
           value={formData.phone}
           onChange={handleInputChange}
-          className={styles.input}
-          required
+          className={`${styles.input} ${fieldErrors.phone ? styles.inputError : ''}`}
+          placeholder="Enter phone number"
         />
+        {fieldErrors.phone && <p className={styles.fieldError}>{fieldErrors.phone}</p>}
       </div>
 
       <div className={styles.formGroup}>
@@ -172,9 +440,10 @@ const DoctorRegistration: React.FC = () => {
           name="address"
           value={formData.address}
           onChange={handleInputChange}
-          className={styles.input}
-          required
+          className={`${styles.input} ${fieldErrors.address ? styles.inputError : ''}`}
+          placeholder="Enter full address"
         />
+        {fieldErrors.address && <p className={styles.fieldError}>{fieldErrors.address}</p>}
       </div>
 
       <div className={styles.formRow}>
@@ -186,9 +455,10 @@ const DoctorRegistration: React.FC = () => {
             name="city"
             value={formData.city}
             onChange={handleInputChange}
-            className={styles.input}
-            required
+            className={`${styles.input} ${fieldErrors.city ? styles.inputError : ''}`}
+            placeholder="Enter city"
           />
+          {fieldErrors.city && <p className={styles.fieldError}>{fieldErrors.city}</p>}
         </div>
 
         <div className={styles.formGroup}>
@@ -199,9 +469,10 @@ const DoctorRegistration: React.FC = () => {
             name="state"
             value={formData.state}
             onChange={handleInputChange}
-            className={styles.input}
-            required
+            className={`${styles.input} ${fieldErrors.state ? styles.inputError : ''}`}
+            placeholder="Enter state"
           />
+          {fieldErrors.state && <p className={styles.fieldError}>{fieldErrors.state}</p>}
         </div>
 
         <div className={styles.formGroup}>
@@ -212,9 +483,10 @@ const DoctorRegistration: React.FC = () => {
             name="zipCode"
             value={formData.zipCode}
             onChange={handleInputChange}
-            className={styles.input}
-            required
+            className={`${styles.input} ${fieldErrors.zipCode ? styles.inputError : ''}`}
+            placeholder="Enter ZIP code"
           />
+          {fieldErrors.zipCode && <p className={styles.fieldError}>{fieldErrors.zipCode}</p>}
         </div>
       </div>
     </div>
@@ -223,6 +495,7 @@ const DoctorRegistration: React.FC = () => {
   const renderStep3 = () => (
     <div className={styles.stepContent}>
       <h2 className={styles.stepTitle}>Professional Information</h2>
+      
       <div className={styles.formGroup}>
         <label className={styles.label} htmlFor="medicalSchool">Medical School *</label>
         <input
@@ -231,9 +504,10 @@ const DoctorRegistration: React.FC = () => {
           name="medicalSchool"
           value={formData.medicalSchool}
           onChange={handleInputChange}
-          className={styles.input}
-          required
+          className={`${styles.input} ${fieldErrors.medicalSchool ? styles.inputError : ''}`}
+          placeholder="Enter medical school name"
         />
+        {fieldErrors.medicalSchool && <p className={styles.fieldError}>{fieldErrors.medicalSchool}</p>}
       </div>
 
       <div className={styles.formGroup}>
@@ -244,24 +518,28 @@ const DoctorRegistration: React.FC = () => {
           name="graduationYear"
           value={formData.graduationYear}
           onChange={handleInputChange}
-          className={styles.input}
+          className={`${styles.input} ${fieldErrors.graduationYear ? styles.inputError : ''}`}
           min="1950"
           max="2025"
-          required
+          placeholder="Enter graduation year"
         />
+        {fieldErrors.graduationYear && <p className={styles.fieldError}>{fieldErrors.graduationYear}</p>}
       </div>
 
       <div className={styles.formGroup}>
-        <label className={styles.label} htmlFor="certifications">Certifications & Additional Qualifications</label>
+        <label className={styles.label} htmlFor="certifications">
+          Certifications & Additional Qualifications {formData.certifications.length > 0 && `(${formData.certifications.length}/1000)`}
+        </label>
         <textarea
           id="certifications"
           name="certifications"
           value={formData.certifications}
           onChange={handleInputChange}
-          className={styles.textarea}
+          className={`${styles.textarea} ${fieldErrors.certifications ? styles.inputError : ''}`}
           rows={4}
           placeholder="List any board certifications, fellowships, or additional qualifications..."
         />
+        {fieldErrors.certifications && <p className={styles.fieldError}>{fieldErrors.certifications}</p>}
       </div>
     </div>
   );
@@ -295,6 +573,12 @@ const DoctorRegistration: React.FC = () => {
           </div>
         </div>
 
+        {message && (
+          <div className={`${styles.message} ${message.includes('Error') ? styles.error : styles.warning}`}>
+            {message}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.step}>
             {currentStep === 1 && renderStep1()}
@@ -325,8 +609,9 @@ const DoctorRegistration: React.FC = () => {
               <button
                 type="submit"
                 className={styles.buttonPrimary}
+                disabled={loading}
               >
-                Submit Registration
+                {loading ? 'Registering...' : 'Submit Registration'}
               </button>
             )}
           </div>
