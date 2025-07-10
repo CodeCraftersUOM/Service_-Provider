@@ -200,9 +200,10 @@ const RestaurantRegistrationForm: React.FC = () => {
       setLoading(false);
     }
   };
-const redirectDashboard=()=>{
+  const redirectDashboard=()=>{
     router.push('/Dashboard');
   }
+
   const resetForm = () => {
     setIsSuccess(false);
     setCurrentStep(1);
@@ -263,7 +264,6 @@ const redirectDashboard=()=>{
           <button onClick={redirectDashboard} className={styles.newRegistrationButton}>
               Go to Dashboard
             </button>
-          
         </div>
       </div>
     );
