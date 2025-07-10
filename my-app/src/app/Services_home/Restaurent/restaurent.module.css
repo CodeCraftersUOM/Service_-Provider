@@ -23,7 +23,7 @@
   box-shadow: 0 25px 50px rgba(30, 58, 138, 0.3);
   padding: 3rem;
   width: 100%;
-  max-width: 900px;
+  max-width: 700px;
   margin: 2rem 0;
   border: 1px solid rgba(59, 130, 246, 0.2);
 }
@@ -527,7 +527,120 @@
     height: 50px;
   }
 }
+/* Add these classes to your existing restaurent.module.css file */
 
+/* Error styling for inputs */
+.inputError {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 1px #ef4444;
+}
+
+/* Error message styling */
+.fieldError {
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+/* Success page styles - add these if not already present */
+.successWrapper {
+  text-align: center;
+  padding: 4rem 3rem;
+  animation: successFadeIn 0.8s ease-out;
+}
+
+@keyframes successFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.successIcon {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 2rem;
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 15px 40px rgba(59, 130, 246, 0.4);
+  }
+}
+
+.successTitle {
+  color: #1e40af;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.successMessage {
+  color: #475569;
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+.successDetails {
+  background: rgba(219, 234, 254, 0.5);
+  padding: 2rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  border: 2px solid #e0e7ff;
+}
+
+.successDetails p {
+  margin: 0.5rem 0;
+  color: #1e40af;
+  font-weight: 500;
+}
+
+.successDetails strong {
+  color: #1e3a8a;
+}
+
+.newRegistrationButton {
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  color: white;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+  margin: 0.5rem;
+}
+
+.newRegistrationButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+}
 /* Focus visible for accessibility */
 .input:focus-visible,
 .select:focus-visible,
