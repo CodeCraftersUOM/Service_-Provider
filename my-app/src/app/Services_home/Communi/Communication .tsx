@@ -5,12 +5,9 @@ import Head from 'next/head';
 import styles from './Communication.module.css';
 import { useRouter } from 'next/navigation';
 
-
 interface CommunicationFormData {
   serviceTypesOffered: string;
-  serviceSpeed: string;
   serviceCoverageArea: string;
-  pricingDetails: string;
   paymentMethods: string;
   currentPromotions: string;
   companyName: string;
@@ -19,10 +16,11 @@ interface CommunicationFormData {
   emailAddress: string;
   businessRegistration: string;
   yearsInBusiness: number | '';
-  customerSupport: string;
-  installationTime: string;
-  contractTerms: string;
   specialFeatures: string;
+}
+
+interface FieldErrors {
+  [key: string]: string;
 }
 
 const CommunicationService: React.FC = () => {
@@ -30,9 +28,7 @@ const CommunicationService: React.FC = () => {
   const [isSuccess, setIsSuccess] = useState(false);
   const [formData, setFormData] = useState<CommunicationFormData>({
     serviceTypesOffered: '',
-    serviceSpeed: '',
     serviceCoverageArea: '',
-    pricingDetails: '',
     paymentMethods: '',
     currentPromotions: '',
     companyName: '',
@@ -41,28 +37,29 @@ const CommunicationService: React.FC = () => {
     emailAddress: '',
     businessRegistration: '',
     yearsInBusiness: '',
-    customerSupport: '',
-    installationTime: '',
-    contractTerms: '',
     specialFeatures: '',
   });
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const router = useRouter();
 
   const paymentMethods = [
     'Cash', 'Credit Card', 'Debit Card', 'Bank Transfer', 
-    'Online Payment', 'Mobile Payment', 'Cryptocurrency'
-  ];
-
-  const serviceTypes = [
-    'Internet Service', 'Mobile Phone', 'Landline Phone', 'Cable TV',
-    'Satellite TV', 'VoIP Services', 'Data Centers', 'Cloud Services'
+    'Online Payment', 'Mobile Payment'
   ];
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
+    
+    // Clear field error when user starts typing
+    if (fieldErrors[name]) {
+      setFieldErrors(prev => ({
+        ...prev,
+        [name]: ""
+      }));
+    }
     
     if (name === 'yearsInBusiness') {
       setFormData(prev => ({
@@ -78,17 +75,31 @@ const CommunicationService: React.FC = () => {
     setMessage('');
   };
 
+  // ✅ UPDATED: Validation with your mandatory rules
   const validateStep = (step: number): boolean => {
+    const errors: FieldErrors = {};
+    
     switch (step) {
       case 1:
-        return !!(formData.companyName && formData.contactPerson && formData.phoneNumber && formData.emailAddress);
+        if (!formData.companyName.trim()) errors.companyName = "Company name is required";
+        if (!formData.contactPerson.trim()) errors.contactPerson = "Contact person is required";
+        if (!formData.phoneNumber.trim()) errors.phoneNumber = "Phone number is required";
+        if (!formData.emailAddress.trim()) errors.emailAddress = "Email address is required";
+        if (!formData.businessRegistration.trim()) errors.businessRegistration = "Business Registration number is mandatory";
+        break;
       case 2:
-        return !!(formData.serviceTypesOffered && formData.serviceSpeed && formData.serviceCoverageArea && formData.pricingDetails);
+        if (!formData.serviceTypesOffered.trim()) errors.serviceTypesOffered = "Service Types Offered is mandatory";
+        if (!formData.serviceCoverageArea.trim()) errors.serviceCoverageArea = "Service Coverage Area is mandatory";
+        if (!formData.specialFeatures.trim()) errors.specialFeatures = "Special features are mandatory";
+        break;
       case 3:
-        return !!(formData.paymentMethods);
-      default:
-        return false;
+        if (!formData.paymentMethods) errors.paymentMethods = "Payment method is mandatory";
+        if (!formData.currentPromotions.trim()) errors.currentPromotions = "Current promotions are mandatory";
+        break;
     }
+    
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const nextStep = () => {
@@ -103,10 +114,19 @@ const CommunicationService: React.FC = () => {
   const prevStep = () => {
     setCurrentStep(prev => Math.max(prev - 1, 1));
     setMessage('');
+    setFieldErrors({});
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // ✅ UPDATED: Validate all steps before submit
+    const allValid = validateStep(1) && validateStep(2) && validateStep(3);
+    if (!allValid) {
+      setMessage('Please fix all errors before submitting.');
+      return;
+    }
+    
     setLoading(true);
     setMessage('');
 
@@ -145,11 +165,11 @@ const CommunicationService: React.FC = () => {
   const resetForm = () => {
     setIsSuccess(false);
     setCurrentStep(1);
+    setFieldErrors({});
+    setMessage('');
     setFormData({
       serviceTypesOffered: '',
-      serviceSpeed: '',
       serviceCoverageArea: '',
-      pricingDetails: '',
       paymentMethods: '',
       currentPromotions: '',
       companyName: '',
@@ -158,9 +178,6 @@ const CommunicationService: React.FC = () => {
       emailAddress: '',
       businessRegistration: '',
       yearsInBusiness: '',
-      customerSupport: '',
-      installationTime: '',
-      contractTerms: '',
       specialFeatures: '',
     });
   };
@@ -259,9 +276,9 @@ const CommunicationService: React.FC = () => {
                       name="companyName"
                       value={formData.companyName}
                       onChange={handleInputChange}
-                      className={styles.input}
-                      required
+                      className={`${styles.input} ${fieldErrors.companyName ? styles.inputError : ''}`}
                     />
+                    {fieldErrors.companyName && <p className={styles.fieldError}>{fieldErrors.companyName}</p>}
                   </div>
 
                   <div className={styles.field}>
@@ -272,9 +289,9 @@ const CommunicationService: React.FC = () => {
                       name="contactPerson"
                       value={formData.contactPerson}
                       onChange={handleInputChange}
-                      className={styles.input}
-                      required
+                      className={`${styles.input} ${fieldErrors.contactPerson ? styles.inputError : ''}`}
                     />
+                    {fieldErrors.contactPerson && <p className={styles.fieldError}>{fieldErrors.contactPerson}</p>}
                   </div>
                 </div>
 
@@ -287,9 +304,9 @@ const CommunicationService: React.FC = () => {
                       name="phoneNumber"
                       value={formData.phoneNumber}
                       onChange={handleInputChange}
-                      className={styles.input}
-                      required
+                      className={`${styles.input} ${fieldErrors.phoneNumber ? styles.inputError : ''}`}
                     />
+                    {fieldErrors.phoneNumber && <p className={styles.fieldError}>{fieldErrors.phoneNumber}</p>}
                   </div>
 
                   <div className={styles.field}>
@@ -300,23 +317,24 @@ const CommunicationService: React.FC = () => {
                       name="emailAddress"
                       value={formData.emailAddress}
                       onChange={handleInputChange}
-                      className={styles.input}
-                      required
+                      className={`${styles.input} ${fieldErrors.emailAddress ? styles.inputError : ''}`}
                     />
+                    {fieldErrors.emailAddress && <p className={styles.fieldError}>{fieldErrors.emailAddress}</p>}
                   </div>
                 </div>
 
                 <div className={styles.row}>
                   <div className={styles.field}>
-                    <label htmlFor="businessRegistration" className={styles.label}>Business Registration</label>
+                    <label htmlFor="businessRegistration" className={styles.label}>Business Registration number *</label>
                     <input
                       type="text"
                       id="businessRegistration"
                       name="businessRegistration"
                       value={formData.businessRegistration}
                       onChange={handleInputChange}
-                      className={styles.input}
+                      className={`${styles.input} ${fieldErrors.businessRegistration ? styles.inputError : ''}`}
                     />
+                    {fieldErrors.businessRegistration && <p className={styles.fieldError}>{fieldErrors.businessRegistration}</p>}
                   </div>
 
                   <div className={styles.field}>
@@ -348,40 +366,11 @@ const CommunicationService: React.FC = () => {
                     name="serviceTypesOffered"
                     value={formData.serviceTypesOffered}
                     onChange={handleInputChange}
-                    className={styles.input}
+                    className={`${styles.input} ${fieldErrors.serviceTypesOffered ? styles.inputError : ''}`}
                     placeholder="Internet, Mobile, TV services, etc."
-                    required
                   />
                   <span className={styles.inputHelp}>Comma-separated list</span>
-                </div>
-
-                <div className={styles.row}>
-                  <div className={styles.field}>
-                    <label htmlFor="serviceSpeed" className={styles.label}>Service Speed *</label>
-                    <input
-                      type="text"
-                      id="serviceSpeed"
-                      name="serviceSpeed"
-                      value={formData.serviceSpeed}
-                      onChange={handleInputChange}
-                      className={styles.input}
-                      placeholder="e.g., 100 Mbps, HD Quality"
-                      required
-                    />
-                  </div>
-
-                  <div className={styles.field}>
-                    <label htmlFor="installationTime" className={styles.label}>Installation Time</label>
-                    <input
-                      type="text"
-                      id="installationTime"
-                      name="installationTime"
-                      value={formData.installationTime}
-                      onChange={handleInputChange}
-                      className={styles.input}
-                      placeholder="e.g., 2-3 business days"
-                    />
-                  </div>
+                  {fieldErrors.serviceTypesOffered && <p className={styles.fieldError}>{fieldErrors.serviceTypesOffered}</p>}
                 </div>
 
                 <div className={styles.field}>
@@ -392,53 +381,25 @@ const CommunicationService: React.FC = () => {
                     name="serviceCoverageArea"
                     value={formData.serviceCoverageArea}
                     onChange={handleInputChange}
-                    className={styles.input}
+                    className={`${styles.input} ${fieldErrors.serviceCoverageArea ? styles.inputError : ''}`}
                     placeholder="Cities, regions or areas covered"
-                    required
                   />
                   <span className={styles.inputHelp}>Comma-separated list</span>
-                </div>
-
-                <div className={styles.row}>
-                  <div className={styles.field}>
-                    <label htmlFor="pricingDetails" className={styles.label}>Pricing Details *</label>
-                    <input
-                      type="text"
-                      id="pricingDetails"
-                      name="pricingDetails"
-                      value={formData.pricingDetails}
-                      onChange={handleInputChange}
-                      className={styles.input}
-                      placeholder="Monthly rates, package costs"
-                      required
-                    />
-                  </div>
-
-                  <div className={styles.field}>
-                    <label htmlFor="customerSupport" className={styles.label}>Customer Support</label>
-                    <input
-                      type="text"
-                      id="customerSupport"
-                      name="customerSupport"
-                      value={formData.customerSupport}
-                      onChange={handleInputChange}
-                      className={styles.input}
-                      placeholder="24/7, Business hours, etc."
-                    />
-                  </div>
+                  {fieldErrors.serviceCoverageArea && <p className={styles.fieldError}>{fieldErrors.serviceCoverageArea}</p>}
                 </div>
 
                 <div className={styles.field}>
-                  <label htmlFor="specialFeatures" className={styles.label}>Special Features</label>
+                  <label htmlFor="specialFeatures" className={styles.label}>Special Features *</label>
                   <textarea
                     id="specialFeatures"
                     name="specialFeatures"
                     value={formData.specialFeatures}
                     onChange={handleInputChange}
-                    className={styles.textarea}
+                    className={`${styles.textarea} ${fieldErrors.specialFeatures ? styles.inputError : ''}`}
                     rows={3}
                     placeholder="Unique features, benefits, or services"
                   />
+                  {fieldErrors.specialFeatures && <p className={styles.fieldError}>{fieldErrors.specialFeatures}</p>}
                 </div>
               </div>
             )}
@@ -448,49 +409,35 @@ const CommunicationService: React.FC = () => {
               <div className={styles.step}>
                 <h2 className={styles.stepTitle}>Step 3: Business Terms</h2>
                 
-                <div className={styles.row}>
-                  <div className={styles.field}>
-                    <label htmlFor="paymentMethods" className={styles.label}>Payment Method *</label>
-                    <select
-                      id="paymentMethods"
-                      name="paymentMethods"
-                      value={formData.paymentMethods}
-                      onChange={handleInputChange}
-                      className={styles.select}
-                      required
-                    >
-                      <option value="">Select payment method</option>
-                      {paymentMethods.map(method => (
-                        <option key={method} value={method}>{method}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className={styles.field}>
-                    <label htmlFor="contractTerms" className={styles.label}>Contract Terms</label>
-                    <input
-                      type="text"
-                      id="contractTerms"
-                      name="contractTerms"
-                      value={formData.contractTerms}
-                      onChange={handleInputChange}
-                      className={styles.input}
-                      placeholder="e.g., 12 months, No contract, etc."
-                    />
-                  </div>
+                <div className={styles.field}>
+                  <label htmlFor="paymentMethods" className={styles.label}>Payment Method *</label>
+                  <select
+                    id="paymentMethods"
+                    name="paymentMethods"
+                    value={formData.paymentMethods}
+                    onChange={handleInputChange}
+                    className={`${styles.select} ${fieldErrors.paymentMethods ? styles.inputError : ''}`}
+                  >
+                    <option value="">Select payment method</option>
+                    {paymentMethods.map(method => (
+                      <option key={method} value={method}>{method}</option>
+                    ))}
+                  </select>
+                  {fieldErrors.paymentMethods && <p className={styles.fieldError}>{fieldErrors.paymentMethods}</p>}
                 </div>
 
                 <div className={styles.field}>
-                  <label htmlFor="currentPromotions" className={styles.label}>Current Promotions</label>
+                  <label htmlFor="currentPromotions" className={styles.label}>Current Promotions *</label>
                   <textarea
                     id="currentPromotions"
                     name="currentPromotions"
                     value={formData.currentPromotions}
                     onChange={handleInputChange}
-                    className={styles.textarea}
+                    className={`${styles.textarea} ${fieldErrors.currentPromotions ? styles.inputError : ''}`}
                     rows={4}
                     placeholder="Special offers, discounts, or bundles available"
                   />
+                  {fieldErrors.currentPromotions && <p className={styles.fieldError}>{fieldErrors.currentPromotions}</p>}
                 </div>
               </div>
             )}
