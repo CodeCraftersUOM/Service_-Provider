@@ -48,7 +48,7 @@ const DoctorRegistration: React.FC = () => {
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const router = useRouter();
 
-  // Validation functions
+  // ✅ UPDATED VALIDATION FUNCTIONS to match your backend rules
   const validateFullName = (name: string): string => {
     if (!name.trim()) return "Full name is required";
     if (name.length < 2) return "Name must be at least 2 characters";
@@ -62,20 +62,20 @@ const DoctorRegistration: React.FC = () => {
     return "";
   };
 
+  // ✅ UPDATED: Years of experience must be 1 or more
   const validateExperienceYears = (years: string): string => {
     if (!years) return "Years of experience is required";
     const numYears = parseInt(years);
     if (isNaN(numYears)) return "Please enter a valid number";
-    if (numYears < 0) return "Experience years cannot be negative";
+    if (numYears < 1) return "Years of experience must be 1 or more"; // ✅ Changed from 0 to 1
     if (numYears > 60) return "Please enter a valid number of years";
     return "";
   };
 
+  // ✅ UPDATED: License number must be present (more strict)
   const validateLicenseNumber = (license: string): string => {
     if (!license.trim()) return "License number is required";
-    if (license.length < 5) return "License number must be at least 5 characters";
-    if (license.length > 20) return "License number must be less than 20 characters";
-    if (!/^[a-zA-Z0-9-]+$/.test(license)) return "License number can only contain letters, numbers, and hyphens";
+    // ✅ Simplified - just needs to be present
     return "";
   };
 
@@ -96,15 +96,17 @@ const DoctorRegistration: React.FC = () => {
     return "";
   };
 
+  // ✅ UPDATED: Address must be of your medical center (more specific)
   const validateAddress = (address: string): string => {
-    if (!address.trim()) return "Address is required";
-    if (address.length < 5) return "Address must be at least 5 characters";
-    if (address.length > 100) return "Address must be less than 100 characters";
+    if (!address.trim()) return "Address of your medical center is required";
+    if (address.length < 10) return "Address must be at least 10 characters"; // ✅ Increased from 5 to 10
+    if (address.length > 200) return "Address must be less than 200 characters"; // ✅ Increased from 100 to 200
     return "";
   };
 
+  // ✅ UPDATED: City must be the city of your institution
   const validateCity = (city: string): string => {
-    if (!city.trim()) return "City is required";
+    if (!city.trim()) return "City of your institution is required";
     if (city.length < 2) return "City must be at least 2 characters";
     if (city.length > 50) return "City must be less than 50 characters";
     if (!/^[a-zA-Z\s.]+$/.test(city)) return "City can only contain letters, spaces, and periods";
@@ -145,10 +147,11 @@ const DoctorRegistration: React.FC = () => {
     return "";
   };
 
+  // ✅ UPDATED: Certifications & Additional Qualifications must be mentioned
   const validateCertifications = (certifications: string): string => {
-    if (certifications.trim() && certifications.length > 1000) {
-      return "Certifications description must be less than 1000 characters";
-    }
+    if (!certifications.trim()) return "Certifications & Additional Qualifications must be mentioned";
+    if (certifications.length < 10) return "Please provide details about your certifications (at least 10 characters)";
+    if (certifications.length > 500) return "Certifications description must be less than 500 characters"; // ✅ Reduced from 1000 to 500
     return "";
   };
 
@@ -240,7 +243,8 @@ const DoctorRegistration: React.FC = () => {
     setMessage('');
 
     try {
-      const response = await fetch('http://localhost:2000/api/addDoctor', {
+      // ✅ UPDATED API endpoint to match your backend
+      const response = await fetch('http://localhost:2000/api/addHelth', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -248,11 +252,24 @@ const DoctorRegistration: React.FC = () => {
         body: JSON.stringify(formData),
       });
 
+      const responseData = await response.json();
+
       if (response.ok) {
         setIsSuccess(true);
       } else {
-        const errorData = await response.json();
-        setMessage(`Error: ${errorData.message || 'Failed to register doctor'}`);
+        // ✅ UPDATED: Better backend error handling
+        if (responseData.errors && Array.isArray(responseData.errors)) {
+          const backendErrors: FieldErrors = {};
+          responseData.errors.forEach((error: any) => {
+            if (error.field) {
+              backendErrors[error.field] = error.message;
+            }
+          });
+          setFieldErrors(backendErrors);
+          setMessage('Please fix the validation errors below.');
+        } else {
+          setMessage(`Error: ${responseData.message || 'Failed to register doctor'}`);
+        }
       }
     } catch (error) {
       setMessage('Error: Failed to connect to server');
@@ -368,7 +385,7 @@ const DoctorRegistration: React.FC = () => {
 
       <div className={styles.formRow}>
         <div className={styles.formGroup}>
-          <label className={styles.label} htmlFor="experienceYears">Years of Experience *</label>
+          <label className={styles.label} htmlFor="experienceYears">Years of Experience * <span style={{fontSize: '0.8em', color: '#666'}}>(Must be 1 or more)</span></label>
           <input
             type="number"
             id="experienceYears"
@@ -376,7 +393,7 @@ const DoctorRegistration: React.FC = () => {
             value={formData.experienceYears}
             onChange={handleInputChange}
             className={`${styles.input} ${fieldErrors.experienceYears ? styles.inputError : ''}`}
-            min="0"
+            min="1"
             max="60"
             placeholder="Enter years of experience"
           />
@@ -384,7 +401,7 @@ const DoctorRegistration: React.FC = () => {
         </div>
 
         <div className={styles.formGroup}>
-          <label className={styles.label} htmlFor="licenseNumber">License Number *</label>
+          <label className={styles.label} htmlFor="licenseNumber">License Number * <span style={{fontSize: '0.8em', color: '#666'}}>(Required)</span></label>
           <input
             type="text"
             id="licenseNumber"
@@ -433,7 +450,7 @@ const DoctorRegistration: React.FC = () => {
       </div>
 
       <div className={styles.formGroup}>
-        <label className={styles.label} htmlFor="address">Address *</label>
+        <label className={styles.label} htmlFor="address">Address of Medical Center * <span style={{fontSize: '0.8em', color: '#666'}}>(10-200 characters)</span></label>
         <input
           type="text"
           id="address"
@@ -441,14 +458,14 @@ const DoctorRegistration: React.FC = () => {
           value={formData.address}
           onChange={handleInputChange}
           className={`${styles.input} ${fieldErrors.address ? styles.inputError : ''}`}
-          placeholder="Enter full address"
+          placeholder="Enter full address of your medical center"
         />
         {fieldErrors.address && <p className={styles.fieldError}>{fieldErrors.address}</p>}
       </div>
 
       <div className={styles.formRow}>
         <div className={styles.formGroup}>
-          <label className={styles.label} htmlFor="city">City *</label>
+          <label className={styles.label} htmlFor="city">City of Institution *</label>
           <input
             type="text"
             id="city"
@@ -456,7 +473,7 @@ const DoctorRegistration: React.FC = () => {
             value={formData.city}
             onChange={handleInputChange}
             className={`${styles.input} ${fieldErrors.city ? styles.inputError : ''}`}
-            placeholder="Enter city"
+            placeholder="Enter city of your institution"
           />
           {fieldErrors.city && <p className={styles.fieldError}>{fieldErrors.city}</p>}
         </div>
@@ -528,7 +545,7 @@ const DoctorRegistration: React.FC = () => {
 
       <div className={styles.formGroup}>
         <label className={styles.label} htmlFor="certifications">
-          Certifications & Additional Qualifications {formData.certifications.length > 0 && `(${formData.certifications.length}/1000)`}
+          Certifications & Additional Qualifications * <span style={{fontSize: '0.8em', color: '#666'}}>(Required - {formData.certifications.length}/500)</span>
         </label>
         <textarea
           id="certifications"
@@ -537,7 +554,7 @@ const DoctorRegistration: React.FC = () => {
           onChange={handleInputChange}
           className={`${styles.textarea} ${fieldErrors.certifications ? styles.inputError : ''}`}
           rows={4}
-          placeholder="List any board certifications, fellowships, or additional qualifications..."
+          placeholder="List any board certifications, fellowships, or additional qualifications... (Required)"
         />
         {fieldErrors.certifications && <p className={styles.fieldError}>{fieldErrors.certifications}</p>}
       </div>

@@ -52,18 +52,15 @@ const GuideRegistrationForm: React.FC = () => {
     'Monaragala', 'Ratnapura', 'Kegalle'
   ];
 
-  const availabilityOptions = ['Weekdays', 'Weekends', 'Both', 'Flexible'];
+  const availabilityOptions = ['Weekdays', 'Weekends'];
 
   const languageOptions = [
-    'English', 'Sinhala', 'Tamil', 'Japanese', 'German', 'French', 'Spanish', 'Chinese'
+    'English', 'Sinhala', 'Tamil', 'Japanese', 'German', 'French'
   ];
 
-  // Validation functions
+  // Updated validation functions to match your backend rules
   const validateName = (name: string): string => {
     if (!name.trim()) return "Full name is required";
-    if (name.length < 2) return "Name must be at least 2 characters";
-    if (name.length > 50) return "Name must be less than 50 characters";
-    if (!/^[a-zA-Z\s.]+$/.test(name)) return "Name can only contain letters, spaces, and periods";
     return "";
   };
 
@@ -76,39 +73,22 @@ const GuideRegistrationForm: React.FC = () => {
 
   const validateNIC = (nic: string): string => {
     if (!nic.trim()) return "National ID is required";
-    // Sri Lankan NIC validation (old format: 9 digits + V/X, new format: 12 digits)
-    const oldNICRegex = /^[0-9]{9}[vVxX]$/;
-    const newNICRegex = /^[0-9]{12}$/;
-    if (!oldNICRegex.test(nic) && !newNICRegex.test(nic)) {
-      return "Please enter a valid Sri Lankan NIC (9 digits + V/X or 12 digits)";
-    }
     return "";
   };
 
   const validateContact = (contact: string): string => {
     if (!contact.trim()) return "Contact number is required";
-    // Sri Lankan phone number validation
-    const phoneRegex = /^(\+94|0)?[1-9][0-9]{8}$/;
-    if (!phoneRegex.test(contact.replace(/\s+/g, ''))) {
-      return "Please enter a valid Sri Lankan phone number";
-    }
     return "";
   };
 
+  // ✅ UPDATED: Any age allowed - no age restrictions
   const validateDateOfBirth = (dob: string): string => {
     if (!dob) return "Date of birth is required";
     const today = new Date();
     const birthDate = new Date(dob);
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
     
     if (birthDate > today) return "Date of birth cannot be in the future";
-    if (age < 18) return "Guide must be at least 18 years old";
-    if (age > 80) return "Please enter a valid date of birth";
+    // Removed age restrictions - any age is now allowed
     return "";
   };
 
@@ -117,34 +97,33 @@ const GuideRegistrationForm: React.FC = () => {
     return "";
   };
 
+  // ✅ UPDATED: At least one language required, no max limit
   const validateLanguages = (languages: string[]): string => {
     if (languages.length === 0) return "At least one language is required";
-    if (languages.length > 5) return "Maximum 5 languages can be selected";
     return "";
   };
 
+  // ✅ UPDATED: At least one availability required, no other rules
   const validateAvailability = (availability: string[]): string => {
-    if (availability.length === 0) return "Availability is required";
+    if (availability.length === 0) return "At least one availability option is required";
     return "";
   };
 
+  // ✅ UPDATED: At least one location required, no max limit
   const validateCoveredLocations = (locations: string[]): string => {
     if (locations.length === 0) return "At least one location must be selected";
-    if (locations.length > 10) return "Maximum 10 locations can be selected";
     return "";
   };
 
+  // ✅ UPDATED: Professional experience is completely optional
   const validateExperiences = (experiences: string): string => {
-    if (experiences.trim() && experiences.length > 1000) {
-      return "Experience description must be less than 1000 characters";
-    }
+    // No validation needed - completely optional and any content allowed
     return "";
   };
 
+  // ✅ UPDATED: About You section MUST have content
   const validateDescription = (description: string): string => {
-    if (description.trim() && description.length > 1000) {
-      return "Description must be less than 1000 characters";
-    }
+    if (!description.trim()) return "You must write something about yourself in the About You section";
     return "";
   };
 
@@ -231,6 +210,7 @@ const GuideRegistrationForm: React.FC = () => {
     setFieldErrors({});
   };
 
+  // ✅ UPDATED: Enhanced error handling for backend responses
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -259,14 +239,27 @@ const GuideRegistrationForm: React.FC = () => {
         body: JSON.stringify(formData),
       });
 
+      const responseData = await response.json();
+
       if (response.ok) {
         setIsSuccess(true);
       } else {
-        const errorData = await response.json();
-        setMessage(`Error: ${errorData.message || 'Failed to register guide'}`);
+        // Handle backend validation errors
+        if (responseData.errors && Array.isArray(responseData.errors)) {
+          const backendErrors: FieldErrors = {};
+          responseData.errors.forEach((error: any) => {
+            if (error.field) {
+              backendErrors[error.field] = error.message;
+            }
+          });
+          setFieldErrors(backendErrors);
+          setMessage('Please fix the validation errors below.');
+        } else {
+          setMessage(`Error: ${responseData.message || 'Failed to register guide'}`);
+        }
       }
     } catch (error) {
-      setMessage('Error: Failed to connect to server');
+      setMessage('Error: Failed to connect to server. Please check your connection and try again.');
     } finally {
       setLoading(false);
     }
@@ -405,7 +398,7 @@ const GuideRegistrationForm: React.FC = () => {
 
               <div className={styles.row}>
                 <div className={styles.field}>
-                  <label htmlFor="dob" className={styles.label}>Date of Birth *</label>
+                  <label htmlFor="dob" className={styles.label}>Date of Birth * <span className={styles.helpText}>(Any age allowed)</span></label>
                   <input
                     type="date"
                     id="dob"
@@ -470,7 +463,7 @@ const GuideRegistrationForm: React.FC = () => {
               <h2 className={styles.stepTitle}>Step 2: Skills & Coverage</h2>
               
               <div className={styles.field}>
-                <label className={styles.label}>Languages *</label>
+                <label className={styles.label}>Languages * <span className={styles.helpText}>(Select at least one)</span></label>
                 <div className={styles.checkboxGrid}>
                   {languageOptions.map(language => (
                     <label key={language} className={styles.checkboxLabel}>
@@ -488,7 +481,7 @@ const GuideRegistrationForm: React.FC = () => {
               </div>
 
               <div className={styles.field}>
-                <label className={styles.label}>Availability *</label>
+                <label className={styles.label}>Availability * <span className={styles.helpText}>(Select at least one)</span></label>
                 <div className={styles.checkboxRow}>
                   {availabilityOptions.map(option => (
                     <label key={option} className={styles.checkboxLabel}>
@@ -506,7 +499,7 @@ const GuideRegistrationForm: React.FC = () => {
               </div>
 
               <div className={styles.field}>
-                <label className={styles.label}>Covered Locations *</label>
+                <label className={styles.label}>Covered Locations * <span className={styles.helpText}>(Select at least one)</span></label>
                 <div className={styles.checkboxGrid}>
                   {locations.map(location => (
                     <label key={location} className={styles.checkboxLabel}>
@@ -532,7 +525,7 @@ const GuideRegistrationForm: React.FC = () => {
               
               <div className={styles.field}>
                 <label htmlFor="experiences" className={styles.label}>
-                  Professional Experience {formData.experiences.length > 0 && `(${formData.experiences.length}/1000)`}
+                  Professional Experience <span className={styles.helpText}>(Optional - write anything or leave blank)</span>
                 </label>
                 <textarea
                   id="experiences"
@@ -541,14 +534,14 @@ const GuideRegistrationForm: React.FC = () => {
                   onChange={handleInputChange}
                   className={`${styles.textarea} ${fieldErrors.experiences ? styles.inputError : ''}`}
                   rows={5}
-                  placeholder="Describe your professional experience, certifications, and qualifications as a tour guide"
+                  placeholder="Describe your professional experience, certifications, and qualifications as a tour guide (optional)"
                 />
                 {fieldErrors.experiences && <p className={styles.fieldError}>{fieldErrors.experiences}</p>}
               </div>
 
               <div className={styles.field}>
                 <label htmlFor="description" className={styles.label}>
-                  About You {formData.description.length > 0 && `(${formData.description.length}/1000)`}
+                  About You * <span className={styles.helpText}>(Required - tell us something about yourself)</span>
                 </label>
                 <textarea
                   id="description"
@@ -557,7 +550,7 @@ const GuideRegistrationForm: React.FC = () => {
                   onChange={handleInputChange}
                   className={`${styles.textarea} ${fieldErrors.description ? styles.inputError : ''}`}
                   rows={5}
-                  placeholder="Tell us about yourself, your guiding style, and what travelers can expect when touring with you"
+                  placeholder="Tell us about yourself, your guiding style, and what travelers can expect when touring with you (required)"
                 />
                 {fieldErrors.description && <p className={styles.fieldError}>{fieldErrors.description}</p>}
               </div>
