@@ -1,9 +1,17 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import styles from "./services.module.css";
+
+// Loading component
+const LoadingSpinner = () => (
+  <div className={styles.loadingContainer}>
+    <div className={styles.spinner}></div>
+    <p>Checking authentication...</p>
+  </div>
+);
 
 const serviceIcons: string[] = [
   "/guide.png",
@@ -56,7 +64,41 @@ const serviceLinks: string[] = [
 const ServiceSelector: React.FC = () => {
   const [activeMenuItem, setActiveMenuItem] = useState('Services');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
   const router = useRouter();
+
+  // Check authentication on component mount
+  useEffect(() => {
+    checkAuthStatus();
+  }, []);
+
+  const checkAuthStatus = async () => {
+    try {
+      const response = await fetch("http://localhost:2000/api/check-auth", {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setIsAuthenticated(true);
+        setUser(data.user);
+      } else {
+        // User is not authenticated, redirect to login
+        router.push("/login?redirect=/Services_home");
+        return;
+      }
+    } catch (error) {
+      console.error("Auth check error:", error);
+      // On error, redirect to login
+      router.push("/login?redirect=/Services_home");
+      return;
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const menuItems = [
     { name: 'Dashboard', icon: '🏠', route: '/dashboard' },
@@ -70,10 +112,24 @@ const ServiceSelector: React.FC = () => {
     { name: 'Log Out', icon: '🚪', route: '/logout' }
   ];
 
-  const handleLogout = () => {
-    localStorage.removeItem("authToken");
-    sessionStorage.removeItem("userSession");
-    router.push("/login");
+  const handleLogout = async () => {
+    try {
+      await fetch("http://localhost:2000/api/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+      
+      // Clear local state
+      setIsAuthenticated(false);
+      setUser(null);
+      
+      // Redirect to home page
+      router.push("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Even if logout fails, redirect to home
+      router.push("/");
+    }
   };
 
   const handleMenuClick = (menuName: string, route: string) => {
@@ -90,6 +146,17 @@ const ServiceSelector: React.FC = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
+  // Show loading spinner while checking authentication
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  // If not authenticated, this component won't render 
+  // (user will be redirected to login)
+  if (!isAuthenticated) {
+    return null;
+  }
+
   const renderContent = () => {
     switch (activeMenuItem) {
       case 'Services':
@@ -97,7 +164,9 @@ const ServiceSelector: React.FC = () => {
           <div className={styles.servicesContent}>
             <div className={styles.header}>
               <div className={styles.headerText}>
-                <h1 className={styles.heading}>Choose Your Service</h1>
+                <h1 className={styles.heading}>
+                  Welcome back, {user?.fullName || user?.username}!
+                </h1>
                 <p className={styles.subheading}>Select the service you'd like to offer and start your journey</p>
               </div>
               <div className={styles.headerStats}>
@@ -185,6 +254,10 @@ const ServiceSelector: React.FC = () => {
 
       {/* Sidebar */}
       <div className={`${styles.sidebar} ${isSidebarOpen ? styles.sidebarOpen : styles.sidebarClosed}`}>
+        <div className={styles.userInfo}>
+          <p>Welcome, {user?.fullName || user?.username}</p>
+          <small>{user?.email}</small>
+        </div>
         <nav className={styles.sidebarNav}>
           {menuItems.map((item) => (
             <button

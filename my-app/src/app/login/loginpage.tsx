@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import styles from "./loginpage.module.css";
 
@@ -11,6 +11,30 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState<{[key: string]: string}>({});
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams.get('redirect') || '/Dashboard';
+
+  // Check if user is already logged in
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch("http://localhost:2000/api/check-auth", {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (response.ok) {
+          // User is already logged in, redirect them
+          router.push(redirectUrl);
+        }
+      } catch (error) {
+        // User is not logged in, stay on login page
+        console.log("User not authenticated");
+      }
+    };
+
+    checkAuth();
+  }, [router, redirectUrl]);
 
   // Validation functions
   const validateEmail = (email: string): string => {
@@ -85,10 +109,8 @@ export default function LoginPage() {
       if (response.ok) {
         console.log("Login successful:", data);
 
-        // Optional: Save user/token in localStorage if needed
-        // localStorage.setItem("token", data.token);
-
-        router.push("/Dashboard"); // Navigate to Services_home
+        // Redirect to the originally requested page or dashboard
+        router.push(redirectUrl);
       } else {
         setError(data.message || "Login failed");
       }
@@ -102,7 +124,12 @@ export default function LoginPage() {
     <div className={styles.container}>
       <div className={styles.card}>
         <h2 className={styles.title}>Welcome Back!</h2>
-        <p className={styles.subtitle}>Login to your account</p>
+        <p className={styles.subtitle}>
+          {searchParams.get('redirect') ? 
+            'Please log in to access this page' : 
+            'Login to your account'
+          }
+        </p>
 
         {error && <p className={styles.error}>{error}</p>}
 
