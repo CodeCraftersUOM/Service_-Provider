@@ -101,7 +101,7 @@ const ServiceSelector: React.FC = () => {
   };
 
   const menuItems = [
-    { name: 'Dashboard', icon: '🏠', route: '/dashboard' },
+    { name: 'Dashboard', icon: '🏠', route: '../Dashboard/Dashboard.tsx' },
     { name: 'Services', icon: '🛠️', route: '/services' },
     { name: 'My Listings', icon: '📋', route: '/listings' },
     { name: 'Bookings', icon: '📅', route: '/bookings' },
@@ -215,7 +215,7 @@ const ServiceSelector: React.FC = () => {
                   <h3>Need Help Getting Started?</h3>
                   <p>Our team is here to guide you through the registration process</p>
                 </div>
-                <button className={styles.helpButton}>Get Support</button>
+                <button className={styles.helpButton}onClick={() => router.push('../Services_home/help')} > Get Support</button>
               </div>
             </div>
           </div>
