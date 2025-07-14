@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import styles from "./signuppage.module.css";
@@ -12,9 +13,18 @@ const SignupPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
   const [gender, setGender] = useState('male');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading,setLoading] =useState(true)
   const [fieldErrors, setFieldErrors] = useState<{[key: string]: string}>({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const router = useRouter();
+  const validateConfirmPassword = (confirmPassword: string): string => {
+    if (!confirmPassword) return "Please confirm your password";
+    if (confirmPassword !== password) return "Passwords do not match";
+    return "";
+  };
 
   // Validation functions
   const validateUsername = (username: string): string => {
@@ -69,18 +79,16 @@ const SignupPage: React.FC = () => {
 
   const validateForm = (): boolean => {
     const errors: {[key: string]: string} = {};
-    
     errors.username = validateUsername(username);
     errors.fullName = validateFullName(fullName);
     errors.email = validateEmail(email);
     errors.password = validatePassword(password);
+    errors.confirmPassword = validateConfirmPassword(confirmPassword);
     errors.dateOfBirth = validateDateOfBirth(dateOfBirth);
-    
     // Remove empty errors
     Object.keys(errors).forEach(key => {
       if (!errors[key]) delete errors[key];
     });
-    
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -93,7 +101,6 @@ const SignupPage: React.FC = () => {
         [field]: ""
       }));
     }
-    
     // Update the corresponding state
     switch (field) {
       case 'username':
@@ -108,6 +115,9 @@ const SignupPage: React.FC = () => {
       case 'password':
         setPassword(value);
         break;
+      case 'confirmPassword':
+        setConfirmPassword(value);
+        break;
       case 'dateOfBirth':
         setDateOfBirth(value);
         break;
@@ -120,12 +130,10 @@ const SignupPage: React.FC = () => {
   const handleSignup = async () => {
     // Clear previous errors
     setError('');
-    
     // Validate form
     if (!validateForm()) {
       return;
     }
-
     try {
       const res = await fetch("http://localhost:2000/api/signup", {
         method: "POST",
@@ -134,14 +142,11 @@ const SignupPage: React.FC = () => {
         },
         body: JSON.stringify({ username, email, password, fullName, dateOfBirth, gender }),
       });
-
       const data = await res.json();
-
       if (!res.ok) {
         setError(data.message || "Signup failed");
         return;
       }
-
       console.log("Signup successful:", data);
       router.push("/login");
     } catch (err) {
@@ -191,15 +196,39 @@ const SignupPage: React.FC = () => {
           {fieldErrors.email && <p className={styles.fieldError}>{fieldErrors.email}</p>}
         </div>
 
-        <div>
+        <div style={{ position: 'relative' }}>
           <input
-            type="password"
+            type={showPassword ? "text" : "password"}
             placeholder="Password"
             value={password}
             onChange={(e) => handleInputChange('password', e.target.value)}
             className={`${styles.input} ${fieldErrors.password ? styles.inputError : ''}`}
           />
+          <span
+            onClick={() => setShowPassword((prev) => !prev)}
+            style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', zIndex: 2 }}
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
+          >
+            {showPassword ? <FaEyeSlash /> : <FaEye />}
+          </span>
           {fieldErrors.password && <p className={styles.fieldError}>{fieldErrors.password}</p>}
+        </div>
+        <div style={{ position: 'relative' }}>
+          <input
+            type={showConfirmPassword ? "text" : "password"}
+            placeholder="Confirm Password"
+            value={confirmPassword}
+            onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+            className={`${styles.input} ${fieldErrors.confirmPassword ? styles.inputError : ''}`}
+          />
+          <span
+            onClick={() => setShowConfirmPassword((prev) => !prev)}
+            style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', zIndex: 2 }}
+            aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+          >
+            {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+          </span>
+          {fieldErrors.confirmPassword && <p className={styles.fieldError}>{fieldErrors.confirmPassword}</p>}
         </div>
 
         <div>
