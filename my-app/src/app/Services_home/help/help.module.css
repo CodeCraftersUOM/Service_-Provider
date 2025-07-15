@@ -1,0 +1,277 @@
+/* help.module.css */
+
+.container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+  padding: 150px 20px;
+}
+
+/* Header Section */
+.header {
+  text-align: center;
+  color: white;
+  margin-bottom: 60px;
+}
+
+.title {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  opacity: 0.9;
+  margin-bottom: 40px;
+}
+
+/* Search Box */
+.searchBox {
+  max-width: 500px;
+  margin: 0 auto;
+  position: relative;
+  background: white;
+  border-radius: 50px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.searchIcon {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #3b82f6;
+  font-size: 1.1rem;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 18px 20px 18px 55px;
+  border: none;
+  border-radius: 50px;
+  font-size: 1rem;
+  outline: none;
+}
+
+.searchInput::placeholder {
+  color: #9ca3af;
+}
+
+/* Main Content */
+.content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Quick Help Cards */
+.quickHelp {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 24px;
+  margin-bottom: 60px;
+}
+
+.helpCard {
+  background: white;
+  padding: 32px 24px;
+  border-radius: 20px;
+  text-align: center;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.helpCard:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  border-color: #3b82f6;
+}
+
+.cardIcon {
+  font-size: 2.5rem;
+  color: #3b82f6;
+  margin-bottom: 16px;
+}
+
+.helpCard h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 8px;
+}
+
+.helpCard p {
+  color: #6b7280;
+  margin: 0;
+}
+
+/* FAQ Section */
+.faqSection {
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  margin-bottom: 40px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.sectionTitle {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+
+
+.faqItem {
+  border: 2px solid #f3f4f6;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.faqItem:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 5px 15px rgba(59, 130, 246, 0.1);
+}
+
+.faqQuestion {
+  width: 100%;
+  padding: 20px 24px;
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1f2937;
+  transition: all 0.3s ease;
+}
+
+.faqQuestion:hover {
+  background: #f8fafc;
+}
+
+.faqAnswer {
+  padding: 0 24px 20px;
+  background: #f8fafc;
+  border-top: 1px solid #e5e7eb;
+}
+
+.faqAnswer p {
+  color: #4b5563;
+  line-height: 1.6;
+  margin: 12px 0 0;
+}
+
+/* No Results */
+.noResults {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6b7280;
+}
+
+/* Contact Section */
+.contactSection {
+  background: white;
+  padding: 40px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.contactSection h2 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 12px;
+}
+
+.contactSection p {
+  color: #6b7280;
+  margin-bottom: 24px;
+}
+
+.contactButton {
+  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+  color: white;
+  padding: 16px 32px;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1rem;
+  display: inline-block;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+}
+
+.contactButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .title {
+    font-size: 2.2rem;
+  }
+  
+  .subtitle {
+    font-size: 1rem;
+  }
+  
+  .quickHelp {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .helpCard {
+    padding: 24px 20px;
+  }
+  
+  .faqSection {
+    padding: 24px 20px;
+  }
+  
+  .contactSection {
+    padding: 24px 20px;
+  }
+  
+  .faqQuestion {
+    padding: 16px 20px;
+    font-size: 1rem;
+  }
+  
+  .faqAnswer {
+    padding: 0 20px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 20px 16px;
+  }
+  
+  .title {
+    font-size: 1.8rem;
+  }
+  
+  .searchInput {
+    padding: 16px 18px 16px 50px;
+  }
+  
+  .helpCard {
+    padding: 20px 16px;
+  }
+  
+  .cardIcon {
+    font-size: 2rem;
+  }
+} 

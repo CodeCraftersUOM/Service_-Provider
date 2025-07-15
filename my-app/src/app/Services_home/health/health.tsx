@@ -48,7 +48,7 @@ const DoctorRegistration: React.FC = () => {
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const router = useRouter();
 
-  // ✅ UPDATED VALIDATION FUNCTIONS to match your backend rules
+  // ✅ UPDATED VALIDATION FUNCTIONS for Sri Lankan requirements
   const validateFullName = (name: string): string => {
     if (!name.trim()) return "Full name is required";
     if (name.length < 2) return "Name must be at least 2 characters";
@@ -67,15 +67,29 @@ const DoctorRegistration: React.FC = () => {
     if (!years) return "Years of experience is required";
     const numYears = parseInt(years);
     if (isNaN(numYears)) return "Please enter a valid number";
-    if (numYears < 1) return "Years of experience must be 1 or more"; // ✅ Changed from 0 to 1
+    if (numYears < 1) return "Years of experience must be 1 or more";
     if (numYears > 60) return "Please enter a valid number of years";
     return "";
   };
 
-  // ✅ UPDATED: License number must be present (more strict)
+  // ✅ UPDATED: Sri Lankan Medical License Number validation
   const validateLicenseNumber = (license: string): string => {
-    if (!license.trim()) return "License number is required";
-    // ✅ Simplified - just needs to be present
+    if (!license.trim()) return "Medical license number is required";
+    
+    const cleanedLicense = license.trim().toUpperCase();
+    
+    // Sri Lankan Medical License patterns:
+    // Pattern 1: MD + 4-6 digits (e.g., MD1234, MD123456)
+    // Pattern 2: SLMC + 4-6 digits (e.g., SLMC1234, SLMC123456)
+    // Pattern 3: 4-6 digits only for older licenses (e.g., 1234, 123456)
+    const mdPattern = /^MD[0-9]{4,6}$/;
+    const slmcPattern = /^SLMC[0-9]{4,6}$/;
+    const numericPattern = /^[0-9]{4,6}$/;
+    
+    if (!mdPattern.test(cleanedLicense) && !slmcPattern.test(cleanedLicense) && !numericPattern.test(cleanedLicense)) {
+      return "Please enter a valid Sri Lankan medical license (MD1234, SLMC1234, or 1234 format)";
+    }
+    
     return "";
   };
 
@@ -86,25 +100,42 @@ const DoctorRegistration: React.FC = () => {
     return "";
   };
 
+  // ✅ UPDATED: Sri Lankan phone number validation
   const validatePhone = (phone: string): string => {
-    if (!phone.trim()) return "Phone number is required";
-    // General phone number validation (allows various formats)
-    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-    const cleanPhone = phone.replace(/[\s\-\(\)\.]/g, '');
-    if (!phoneRegex.test(cleanPhone)) return "Please enter a valid phone number";
-    if (cleanPhone.length < 10) return "Phone number must be at least 10 digits";
+    if (!phone.trim()) return "Contact number is required";
+    
+    // Remove any spaces, dashes, or other non-digit characters
+    const cleanedPhone = phone.replace(/\D/g, '');
+    
+    // Check if it's exactly 10 digits
+    if (cleanedPhone.length !== 10) {
+      return "Contact number must be exactly 10 digits";
+    }
+    
+    // Sri Lankan phone number patterns
+    // Pattern 1: 07XXXXXXXX (mobile numbers)
+    // Pattern 2: 01XXXXXXXX (landline numbers)
+    // Pattern 3: 03XXXXXXXX (some landlines)
+    // Pattern 4: 08XXXXXXXX (some special numbers)
+    const mobilePattern = /^07[0-9]{8}$/;
+    const landlinePattern = /^0[1-9][0-9]{8}$/;
+    
+    if (!mobilePattern.test(cleanedPhone) && !landlinePattern.test(cleanedPhone)) {
+      return "Please enter a valid Sri Lankan phone number (07XXXXXXXX for mobile or 0XXXXXXXXX for landline)";
+    }
+    
     return "";
   };
 
-  // ✅ UPDATED: Address must be of your medical center (more specific)
+  // ✅ UPDATED: Address validation for Sri Lankan context
   const validateAddress = (address: string): string => {
     if (!address.trim()) return "Address of your medical center is required";
-    if (address.length < 10) return "Address must be at least 10 characters"; // ✅ Increased from 5 to 10
-    if (address.length > 200) return "Address must be less than 200 characters"; // ✅ Increased from 100 to 200
+    if (address.length < 10) return "Address must be at least 10 characters";
+    if (address.length > 200) return "Address must be less than 200 characters";
     return "";
   };
 
-  // ✅ UPDATED: City must be the city of your institution
+  // ✅ UPDATED: City validation for Sri Lankan cities
   const validateCity = (city: string): string => {
     if (!city.trim()) return "City of your institution is required";
     if (city.length < 2) return "City must be at least 2 characters";
@@ -113,19 +144,36 @@ const DoctorRegistration: React.FC = () => {
     return "";
   };
 
+  // ✅ UPDATED: State/Province validation for Sri Lankan provinces
   const validateState = (state: string): string => {
-    if (!state.trim()) return "State is required";
-    if (state.length < 2) return "State must be at least 2 characters";
-    if (state.length > 50) return "State must be less than 50 characters";
-    if (!/^[a-zA-Z\s.]+$/.test(state)) return "State can only contain letters, spaces, and periods";
+    if (!state.trim()) return "Province is required";
+    
+    // Sri Lankan provinces
+    const validProvinces = [
+      'Western', 'Central', 'Southern', 'Northern', 'Eastern',
+      'North Western', 'North Central', 'Uva', 'Sabaragamuwa'
+    ];
+    
+    if (!validProvinces.includes(state)) {
+      return "Please select a valid Sri Lankan province";
+    }
+    
     return "";
   };
 
+  // ✅ UPDATED: Sri Lankan postal code validation
   const validateZipCode = (zipCode: string): string => {
-    if (!zipCode.trim()) return "ZIP code is required";
-    // Supports various ZIP code formats (US, UK, Canada, etc.)
-    const zipRegex = /^[a-zA-Z0-9\s-]{3,10}$/;
-    if (!zipRegex.test(zipCode)) return "Please enter a valid ZIP code";
+    if (!zipCode.trim()) return "Postal code is required";
+    
+    const cleanedZip = zipCode.replace(/\s/g, '');
+    
+    // Sri Lankan postal codes are 5 digits (e.g., 10400, 80000)
+    const sriLankanPostalPattern = /^[0-9]{5}$/;
+    
+    if (!sriLankanPostalPattern.test(cleanedZip)) {
+      return "Please enter a valid Sri Lankan postal code (5 digits, e.g., 10400)";
+    }
+    
     return "";
   };
 
@@ -147,11 +195,11 @@ const DoctorRegistration: React.FC = () => {
     return "";
   };
 
-  // ✅ UPDATED: Certifications & Additional Qualifications must be mentioned
+  // ✅ UPDATED: Certifications validation
   const validateCertifications = (certifications: string): string => {
     if (!certifications.trim()) return "Certifications & Additional Qualifications must be mentioned";
     if (certifications.length < 10) return "Please provide details about your certifications (at least 10 characters)";
-    if (certifications.length > 500) return "Certifications description must be less than 500 characters"; // ✅ Reduced from 1000 to 500
+    if (certifications.length > 500) return "Certifications description must be less than 500 characters";
     return "";
   };
 
@@ -243,7 +291,6 @@ const DoctorRegistration: React.FC = () => {
     setMessage('');
 
     try {
-      // ✅ UPDATED API endpoint to match your backend
       const response = await fetch('http://localhost:2000/api/addHelth', {
         method: 'POST',
         headers: {
@@ -257,7 +304,6 @@ const DoctorRegistration: React.FC = () => {
       if (response.ok) {
         setIsSuccess(true);
       } else {
-        // ✅ UPDATED: Better backend error handling
         if (responseData.errors && Array.isArray(responseData.errors)) {
           const backendErrors: FieldErrors = {};
           responseData.errors.forEach((error: any) => {
@@ -401,7 +447,7 @@ const DoctorRegistration: React.FC = () => {
         </div>
 
         <div className={styles.formGroup}>
-          <label className={styles.label} htmlFor="licenseNumber">License Number * <span style={{fontSize: '0.8em', color: '#666'}}>(Required)</span></label>
+          <label className={styles.label} htmlFor="licenseNumber">Medical License Number * <span style={{fontSize: '0.8em', color: '#666'}}>(MD1234, SLMC1234, or 1234)</span></label>
           <input
             type="text"
             id="licenseNumber"
@@ -409,7 +455,7 @@ const DoctorRegistration: React.FC = () => {
             value={formData.licenseNumber}
             onChange={handleInputChange}
             className={`${styles.input} ${fieldErrors.licenseNumber ? styles.inputError : ''}`}
-            placeholder="Enter medical license number"
+            placeholder="Enter Sri Lankan medical license"
           />
           {fieldErrors.licenseNumber && <p className={styles.fieldError}>{fieldErrors.licenseNumber}</p>}
         </div>
@@ -436,7 +482,7 @@ const DoctorRegistration: React.FC = () => {
       </div>
 
       <div className={styles.formGroup}>
-        <label className={styles.label} htmlFor="phone">Phone Number *</label>
+        <label className={styles.label} htmlFor="phone">Contact Number * <span style={{fontSize: '0.8em', color: '#666'}}>(10 digits: 07XXXXXXXX or 0XXXXXXXXX)</span></label>
         <input
           type="tel"
           id="phone"
@@ -444,7 +490,7 @@ const DoctorRegistration: React.FC = () => {
           value={formData.phone}
           onChange={handleInputChange}
           className={`${styles.input} ${fieldErrors.phone ? styles.inputError : ''}`}
-          placeholder="Enter phone number"
+          placeholder="Enter Sri Lankan phone number"
         />
         {fieldErrors.phone && <p className={styles.fieldError}>{fieldErrors.phone}</p>}
       </div>
@@ -479,21 +525,30 @@ const DoctorRegistration: React.FC = () => {
         </div>
 
         <div className={styles.formGroup}>
-          <label className={styles.label} htmlFor="state">State *</label>
-          <input
-            type="text"
+          <label className={styles.label} htmlFor="state">Province * <span style={{fontSize: '0.8em', color: '#666'}}>(Sri Lankan province)</span></label>
+          <select
             id="state"
             name="state"
             value={formData.state}
             onChange={handleInputChange}
-            className={`${styles.input} ${fieldErrors.state ? styles.inputError : ''}`}
-            placeholder="Enter state"
-          />
+            className={`${styles.select} ${fieldErrors.state ? styles.inputError : ''}`}
+          >
+            <option value="">Select Province</option>
+            <option value="Western">Western Province</option>
+            <option value="Central">Central Province</option>
+            <option value="Southern">Southern Province</option>
+            <option value="Northern">Northern Province</option>
+            <option value="Eastern">Eastern Province</option>
+            <option value="North Western">North Western Province</option>
+            <option value="North Central">North Central Province</option>
+            <option value="Uva">Uva Province</option>
+            <option value="Sabaragamuwa">Sabaragamuwa Province</option>
+          </select>
           {fieldErrors.state && <p className={styles.fieldError}>{fieldErrors.state}</p>}
         </div>
 
         <div className={styles.formGroup}>
-          <label className={styles.label} htmlFor="zipCode">ZIP Code *</label>
+          <label className={styles.label} htmlFor="zipCode">Postal Code * <span style={{fontSize: '0.8em', color: '#666'}}>(5 digits: e.g., 10400)</span></label>
           <input
             type="text"
             id="zipCode"
@@ -501,7 +556,7 @@ const DoctorRegistration: React.FC = () => {
             value={formData.zipCode}
             onChange={handleInputChange}
             className={`${styles.input} ${fieldErrors.zipCode ? styles.inputError : ''}`}
-            placeholder="Enter ZIP code"
+            placeholder="Enter 5-digit postal code"
           />
           {fieldErrors.zipCode && <p className={styles.fieldError}>{fieldErrors.zipCode}</p>}
         </div>

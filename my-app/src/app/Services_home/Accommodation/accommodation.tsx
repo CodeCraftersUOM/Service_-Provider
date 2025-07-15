@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import styles from "./accommodation.module.css";
+import React, { useState } from 'react';
+import styles from './accommodation.module.css';
 
-interface AccommodationFormData {
+interface FormData {
   accommodationName: string;
   ownerFullName: string;
   phoneNumber: string;
@@ -13,25 +13,21 @@ interface AccommodationFormData {
   locationAddress: string;
   googleMapsLink: string;
   propertyDescription: string;
-  starRating: number | "";
-
+  starRating: number | '';
   checkInTime: string;
   checkOutTime: string;
-
   availability: {
     daysOpen: string[];
     is24x7Reception: boolean;
     closedOnHolidays: boolean;
   };
-
   tourismLicenseNumber: string;
   businessRegistrationNumber: string;
-  yearsInOperation: number | "";
-  numberOfRooms: number | ""; // Make sure these are required for step 3
-  maxGuests: number | ""; // Make sure these are required for step 3
-  minPricePerNight: number | ""; // Make sure these are required for step 3
-  maxPricePerNight: number | ""; // Make sure these are required for step 3
-
+  yearsInOperation: number | '';
+  numberOfRooms: number | '';
+  maxGuests: number | '';
+  minPricePerNight: number | '';
+  maxPricePerNight: number | '';
   amenities: {
     pool: boolean;
     gym: boolean;
@@ -51,338 +47,259 @@ interface AccommodationFormData {
   };
 }
 
-const AccommodationRegistrationForm: React.FC = () => {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [formData, setFormData] = useState<AccommodationFormData>({
-    accommodationName: "",
-    ownerFullName: "",
-    phoneNumber: "",
-    emailAddress: "",
-    alternateContactNumber: "",
-    propertyType: "",
-    locationAddress: "",
-    googleMapsLink: "",
-    propertyDescription: "",
-    starRating: "",
-
-    checkInTime: "",
-    checkOutTime: "",
-
-    availability: {
-      daysOpen: [],
-      is24x7Reception: false,
-      closedOnHolidays: false,
-    },
-
-    tourismLicenseNumber: "",
-    businessRegistrationNumber: "",
-    yearsInOperation: "",
-    numberOfRooms: "",
-    maxGuests: "",
-    minPricePerNight: "",
-    maxPricePerNight: "",
-
+const AccommodationForm: React.FC = () => {
+  const [step, setStep] = useState(1);
+  const [success, setSuccess] = useState(false);
+  const [data, setData] = useState<FormData>({
+    accommodationName: '', ownerFullName: '', phoneNumber: '', emailAddress: '', alternateContactNumber: '',
+    propertyType: '', locationAddress: '', googleMapsLink: '', propertyDescription: '', starRating: '',
+    checkInTime: '', checkOutTime: '',
+    availability: { daysOpen: [], is24x7Reception: false, closedOnHolidays: false },
+    tourismLicenseNumber: '', businessRegistrationNumber: '', yearsInOperation: '',
+    numberOfRooms: '', maxGuests: '', minPricePerNight: '', maxPricePerNight: '',
     amenities: {
-      pool: false,
-      gym: false,
-      spa: false,
-      restaurantOnSite: false,
-      barLounge: false,
-      roomService: false,
-      laundryService: false,
-      conciergeService: false,
-      airportTransfer: false,
-      petFriendly: false,
-      eventFacilities: false,
-      parkingAvailable: false,
-      wifi: false,
-      familyAreaKidsFriendly: false,
-      wheelchairAccessible: false,
-    },
+      pool: false, gym: false, spa: false, restaurantOnSite: false, barLounge: false,
+      roomService: false, laundryService: false, conciergeService: false, airportTransfer: false,
+      petFriendly: false, eventFacilities: false, parkingAvailable: false, wifi: false,
+      familyAreaKidsFriendly: false, wheelchairAccessible: false
+    }
   });
-
+  const [errors, setErrors] = useState<{[key: string]: string}>({});
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState('');
 
   const accommodationTypes = [
-    "Hotel",
-    "Guest House",
-    "Villa",
-    "Apartment",
-    "Homestay",
-    "Resort",
-    "Boutique Hotel",
-    "Motel",
-    "Bed and Breakfast",
-    "Other",
+    'Hotel', 'Guest House', 'Villa', 'Apartment', 'Homestay', 'Resort',
+    'Boutique Hotel', 'Motel', 'Bed and Breakfast', 'Other'
   ];
-  const daysOfWeek = [
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-    "Sunday",
-  ];
+  const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-  const handleInputChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
-  ) => {
-    const { name, value, type } = e.target;
+  // ✅ CONSOLIDATED VALIDATION with same patterns
+  const validate = () => {
+    const e: {[key: string]: string} = {};
+    
+    // Required fields
+    if (!data.accommodationName.trim()) e.accommodationName = "Accommodation name required";
+    if (!data.ownerFullName.trim()) e.ownerFullName = "Owner name required";
+    if (!data.emailAddress.trim()) e.emailAddress = "Email required";
+    if (!data.propertyType) e.propertyType = "Property type required";
+    if (!data.locationAddress.trim()) e.locationAddress = "Location address required";
+    if (!data.propertyDescription.trim()) e.propertyDescription = "Property description required";
+    if (!data.checkInTime) e.checkInTime = "Check-in time required";
+    if (!data.checkOutTime) e.checkOutTime = "Check-out time required";
+    if (data.numberOfRooms === '') e.numberOfRooms = "Number of rooms required";
+    if (data.maxGuests === '') e.maxGuests = "Max guests required";
+    if (data.minPricePerNight === '') e.minPricePerNight = "Min price required";
+    if (data.maxPricePerNight === '') e.maxPricePerNight = "Max price required";
 
-    if (type === "checkbox") {
-      const checkbox = e.target as HTMLInputElement;
-      if (name.startsWith("amenities.")) {
-        const amenityKey = name.split(
-          "."
-        )[1] as keyof typeof formData.amenities;
-        setFormData((prev) => ({
-          ...prev,
-          amenities: {
-            ...prev.amenities,
-            [amenityKey]: checkbox.checked,
-          },
-        }));
-      } else if (name.startsWith("availability.")) {
-        const availabilityKey = name.split(
-          "."
-        )[1] as keyof typeof formData.availability;
-        setFormData((prev) => ({
-          ...prev,
-          availability: {
-            ...prev.availability,
-            [availabilityKey]: checkbox.checked,
-          },
-        }));
+    // ✅ Phone validation (10 digits, specific patterns)
+    const validatePhone = (phone: string) => {
+      const cleaned = phone.replace(/\D/g, '');
+      return cleaned.length === 10 && /^(07[0-9]{8}|0[1-9][0-9]{8})$/.test(cleaned);
+    };
+
+    if (!data.phoneNumber.trim()) {
+      e.phoneNumber = "Phone number required";
+    } else if (!validatePhone(data.phoneNumber)) {
+      e.phoneNumber = "Invalid phone number (07XXXXXXXX for mobile, 0XXXXXXXXX for landline)";
+    }
+
+    // Alternate phone validation (optional but must be valid if provided)
+    if (data.alternateContactNumber.trim() && !validatePhone(data.alternateContactNumber)) {
+      e.alternateContactNumber = "Invalid alternate contact number";
+    }
+
+    // Email validation
+    if (data.emailAddress && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.emailAddress)) {
+      e.emailAddress = "Invalid email format";
+    }
+
+    // ✅ Google Maps link validation (must be Google Maps URL)
+    if (data.googleMapsLink.trim()) {
+      try {
+        const url = new URL(data.googleMapsLink);
+        const validDomains = ['maps.google.com', 'maps.google.', 'goo.gl', 'maps.app.goo.gl'];
+        if (!validDomains.some(domain => url.hostname.includes(domain) || url.href.includes('maps.google'))) {
+          e.googleMapsLink = "Must be a valid Google Maps link";
+        }
+      } catch {
+        e.googleMapsLink = "Invalid Google Maps URL format";
       }
-    } else if (
-      name === "starRating" ||
-      name === "yearsInOperation" ||
-      name === "numberOfRooms" ||
-      name === "maxGuests" ||
-      name === "minPricePerNight" ||
-      name === "maxPricePerNight"
-    ) {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value === "" ? "" : parseFloat(value),
-      }));
-    } else if (name === "checkInTime" || name === "checkOutTime") {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
+    }
+
+    // ✅ Business registration validation (optional)
+    if (data.businessRegistrationNumber.trim()) {
+      const reg = data.businessRegistrationNumber.trim().toUpperCase();
+      if (!/^(PV|HS|SP|PQ)[0-9]+$|^[0-9]+$/.test(reg)) {
+        e.businessRegistrationNumber = "Invalid business registration format (PV12345, HS12345, SP12345, PQ12345, or numeric)";
+      }
+    }
+
+    // Numeric validations
+    if (data.starRating !== '' && (isNaN(+data.starRating) || +data.starRating < 0 || +data.starRating > 5)) {
+      e.starRating = "Star rating: 0-5";
+    }
+
+    if (data.yearsInOperation !== '' && (isNaN(+data.yearsInOperation) || +data.yearsInOperation < 0)) {
+      e.yearsInOperation = "Invalid years in operation";
+    }
+
+    if (data.numberOfRooms !== '' && (isNaN(+data.numberOfRooms) || +data.numberOfRooms < 1)) {
+      e.numberOfRooms = "Number of rooms must be at least 1";
+    }
+
+    if (data.maxGuests !== '' && (isNaN(+data.maxGuests) || +data.maxGuests < 1)) {
+      e.maxGuests = "Max guests must be at least 1";
+    }
+
+    if (data.minPricePerNight !== '' && (isNaN(+data.minPricePerNight) || +data.minPricePerNight < 0)) {
+      e.minPricePerNight = "Min price must be 0 or more";
+    }
+
+    if (data.maxPricePerNight !== '' && (isNaN(+data.maxPricePerNight) || +data.maxPricePerNight < 0)) {
+      e.maxPricePerNight = "Max price must be 0 or more";
+    }
+
+    if (data.minPricePerNight !== '' && data.maxPricePerNight !== '' && 
+        +data.minPricePerNight > +data.maxPricePerNight) {
+      e.maxPricePerNight = "Max price must be greater than min price";
+    }
+
+    // Time validation
+    if (data.checkInTime && data.checkOutTime && data.checkInTime >= data.checkOutTime) {
+      e.checkOutTime = "Check-out time must be after check-in time";
+    }
+
+    return e;
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value, type } = e.target;
+    const checked = (e.target as HTMLInputElement).checked;
+    
+    if (errors[name]) setErrors(prev => ({ ...prev, [name]: "" }));
+
+    if (type === 'checkbox') {
+      if (name.startsWith('amenities.')) {
+        const amenityKey = name.split('.')[1] as keyof typeof data.amenities;
+        setData(prev => ({ ...prev, amenities: { ...prev.amenities, [amenityKey]: checked } }));
+      } else if (name.startsWith('availability.')) {
+        const key = name.split('.')[1] as keyof typeof data.availability;
+        setData(prev => ({ ...prev, availability: { ...prev.availability, [key]: checked } }));
+      }
+    } else if (['starRating', 'yearsInOperation', 'numberOfRooms', 'maxGuests', 'minPricePerNight', 'maxPricePerNight'].includes(name)) {
+      setData(prev => ({ ...prev, [name]: value === '' ? '' : parseFloat(value) }));
     } else {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
+      setData(prev => ({ ...prev, [name]: value }));
     }
   };
 
-  const handleDaysChange = (day: string) => {
-    setFormData((prev) => ({
+  const toggleDay = (day: string) => {
+    setData(prev => ({
       ...prev,
       availability: {
         ...prev.availability,
         daysOpen: prev.availability.daysOpen.includes(day)
-          ? prev.availability.daysOpen.filter((d) => d !== day)
-          : [...prev.availability.daysOpen, day],
-      },
+          ? prev.availability.daysOpen.filter(d => d !== day)
+          : [...prev.availability.daysOpen, day]
+      }
     }));
   };
 
-  const validateStep = (step: number): boolean => {
-    switch (step) {
-      case 1:
-        return !!(
-          formData.accommodationName &&
-          formData.ownerFullName &&
-          formData.phoneNumber &&
-          formData.emailAddress &&
-          formData.propertyType
-        );
-      case 2:
-        return !!(
-          formData.locationAddress &&
-          formData.propertyDescription &&
-          formData.checkInTime &&
-          formData.checkOutTime
-        );
-      case 3:
-        // FIX: Add validation for fields in step 3
-        return !!(
-          formData.numberOfRooms !== "" &&
-          formData.maxGuests !== "" &&
-          formData.minPricePerNight !== "" &&
-          formData.maxPricePerNight !== ""
-        );
-      default:
-        return false;
-    }
-  };
-
-  const nextStep = () => {
-    if (validateStep(currentStep)) {
-      setCurrentStep((prev) => Math.min(prev + 1, 3));
-      setMessage("");
+  const next = () => {
+    const stepErrors = validate();
+    const stepFields = {
+      1: ['accommodationName', 'ownerFullName', 'phoneNumber', 'emailAddress', 'alternateContactNumber', 'propertyType'],
+      2: ['locationAddress', 'googleMapsLink', 'propertyDescription', 'starRating', 'checkInTime', 'checkOutTime']
+    };
+    
+    const currentErrors = Object.keys(stepErrors).filter(key => 
+      stepFields[step as keyof typeof stepFields]?.includes(key)
+    );
+    
+    if (currentErrors.length === 0) {
+      setStep(prev => Math.min(prev + 1, 3));
+      setMessage('');
     } else {
-      setMessage("Please fill in all required fields before proceeding.");
+      const filtered: {[key: string]: string} = {};
+      currentErrors.forEach(key => filtered[key] = stepErrors[key]);
+      setErrors(filtered);
+      setMessage('Fill required fields');
     }
   };
 
-  const prevStep = () => {
-    setCurrentStep((prev) => Math.max(prev - 1, 1));
-    setMessage("");
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage("");
-
-    // Ensure step 3 is validated before final submission
-    if (!validateStep(3)) {
-      setMessage("Please fill in all required fields in the final step.");
-      setLoading(false);
+  const submit = async () => {
+    const allErrors = validate();
+    if (Object.keys(allErrors).length > 0) {
+      setErrors(allErrors);
+      setMessage('Fix all errors before submitting');
       return;
     }
 
+    setLoading(true);
     const dataToSend = {
-      ...formData,
-      daysAvailable: formData.availability.daysOpen,
-      is24x7Reception: formData.availability.is24x7Reception,
-      availability: undefined, // Remove the nested availability object before sending
+      ...data,
+      daysAvailable: data.availability.daysOpen,
+      is24x7Reception: data.availability.is24x7Reception,
+      availability: undefined
     };
 
     try {
-      const response = await fetch(
-        "http://localhost:2000/api/addAccommodation",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(dataToSend),
-        }
-      );
-
+      const response = await fetch('http://localhost:2000/api/addAccommodation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dataToSend),
+      });
       if (response.ok) {
-        setIsSuccess(true);
+        setSuccess(true);
       } else {
-        const errorData = await response.json();
-        setMessage(
-          `Error: ${errorData.error || "Failed to register accommodation"}`
-        );
-        if (errorData.details) {
-          Object.values(errorData.details).forEach((detail) => {
-            console.error(detail);
-          });
-        }
+        const result = await response.json();
+        setMessage(`Error: ${result.error || 'Registration failed'}`);
       }
-    } catch (error) {
-      setMessage("Error: Failed to connect to server");
-      console.error("Frontend fetch error:", error);
+    } catch {
+      setMessage('Error: Server connection failed');
     } finally {
       setLoading(false);
     }
   };
 
-  const resetForm = () => {
-    setIsSuccess(false);
-    setCurrentStep(1);
-    setFormData({
-      accommodationName: "",
-      ownerFullName: "",
-      phoneNumber: "",
-      emailAddress: "",
-      alternateContactNumber: "",
-      propertyType: "",
-      locationAddress: "",
-      googleMapsLink: "",
-      propertyDescription: "",
-      starRating: "",
-
-      checkInTime: "",
-      checkOutTime: "",
-
-      availability: {
-        daysOpen: [],
-        is24x7Reception: false,
-        closedOnHolidays: false,
-      },
-
-      tourismLicenseNumber: "",
-      businessRegistrationNumber: "",
-      yearsInOperation: "",
-      numberOfRooms: "",
-      maxGuests: "",
-      minPricePerNight: "",
-      maxPricePerNight: "",
-
+  const reset = () => {
+    setSuccess(false);
+    setStep(1);
+    setErrors({});
+    setMessage('');
+    setData({
+      accommodationName: '', ownerFullName: '', phoneNumber: '', emailAddress: '', alternateContactNumber: '',
+      propertyType: '', locationAddress: '', googleMapsLink: '', propertyDescription: '', starRating: '',
+      checkInTime: '', checkOutTime: '',
+      availability: { daysOpen: [], is24x7Reception: false, closedOnHolidays: false },
+      tourismLicenseNumber: '', businessRegistrationNumber: '', yearsInOperation: '',
+      numberOfRooms: '', maxGuests: '', minPricePerNight: '', maxPricePerNight: '',
       amenities: {
-        pool: false,
-        gym: false,
-        spa: false,
-        restaurantOnSite: false,
-        barLounge: false,
-        roomService: false,
-        laundryService: false,
-        conciergeService: false,
-        airportTransfer: false,
-        petFriendly: false,
-        eventFacilities: false,
-        parkingAvailable: false,
-        wifi: false,
-        familyAreaKidsFriendly: false,
-        wheelchairAccessible: false,
-      },
+        pool: false, gym: false, spa: false, restaurantOnSite: false, barLounge: false,
+        roomService: false, laundryService: false, conciergeService: false, airportTransfer: false,
+        petFriendly: false, eventFacilities: false, parkingAvailable: false, wifi: false,
+        familyAreaKidsFriendly: false, wheelchairAccessible: false
+      }
     });
   };
 
-  if (isSuccess) {
+  if (success) {
     return (
       <div className={styles.container}>
         <div className={styles.successWrapper}>
-          <div className={styles.successIcon}>
-            <svg
-              width="80"
-              height="80"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-              <polyline points="22,4 12,14.01 9,11.01"></polyline>
-            </svg>
-          </div>
-          <h1 className={styles.successTitle}>
-            Accommodation Successfully Registered!
-          </h1>
+          <div className={styles.successIcon}>✓</div>
+          <h1 className={styles.successTitle}>Accommodation Successfully Registered!</h1>
           <p className={styles.successMessage}>
-            Congratulations! Your accommodation{" "}
-            <strong>{formData.accommodationName}</strong> has been successfully
-            registered in our system.
+            <strong>{data.accommodationName}</strong> has been registered successfully.
           </p>
           <div className={styles.successDetails}>
-            <p>
-              <strong>Owner:</strong> {formData.ownerFullName}
-            </p>
-            <p>
-              <strong>Property Type:</strong> {formData.propertyType}
-            </p>
-            <p>
-              <strong>Email:</strong> {formData.emailAddress}
-            </p>
+            <p><strong>Owner:</strong> {data.ownerFullName}</p>
+            <p><strong>Type:</strong> {data.propertyType}</p>
+            <p><strong>Rooms:</strong> {data.numberOfRooms}</p>
+            <p><strong>Max Guests:</strong> {data.maxGuests}</p>
           </div>
-          <button onClick={resetForm} className={styles.newRegistrationButton}>
-            Register Another Accommodation
-          </button>
+          <button onClick={reset} className={styles.newRegistrationButton}>Register Another</button>
         </div>
       </div>
     );
@@ -391,21 +308,15 @@ const AccommodationRegistrationForm: React.FC = () => {
   return (
     <div className={styles.container}>
       <div className={styles.formWrapper}>
+        {/* Progress */}
         <div className={styles.progressContainer}>
           <div className={styles.progressBar}></div>
           <div className={styles.stepIndicators}>
-            {[1, 2, 3].map((step) => (
-              <div
-                key={step}
-                className={`${styles.stepIndicator} ${
-                  currentStep >= step ? styles.active : ""
-                }`}
-              >
-                <div className={styles.stepNumber}>{step}</div>
+            {[1, 2, 3].map(s => (
+              <div key={s} className={`${styles.stepIndicator} ${step >= s ? styles.active : ''}`}>
+                <div className={styles.stepNumber}>{s}</div>
                 <div className={styles.stepLabel}>
-                  {step === 1 && "Basic Info"}
-                  {step === 2 && "Details & Times"}
-                  {step === 3 && "Additional Info"}
+                  {s === 1 ? 'Basic' : s === 2 ? 'Details' : 'Info'}
                 </div>
               </div>
             ))}
@@ -413,240 +324,128 @@ const AccommodationRegistrationForm: React.FC = () => {
         </div>
 
         <h1 className={styles.title}>Accommodation Registration</h1>
+        {message && <div className={`${styles.message} ${message.includes('Error') ? styles.error : styles.warning}`}>{message}</div>}
 
-        {message && (
-          <div
-            className={`${styles.message} ${
-              message.includes("Error") ? styles.error : styles.warning
-            }`}
-          >
-            {message}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className={styles.form}>
-          {currentStep === 1 && (
+        <div className={styles.form}>
+          {/* Step 1: Basic Information */}
+          {step === 1 && (
             <div className={styles.step}>
-              <h2 className={styles.stepTitle}>Step 1: Basic Information</h2>
-
+              <h2>Basic Information</h2>
+              
               <div className={styles.row}>
                 <div className={styles.field}>
-                  <label htmlFor="accommodationName" className={styles.label}>
-                    Accommodation Name *
-                  </label>
-                  <input
-                    type="text"
-                    id="accommodationName"
-                    name="accommodationName"
-                    value={formData.accommodationName}
-                    onChange={handleInputChange}
-                    className={styles.input}
-                    required
-                  />
+                  <label>Accommodation Name *</label>
+                  <input name="accommodationName" value={data.accommodationName} onChange={handleChange}
+                         className={`${styles.input} ${errors.accommodationName ? styles.inputError : ''}`}
+                         placeholder="Hotel/property name" />
+                  {errors.accommodationName && <span className={styles.fieldError}>{errors.accommodationName}</span>}
                 </div>
-
                 <div className={styles.field}>
-                  <label htmlFor="ownerFullName" className={styles.label}>
-                    Owner Full Name *
-                  </label>
-                  <input
-                    type="text"
-                    id="ownerFullName"
-                    name="ownerFullName"
-                    value={formData.ownerFullName}
-                    onChange={handleInputChange}
-                    className={styles.input}
-                    required
-                  />
+                  <label>Owner Full Name *</label>
+                  <input name="ownerFullName" value={data.ownerFullName} onChange={handleChange}
+                         className={`${styles.input} ${errors.ownerFullName ? styles.inputError : ''}`}
+                         placeholder="Owner's full name" />
+                  {errors.ownerFullName && <span className={styles.fieldError}>{errors.ownerFullName}</span>}
                 </div>
               </div>
 
               <div className={styles.row}>
                 <div className={styles.field}>
-                  <label htmlFor="phoneNumber" className={styles.label}>
-                    Phone Number *
-                  </label>
-                  <input
-                    type="tel"
-                    id="phoneNumber"
-                    name="phoneNumber"
-                    value={formData.phoneNumber}
-                    onChange={handleInputChange}
-                    className={styles.input}
-                    required
-                  />
+                  <label>Phone Number * <small>(10 digits)</small></label>
+                  <input name="phoneNumber" value={data.phoneNumber} onChange={handleChange}
+                         className={`${styles.input} ${errors.phoneNumber ? styles.inputError : ''}`}
+                         placeholder="0771234567" />
+                  {errors.phoneNumber && <span className={styles.fieldError}>{errors.phoneNumber}</span>}
                 </div>
-
                 <div className={styles.field}>
-                  <label htmlFor="emailAddress" className={styles.label}>
-                    Email Address *
-                  </label>
-                  <input
-                    type="email"
-                    id="emailAddress"
-                    name="emailAddress"
-                    value={formData.emailAddress}
-                    onChange={handleInputChange}
-                    className={styles.input}
-                    required
-                  />
+                  <label>Email Address *</label>
+                  <input type="email" name="emailAddress" value={data.emailAddress} onChange={handleChange}
+                         className={`${styles.input} ${errors.emailAddress ? styles.inputError : ''}`}
+                         placeholder="email@example.com" />
+                  {errors.emailAddress && <span className={styles.fieldError}>{errors.emailAddress}</span>}
                 </div>
               </div>
 
               <div className={styles.row}>
                 <div className={styles.field}>
-                  <label
-                    htmlFor="alternateContactNumber"
-                    className={styles.label}
-                  >
-                    Alternate Contact Number
-                  </label>
-                  <input
-                    type="tel"
-                    id="alternateContactNumber"
-                    name="alternateContactNumber"
-                    value={formData.alternateContactNumber}
-                    onChange={handleInputChange}
-                    className={styles.input}
-                  />
+                  <label>Alternate Contact <small>(Optional, 10 digits)</small></label>
+                  <input name="alternateContactNumber" value={data.alternateContactNumber} onChange={handleChange}
+                         className={`${styles.input} ${errors.alternateContactNumber ? styles.inputError : ''}`}
+                         placeholder="0112345678" />
+                  {errors.alternateContactNumber && <span className={styles.fieldError}>{errors.alternateContactNumber}</span>}
                 </div>
-
                 <div className={styles.field}>
-                  <label htmlFor="propertyType" className={styles.label}>
-                    Property Type *
-                  </label>
-                  <select
-                    id="propertyType"
-                    name="propertyType"
-                    value={formData.propertyType}
-                    onChange={handleInputChange}
-                    className={styles.select}
-                    required
-                  >
-                    <option value="">Select Property Type</option>
-                    {accommodationTypes.map((type) => (
-                      <option key={type} value={type}>
-                        {type}
-                      </option>
-                    ))}
+                  <label>Property Type *</label>
+                  <select name="propertyType" value={data.propertyType} onChange={handleChange}
+                          className={`${styles.select} ${errors.propertyType ? styles.inputError : ''}`}>
+                    <option value="">Select Type</option>
+                    {accommodationTypes.map(type => <option key={type} value={type}>{type}</option>)}
                   </select>
+                  {errors.propertyType && <span className={styles.fieldError}>{errors.propertyType}</span>}
                 </div>
               </div>
             </div>
           )}
 
-          {currentStep === 2 && (
+          {/* Step 2: Details & Times */}
+          {step === 2 && (
             <div className={styles.step}>
-              <h2 className={styles.stepTitle}>Step 2: Details & Times</h2>
-
+              <h2>Details & Times</h2>
+              
               <div className={styles.field}>
-                <label htmlFor="locationAddress" className={styles.label}>
-                  Location Address *
-                </label>
-                <textarea
-                  id="locationAddress"
-                  name="locationAddress"
-                  value={formData.locationAddress}
-                  onChange={handleInputChange}
-                  className={styles.textarea}
-                  rows={3}
-                  required
-                />
+                <label>Location Address *</label>
+                <textarea name="locationAddress" value={data.locationAddress} onChange={handleChange}
+                          className={`${styles.textarea} ${errors.locationAddress ? styles.inputError : ''}`}
+                          rows={3} placeholder="Full address of property" />
+                {errors.locationAddress && <span className={styles.fieldError}>{errors.locationAddress}</span>}
               </div>
 
               <div className={styles.field}>
-                <label htmlFor="googleMapsLink" className={styles.label}>
-                  Google Maps Link
-                </label>
-                <input
-                  type="url"
-                  id="googleMapsLink"
-                  name="googleMapsLink"
-                  value={formData.googleMapsLink}
-                  onChange={handleInputChange}
-                  className={styles.input}
-                  placeholder="https://maps.google.com/..."
-                />
+                <label>Google Maps Link <small>(Optional - Google Maps only)</small></label>
+                <input type="url" name="googleMapsLink" value={data.googleMapsLink} onChange={handleChange}
+                       className={`${styles.input} ${errors.googleMapsLink ? styles.inputError : ''}`}
+                       placeholder="Google Maps URL" />
+                {errors.googleMapsLink && <span className={styles.fieldError}>{errors.googleMapsLink}</span>}
               </div>
 
               <div className={styles.field}>
-                <label htmlFor="propertyDescription" className={styles.label}>
-                  Property Description *
-                </label>
-                <textarea
-                  id="propertyDescription"
-                  name="propertyDescription"
-                  value={formData.propertyDescription}
-                  onChange={handleInputChange}
-                  className={styles.textarea}
-                  rows={4}
-                  required
-                />
+                <label>Property Description *</label>
+                <textarea name="propertyDescription" value={data.propertyDescription} onChange={handleChange}
+                          className={`${styles.textarea} ${errors.propertyDescription ? styles.inputError : ''}`}
+                          rows={4} placeholder="Describe your property" />
+                {errors.propertyDescription && <span className={styles.fieldError}>{errors.propertyDescription}</span>}
               </div>
 
               <div className={styles.row}>
                 <div className={styles.field}>
-                  <label htmlFor="starRating" className={styles.label}>
-                    Star Rating
-                  </label>
-                  <input
-                    type="number"
-                    id="starRating"
-                    name="starRating"
-                    value={formData.starRating}
-                    onChange={handleInputChange}
-                    className={styles.input}
-                    min="0"
-                    max="5"
-                    step="0.5"
-                  />
+                  <label>Star Rating <small>(0-5, optional)</small></label>
+                  <input type="number" name="starRating" value={data.starRating} onChange={handleChange}
+                         className={`${styles.input} ${errors.starRating ? styles.inputError : ''}`}
+                         min="0" max="5" step="0.5" placeholder="0-5 stars" />
+                  {errors.starRating && <span className={styles.fieldError}>{errors.starRating}</span>}
                 </div>
-              </div>
-
-              <div className={styles.row}>
                 <div className={styles.field}>
-                  <label htmlFor="checkInTime" className={styles.label}>
-                    Check-in Time *
-                  </label>
-                  <input
-                    type="time"
-                    id="checkInTime"
-                    name="checkInTime"
-                    value={formData.checkInTime}
-                    onChange={handleInputChange}
-                    className={styles.input}
-                    required
-                  />
+                  <label>Check-in Time *</label>
+                  <input type="time" name="checkInTime" value={data.checkInTime} onChange={handleChange}
+                         className={`${styles.input} ${errors.checkInTime ? styles.inputError : ''}`} />
+                  {errors.checkInTime && <span className={styles.fieldError}>{errors.checkInTime}</span>}
                 </div>
-
                 <div className={styles.field}>
-                  <label htmlFor="checkOutTime" className={styles.label}>
-                    Check-out Time *
-                  </label>
-                  <input
-                    type="time"
-                    id="checkOutTime"
-                    name="checkOutTime"
-                    value={formData.checkOutTime}
-                    onChange={handleInputChange}
-                    className={styles.input}
-                    required
-                  />
+                  <label>Check-out Time *</label>
+                  <input type="time" name="checkOutTime" value={data.checkOutTime} onChange={handleChange}
+                         className={`${styles.input} ${errors.checkOutTime ? styles.inputError : ''}`} />
+                  {errors.checkOutTime && <span className={styles.fieldError}>{errors.checkOutTime}</span>}
                 </div>
               </div>
 
               <div className={styles.field}>
-                <label className={styles.label}>Availability Days</label>
+                <label>Availability Days <small>(Optional)</small></label>
                 <div className={styles.checkboxGrid}>
-                  {daysOfWeek.map((day) => (
+                  {daysOfWeek.map(day => (
                     <label key={day} className={styles.checkboxLabel}>
-                      <input
-                        type="checkbox"
-                        checked={formData.availability.daysOpen.includes(day)}
-                        onChange={() => handleDaysChange(day)}
-                        className={styles.checkbox}
-                      />
-                      {day}
+                      <input type="checkbox" checked={data.availability.daysOpen.includes(day)}
+                             onChange={() => toggleDay(day)} />
+                      {day.slice(0, 3)}
                     </label>
                   ))}
                 </div>
@@ -654,362 +453,109 @@ const AccommodationRegistrationForm: React.FC = () => {
 
               <div className={styles.checkboxRow}>
                 <label className={styles.checkboxLabel}>
-                  <input
-                    type="checkbox"
-                    name="availability.is24x7Reception"
-                    checked={formData.availability.is24x7Reception}
-                    onChange={handleInputChange}
-                    className={styles.checkbox}
-                  />
+                  <input type="checkbox" name="availability.is24x7Reception" 
+                         checked={data.availability.is24x7Reception} onChange={handleChange} />
                   24x7 Reception
                 </label>
-
                 <label className={styles.checkboxLabel}>
-                  <input
-                    type="checkbox"
-                    name="availability.closedOnHolidays"
-                    checked={formData.availability.closedOnHolidays}
-                    onChange={handleInputChange}
-                    className={styles.checkbox}
-                  />
+                  <input type="checkbox" name="availability.closedOnHolidays"
+                         checked={data.availability.closedOnHolidays} onChange={handleChange} />
                   Closed on Holidays
                 </label>
               </div>
             </div>
           )}
 
-          {currentStep === 3 && (
+          {/* Step 3: Additional Information */}
+          {step === 3 && (
             <div className={styles.step}>
-              <h2 className={styles.stepTitle}>
-                Step 3: Additional Information
-              </h2>
-
+              <h2>Additional Information</h2>
+              
               <div className={styles.row}>
                 <div className={styles.field}>
-                  <label
-                    htmlFor="tourismLicenseNumber"
-                    className={styles.label}
-                  >
-                    Tourism License Number
-                  </label>
-                  <input
-                    type="text"
-                    id="tourismLicenseNumber"
-                    name="tourismLicenseNumber"
-                    value={formData.tourismLicenseNumber}
-                    onChange={handleInputChange}
-                    className={styles.input}
-                  />
+                  <label>Tourism License <small>(Optional)</small></label>
+                  <input name="tourismLicenseNumber" value={data.tourismLicenseNumber} onChange={handleChange}
+                         className={styles.input} placeholder="Tourism license number" />
                 </div>
-
                 <div className={styles.field}>
-                  <label
-                    htmlFor="businessRegistrationNumber"
-                    className={styles.label}
-                  >
-                    Business Registration Number
-                  </label>
-                  <input
-                    type="text"
-                    id="businessRegistrationNumber"
-                    name="businessRegistrationNumber"
-                    value={formData.businessRegistrationNumber}
-                    onChange={handleInputChange}
-                    className={styles.input}
-                  />
+                  <label>Business Registration <small>(Optional - PV12345, etc.)</small></label>
+                  <input name="businessRegistrationNumber" value={data.businessRegistrationNumber} onChange={handleChange}
+                         className={`${styles.input} ${errors.businessRegistrationNumber ? styles.inputError : ''}`}
+                         placeholder="Business registration" />
+                  {errors.businessRegistrationNumber && <span className={styles.fieldError}>{errors.businessRegistrationNumber}</span>}
                 </div>
               </div>
 
               <div className={styles.row}>
                 <div className={styles.field}>
-                  <label htmlFor="yearsInOperation" className={styles.label}>
-                    Years in Operation
-                  </label>
-                  <input
-                    type="number"
-                    id="yearsInOperation"
-                    name="yearsInOperation"
-                    value={formData.yearsInOperation}
-                    onChange={handleInputChange}
-                    className={styles.input}
-                    min="0"
-                  />
+                  <label>Years in Operation <small>(Optional)</small></label>
+                  <input type="number" name="yearsInOperation" value={data.yearsInOperation} onChange={handleChange}
+                         className={`${styles.input} ${errors.yearsInOperation ? styles.inputError : ''}`}
+                         min="0" placeholder="Years operating" />
+                  {errors.yearsInOperation && <span className={styles.fieldError}>{errors.yearsInOperation}</span>}
                 </div>
-
                 <div className={styles.field}>
-                  <label htmlFor="numberOfRooms" className={styles.label}>
-                    Number of Rooms *
-                  </label>
-                  <input
-                    type="number"
-                    id="numberOfRooms"
-                    name="numberOfRooms"
-                    value={formData.numberOfRooms}
-                    onChange={handleInputChange}
-                    className={styles.input}
-                    min="0"
-                    required // Marked as required
-                  />
+                  <label>Number of Rooms *</label>
+                  <input type="number" name="numberOfRooms" value={data.numberOfRooms} onChange={handleChange}
+                         className={`${styles.input} ${errors.numberOfRooms ? styles.inputError : ''}`}
+                         min="1" placeholder="Total rooms" />
+                  {errors.numberOfRooms && <span className={styles.fieldError}>{errors.numberOfRooms}</span>}
                 </div>
               </div>
 
               <div className={styles.row}>
                 <div className={styles.field}>
-                  <label htmlFor="maxGuests" className={styles.label}>
-                    Max Guests *
-                  </label>
-                  <input
-                    type="number"
-                    id="maxGuests"
-                    name="maxGuests"
-                    value={formData.maxGuests}
-                    onChange={handleInputChange}
-                    className={styles.input}
-                    min="1"
-                    required // Marked as required
-                  />
+                  <label>Max Guests *</label>
+                  <input type="number" name="maxGuests" value={data.maxGuests} onChange={handleChange}
+                         className={`${styles.input} ${errors.maxGuests ? styles.inputError : ''}`}
+                         min="1" placeholder="Maximum guests" />
+                  {errors.maxGuests && <span className={styles.fieldError}>{errors.maxGuests}</span>}
                 </div>
-              </div>
-
-              <div className={styles.row}>
                 <div className={styles.field}>
-                  <label htmlFor="minPricePerNight" className={styles.label}>
-                    Min Price Per Night *
-                  </label>
-                  <input
-                    type="number"
-                    id="minPricePerNight"
-                    name="minPricePerNight"
-                    value={formData.minPricePerNight}
-                    onChange={handleInputChange}
-                    className={styles.input}
-                    min="0"
-                    required // Marked as required
-                  />
+                  <label>Min Price/Night *</label>
+                  <input type="number" name="minPricePerNight" value={data.minPricePerNight} onChange={handleChange}
+                         className={`${styles.input} ${errors.minPricePerNight ? styles.inputError : ''}`}
+                         min="0" placeholder="Minimum price" />
+                  {errors.minPricePerNight && <span className={styles.fieldError}>{errors.minPricePerNight}</span>}
                 </div>
-
                 <div className={styles.field}>
-                  <label htmlFor="maxPricePerNight" className={styles.label}>
-                    Max Price Per Night *
-                  </label>
-                  <input
-                    type="number"
-                    id="maxPricePerNight"
-                    name="maxPricePerNight"
-                    value={formData.maxPricePerNight}
-                    onChange={handleInputChange}
-                    className={styles.input}
-                    min="0"
-                    required // Marked as required
-                  />
+                  <label>Max Price/Night *</label>
+                  <input type="number" name="maxPricePerNight" value={data.maxPricePerNight} onChange={handleChange}
+                         className={`${styles.input} ${errors.maxPricePerNight ? styles.inputError : ''}`}
+                         min="0" placeholder="Maximum price" />
+                  {errors.maxPricePerNight && <span className={styles.fieldError}>{errors.maxPricePerNight}</span>}
                 </div>
               </div>
 
               <div className={styles.field}>
-                <label className={styles.label}>Amenities</label>
+                <label>Amenities <small>(Optional - Select any that apply)</small></label>
                 <div className={styles.checkboxGrid}>
-                  <label className={styles.checkboxLabel}>
-                    <input
-                      type="checkbox"
-                      name="amenities.pool"
-                      checked={formData.amenities.pool}
-                      onChange={handleInputChange}
-                      className={styles.checkbox}
-                    />
-                    Pool
-                  </label>
-
-                  <label className={styles.checkboxLabel}>
-                    <input
-                      type="checkbox"
-                      name="amenities.gym"
-                      checked={formData.amenities.gym}
-                      onChange={handleInputChange}
-                      className={styles.checkbox}
-                    />
-                    Gym
-                  </label>
-
-                  <label className={styles.checkboxLabel}>
-                    <input
-                      type="checkbox"
-                      name="amenities.spa"
-                      checked={formData.amenities.spa}
-                      onChange={handleInputChange}
-                      className={styles.checkbox}
-                    />
-                    Spa
-                  </label>
-
-                  <label className={styles.checkboxLabel}>
-                    <input
-                      type="checkbox"
-                      name="amenities.restaurantOnSite"
-                      checked={formData.amenities.restaurantOnSite}
-                      onChange={handleInputChange}
-                      className={styles.checkbox}
-                    />
-                    Restaurant On-site
-                  </label>
-
-                  <label className={styles.checkboxLabel}>
-                    <input
-                      type="checkbox"
-                      name="amenities.barLounge"
-                      checked={formData.amenities.barLounge}
-                      onChange={handleInputChange}
-                      className={styles.checkbox}
-                    />
-                    Bar/Lounge
-                  </label>
-
-                  <label className={styles.checkboxLabel}>
-                    <input
-                      type="checkbox"
-                      name="amenities.roomService"
-                      checked={formData.amenities.roomService}
-                      onChange={handleInputChange}
-                      className={styles.checkbox}
-                    />
-                    Room Service
-                  </label>
-
-                  <label className={styles.checkboxLabel}>
-                    <input
-                      type="checkbox"
-                      name="amenities.laundryService"
-                      checked={formData.amenities.laundryService}
-                      onChange={handleInputChange}
-                      className={styles.checkbox}
-                    />
-                    Laundry Service
-                  </label>
-
-                  <label className={styles.checkboxLabel}>
-                    <input
-                      type="checkbox"
-                      name="amenities.conciergeService"
-                      checked={formData.amenities.conciergeService}
-                      onChange={handleInputChange}
-                      className={styles.checkbox}
-                    />
-                    Concierge Service
-                  </label>
-
-                  <label className={styles.checkboxLabel}>
-                    <input
-                      type="checkbox"
-                      name="amenities.parkingAvailable"
-                      checked={formData.amenities.parkingAvailable}
-                      onChange={handleInputChange}
-                      className={styles.checkbox}
-                    />
-                    Parking Available
-                  </label>
-
-                  <label className={styles.checkboxLabel}>
-                    <input
-                      type="checkbox"
-                      name="amenities.wifi"
-                      checked={formData.amenities.wifi}
-                      onChange={handleInputChange}
-                      className={styles.checkbox}
-                    />
-                    WiFi
-                  </label>
-
-                  <label className={styles.checkboxLabel}>
-                    <input
-                      type="checkbox"
-                      name="amenities.petFriendly"
-                      checked={formData.amenities.petFriendly}
-                      onChange={handleInputChange}
-                      className={styles.checkbox}
-                    />
-                    Pet Friendly
-                  </label>
-
-                  <label className={styles.checkboxLabel}>
-                    <input
-                      type="checkbox"
-                      name="amenities.airportTransfer"
-                      checked={formData.amenities.airportTransfer}
-                      onChange={handleInputChange}
-                      className={styles.checkbox}
-                    />
-                    Airport Transfer
-                  </label>
-
-                  <label className={styles.checkboxLabel}>
-                    <input
-                      type="checkbox"
-                      name="amenities.wheelchairAccessible"
-                      checked={formData.amenities.wheelchairAccessible}
-                      onChange={handleInputChange}
-                      className={styles.checkbox}
-                    />
-                    Wheelchair Accessible
-                  </label>
-
-                  <label className={styles.checkboxLabel}>
-                    <input
-                      type="checkbox"
-                      name="amenities.eventFacilities"
-                      checked={formData.amenities.eventFacilities}
-                      onChange={handleInputChange}
-                      className={styles.checkbox}
-                    />
-                    Event Facilities
-                  </label>
-
-                  <label className={styles.checkboxLabel}>
-                    <input
-                      type="checkbox"
-                      name="amenities.familyAreaKidsFriendly"
-                      checked={formData.amenities.familyAreaKidsFriendly}
-                      onChange={handleInputChange}
-                      className={styles.checkbox}
-                    />
-                    Family Area/Kids Friendly
-                  </label>
+                  {Object.entries(data.amenities).map(([key, value]) => (
+                    <label key={key} className={styles.checkboxLabel}>
+                      <input type="checkbox" name={`amenities.${key}`} checked={value} onChange={handleChange} />
+                      {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                    </label>
+                  ))}
                 </div>
               </div>
             </div>
           )}
 
+          {/* Navigation */}
           <div className={styles.buttonContainer}>
-            {currentStep > 1 && (
-              <button
-                type="button"
-                onClick={prevStep}
-                className={styles.prevButton}
-              >
-                Previous
-              </button>
-            )}
-
-            {currentStep < 3 ? (
-              <button
-                type="button"
-                onClick={nextStep}
-                className={styles.nextButton}
-              >
-                Next
-              </button>
+            {step > 1 && <button onClick={() => setStep(step - 1)} className={styles.prevButton}>Previous</button>}
+            {step < 3 ? (
+              <button onClick={next} className={styles.nextButton}>Next</button>
             ) : (
-              <button
-                type="submit"
-                className={styles.submitButton}
-                disabled={loading}
-              >
-                {loading ? "Registering..." : "Register Accommodation"}
+              <button onClick={submit} disabled={loading} className={styles.submitButton}>
+                {loading ? 'Registering...' : 'Register Accommodation'}
               </button>
             )}
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );
 };
 
-export default AccommodationRegistrationForm;
+export default AccommodationForm;
