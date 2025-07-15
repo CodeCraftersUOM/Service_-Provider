@@ -52,7 +52,7 @@ const serviceDescriptions: string[] = [
 const serviceLinks: string[] = [
   "Services_home/guide",
   "Services_home/health",
-  "Services_home/accommodation",
+  "Services_home/Accommodation",
   "Services_home/Restaurent",
   "Services_home/Vehicle_repair",
   "Services_home/taxi",
@@ -101,7 +101,7 @@ const ServiceSelector: React.FC = () => {
   };
 
   const menuItems = [
-    { name: 'Dashboard', icon: '🏠', route: '../Dashboard/Dashboard.tsx' },
+    { name: 'Dashboard', icon: '🏠', route: '../Dashboard' },
     { name: 'Services', icon: '🛠️', route: '/services' },
     { name: 'My Listings', icon: '📋', route: '/listings' },
     { name: 'Bookings', icon: '📅', route: '/bookings' },
@@ -109,6 +109,7 @@ const ServiceSelector: React.FC = () => {
     { name: 'Messages', icon: '💬', route: '/messages' },
     { name: 'Payments', icon: '💳', route: '/payments' },
     { name: 'Settings', icon: '⚙️', route: '/settings' },
+    { name: 'Help', icon: '💡', route: '/Services_home/help' },
     { name: 'Log Out', icon: '🚪', route: '/logout' }
   ];
 
@@ -135,6 +136,14 @@ const ServiceSelector: React.FC = () => {
   const handleMenuClick = (menuName: string, route: string) => {
     if (menuName === 'Log Out') {
       handleLogout();
+      return;
+    }
+    if (menuName === 'Dashboard') {
+      router.push(route);
+      return;
+    }
+    if (menuName === 'Help') {
+      router.push(route);
       return;
     }
     setActiveMenuItem(menuName);
@@ -215,7 +224,7 @@ const ServiceSelector: React.FC = () => {
                   <h3>Need Help Getting Started?</h3>
                   <p>Our team is here to guide you through the registration process</p>
                 </div>
-                <button className={styles.helpButton}onClick={() => router.push('../Services_home/help')} > Get Support</button>
+                <button className={styles.helpButton}onClick={() => router.push('/Services_home/help')} > Get Support</button>
               </div>
             </div>
           </div>

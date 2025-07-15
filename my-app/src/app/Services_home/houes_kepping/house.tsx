@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import styles from './house.module.css';
 import { useRouter } from 'next/navigation';
 
-interface HousekeepingFormData {
+interface FormData {
   businessName: string;
   ownerFullName: string;
   contactPhone: string;
@@ -25,402 +25,220 @@ interface HousekeepingFormData {
   termsAgreed: boolean;
 }
 
-interface FieldErrors {
-  [key: string]: string;
-}
-
-const HousekeepingRegistrationForm: React.FC = () => {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [formData, setFormData] = useState<HousekeepingFormData>({
-    businessName: '',
-    ownerFullName: '',
-    contactPhone: '',
-    contactEmail: '',
-    alternatePhone: '',
-    websiteUrl: '',
-    businessDescription: '',
-    serviceTypes: [],
-    pricingMethod: '',
-    serviceArea: '',
-    addressOrLandmark: '',
-    googleMapsLink: '',
-    daysAvailable: [],
-    timeSlot: '',
-    emergencyServiceAvailable: false,
-    businessRegistrationNumber: '',
-    licensesCertificates: '',
-    termsAgreed: false,
+const HousekeepingForm: React.FC = () => {
+  const [step, setStep] = useState(1);
+  const [success, setSuccess] = useState(false);
+  const [data, setData] = useState<FormData>({
+    businessName: '', ownerFullName: '', contactPhone: '', contactEmail: '', alternatePhone: '',
+    websiteUrl: '', businessDescription: '', serviceTypes: [], pricingMethod: '', serviceArea: '',
+    addressOrLandmark: '', googleMapsLink: '', daysAvailable: [], timeSlot: '',
+    emergencyServiceAvailable: false, businessRegistrationNumber: '', licensesCertificates: '', termsAgreed: false
   });
-
+  const [errors, setErrors] = useState<{[key: string]: string}>({});
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const router = useRouter();
 
-  const serviceTypeOptions = [
-    'Housekeeping (Home/Office)',
-    'Deep Cleaning',
-    'Carpet Cleaning',
-    'Window Cleaning',
-    'Laundry & Ironing',
-    'Dry Cleaning',
-    'Sofa/Chair Cleaning',
-    'Disinfection & Sanitization',
+  const serviceTypes = [
+    'Housekeeping (Home/Office)', 'Deep Cleaning', 'Carpet Cleaning', 'Window Cleaning',
+    'Laundry & Ironing', 'Dry Cleaning', 'Sofa/Chair Cleaning', 'Disinfection & Sanitization'
   ];
+  const pricingMethods = ['Per Hour', 'Per Square Foot', 'Per Visit', 'Custom Quote'];
+  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-  const pricingMethodOptions = [
-    'Per Hour',
-    'Per Square Foot',
-    'Per Visit',
-    'Custom Quote',
-  ];
+  // ✅ CONSOLIDATED VALIDATION with Sri Lankan requirements
+  const validate = () => {
+    const e: {[key: string]: string} = {};
+    
+    // Required fields
+    if (!data.businessName.trim()) e.businessName = "Business name required";
+    if (!data.ownerFullName.trim()) e.ownerFullName = "Owner name required";
+    if (!data.contactEmail.trim()) e.contactEmail = "Email required";
+    if (!data.serviceTypes.length) e.serviceTypes = "Select at least one service";
+    if (!data.pricingMethod) e.pricingMethod = "Pricing method required";
+    if (!data.serviceArea.trim()) e.serviceArea = "Service area required";
+    if (!data.daysAvailable.length) e.daysAvailable = "Select available days";
+    if (!data.timeSlot.trim()) e.timeSlot = "Time slot required";
+    if (!data.termsAgreed) e.termsAgreed = "Must agree to terms";
 
-  const dayOptions = [
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday',
-    'Sunday',
-  ];
+    // ✅ Phone validation (10 digits, specific patterns)
+    const validatePhone = (phone: string) => {
+      const cleaned = phone.replace(/\D/g, '');
+      return cleaned.length === 10 && /^(07[0-9]{8}|0[1-9][0-9]{8})$/.test(cleaned);
+    };
 
-  // Validation functions
-  const validateBusinessName = (name: string): string => {
-    if (!name.trim()) return "Business name is required";
-    if (name.length < 2) return "Business name must be at least 2 characters";
-    if (name.length > 100) return "Business name must be less than 100 characters";
-    if (!/^[a-zA-Z0-9\s.&'-]+$/.test(name)) return "Business name can only contain letters, numbers, spaces, and common symbols";
-    return "";
-  };
-
-  const validateOwnerFullName = (name: string): string => {
-    if (!name.trim()) return "Owner full name is required";
-    if (name.length < 2) return "Name must be at least 2 characters";
-    if (name.length > 50) return "Name must be less than 50 characters";
-    if (!/^[a-zA-Z\s.]+$/.test(name)) return "Name can only contain letters, spaces, and periods";
-    return "";
-  };
-
-  const validateContactPhone = (phone: string): string => {
-    if (!phone.trim()) return "Contact phone is required";
-    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-    const cleanPhone = phone.replace(/[\s\-\(\)\.]/g, '');
-    if (!phoneRegex.test(cleanPhone)) return "Please enter a valid phone number";
-    if (cleanPhone.length < 10) return "Phone number must be at least 10 digits";
-    return "";
-  };
-
-  const validateContactEmail = (email: string): string => {
-    if (!email.trim()) return "Contact email is required";
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) return "Please enter a valid email address";
-    return "";
-  };
-
-  const validateAlternatePhone = (phone: string): string => {
-    if (phone.trim()) {
-      const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-      const cleanPhone = phone.replace(/[\s\-\(\)\.]/g, '');
-      if (!phoneRegex.test(cleanPhone)) return "Please enter a valid alternate phone number";
-      if (cleanPhone.length < 10) return "Alternate phone number must be at least 10 digits";
+    if (!data.contactPhone.trim()) {
+      e.contactPhone = "Contact phone required";
+    } else if (!validatePhone(data.contactPhone)) {
+      e.contactPhone = "Invalid phone number (07XXXXXXXX for mobile, 0XXXXXXXXX for landline)";
     }
-    return "";
-  };
 
-  const validateWebsiteUrl = (url: string): string => {
-    if (url.trim()) {
+    // ✅ Alternate phone validation (optional but must be valid if provided)
+    if (data.alternatePhone.trim() && !validatePhone(data.alternatePhone)) {
+      e.alternatePhone = "Invalid alternate phone number";
+    }
+
+    // Email validation
+    if (data.contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.contactEmail)) {
+      e.contactEmail = "Invalid email format";
+    }
+
+    // ✅ Google Maps link validation (must be Google Maps URL)
+    if (data.googleMapsLink.trim()) {
       try {
-        new URL(url);
-      } catch {
-        return "Please enter a valid website URL";
-      }
-    }
-    return "";
-  };
-
-  const validateBusinessDescription = (description: string): string => {
-    if (description.trim() && description.length > 1000) {
-      return "Business description must be less than 1000 characters";
-    }
-    return "";
-  };
-
-  const validateServiceTypes = (services: string[]): string => {
-    if (services.length === 0) return "At least one service type is required";
-    if (services.length > 8) return "Maximum 8 service types can be selected";
-    return "";
-  };
-
-  const validatePricingMethod = (method: string): string => {
-    if (!method) return "Pricing method is required";
-    return "";
-  };
-
-  const validateServiceArea = (area: string): string => {
-    if (!area.trim()) return "Service area is required";
-    if (area.length < 2) return "Service area must be at least 2 characters";
-    if (area.length > 100) return "Service area must be less than 100 characters";
-    return "";
-  };
-
-  const validateAddressOrLandmark = (address: string): string => {
-    if (address.trim() && address.length > 200) {
-      return "Address must be less than 200 characters";
-    }
-    return "";
-  };
-
-  const validateGoogleMapsLink = (link: string): string => {
-    if (link.trim()) {
-      try {
-        new URL(link);
-        if (!link.includes('maps.google') && !link.includes('goo.gl/maps')) {
-          return "Please enter a valid Google Maps link";
+        const url = new URL(data.googleMapsLink);
+        const validDomains = ['maps.google.com', 'maps.google.', 'goo.gl', 'maps.app.goo.gl'];
+        if (!validDomains.some(domain => url.hostname.includes(domain) || url.href.includes('maps.google'))) {
+          e.googleMapsLink = "Must be a valid Google Maps link (maps.google.com, goo.gl/maps, or maps.app.goo.gl)";
         }
       } catch {
-        return "Please enter a valid URL";
+        e.googleMapsLink = "Invalid Google Maps URL format";
       }
     }
-    return "";
-  };
 
-  const validateDaysAvailable = (days: string[]): string => {
-    if (days.length === 0) return "At least one available day is required";
-    return "";
-  };
-
-  const validateTimeSlot = (timeSlot: string): string => {
-    if (!timeSlot.trim()) return "Time slot is required";
-    if (timeSlot.length < 5) return "Time slot must be at least 5 characters";
-    if (timeSlot.length > 100) return "Time slot must be less than 100 characters";
-    return "";
-  };
-
-  const validateBusinessRegistrationNumber = (regNumber: string): string => {
-    if (regNumber.trim()) {
-      if (regNumber.length < 5) return "Registration number must be at least 5 characters";
-      if (regNumber.length > 50) return "Registration number must be less than 50 characters";
-      if (!/^[a-zA-Z0-9\-\/]+$/.test(regNumber)) return "Registration number can only contain letters, numbers, hyphens, and slashes";
+    // ✅ Business registration validation (optional)
+    if (data.businessRegistrationNumber.trim()) {
+      const reg = data.businessRegistrationNumber.trim().toUpperCase();
+      if (!/^(PV|HS|SP|PQ)[0-9]+$|^[0-9]+$/.test(reg)) {
+        e.businessRegistrationNumber = "Invalid business registration format (PV12345, HS12345, SP12345, PQ12345, or numeric)";
+      }
     }
-    return "";
-  };
 
-  const validateLicensesCertificates = (licenses: string): string => {
-    if (licenses.trim() && licenses.length > 500) {
-      return "Licenses URL must be less than 500 characters";
+    // Optional validations
+    if (data.websiteUrl && data.websiteUrl.trim()) {
+      try { new URL(data.websiteUrl); } catch { e.websiteUrl = "Invalid website URL"; }
     }
-    return "";
-  };
 
-  const validateTermsAgreed = (agreed: boolean): string => {
-    if (!agreed) return "You must agree to the terms and conditions";
-    return "";
-  };
-
-  const validateStep = (step: number): FieldErrors => {
-    const errors: FieldErrors = {};
-    
-    switch (step) {
-      case 1:
-        errors.businessName = validateBusinessName(formData.businessName);
-        errors.ownerFullName = validateOwnerFullName(formData.ownerFullName);
-        errors.contactPhone = validateContactPhone(formData.contactPhone);
-        errors.contactEmail = validateContactEmail(formData.contactEmail);
-        errors.alternatePhone = validateAlternatePhone(formData.alternatePhone);
-        errors.websiteUrl = validateWebsiteUrl(formData.websiteUrl);
-        errors.businessDescription = validateBusinessDescription(formData.businessDescription);
-        break;
-      case 2:
-        errors.serviceTypes = validateServiceTypes(formData.serviceTypes);
-        errors.pricingMethod = validatePricingMethod(formData.pricingMethod);
-        errors.serviceArea = validateServiceArea(formData.serviceArea);
-        errors.addressOrLandmark = validateAddressOrLandmark(formData.addressOrLandmark);
-        errors.googleMapsLink = validateGoogleMapsLink(formData.googleMapsLink);
-        break;
-      case 3:
-        errors.daysAvailable = validateDaysAvailable(formData.daysAvailable);
-        errors.timeSlot = validateTimeSlot(formData.timeSlot);
-        errors.businessRegistrationNumber = validateBusinessRegistrationNumber(formData.businessRegistrationNumber);
-        errors.licensesCertificates = validateLicensesCertificates(formData.licensesCertificates);
-        errors.termsAgreed = validateTermsAgreed(formData.termsAgreed);
-        break;
+    // Length validations
+    if (data.businessName && (data.businessName.length < 2 || data.businessName.length > 100)) {
+      e.businessName = "Business name: 2-100 characters";
     }
-    
-    // Remove empty errors
-    Object.keys(errors).forEach(key => {
-      if (!errors[key]) delete errors[key];
-    });
-    
-    return errors;
+
+    if (data.ownerFullName && (data.ownerFullName.length < 2 || data.ownerFullName.length > 50)) {
+      e.ownerFullName = "Owner name: 2-50 characters";
+    }
+
+    if (data.businessDescription && data.businessDescription.length > 1000) {
+      e.businessDescription = "Description max 1000 characters";
+    }
+
+    if (data.serviceArea && (data.serviceArea.length < 2 || data.serviceArea.length > 100)) {
+      e.serviceArea = "Service area: 2-100 characters";
+    }
+
+    if (data.addressOrLandmark && data.addressOrLandmark.length > 200) {
+      e.addressOrLandmark = "Address max 200 characters";
+    }
+
+    if (data.timeSlot && (data.timeSlot.length < 5 || data.timeSlot.length > 100)) {
+      e.timeSlot = "Time slot: 5-100 characters";
+    }
+
+    if (data.serviceTypes.length > 8) {
+      e.serviceTypes = "Maximum 8 services allowed";
+    }
+
+    return e;
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    const checkbox = e.target as HTMLInputElement;
+    const checked = (e.target as HTMLInputElement).checked;
     
-    // Clear field error when user starts typing
-    if (fieldErrors[name]) {
-      setFieldErrors(prev => ({
-        ...prev,
-        [name]: ""
-      }));
-    }
-    
-    if (type === 'checkbox') {
-      setFormData(prev => ({
-        ...prev,
-        [name]: checkbox.checked,
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value,
-      }));
-    }
+    if (errors[name]) setErrors(prev => ({ ...prev, [name]: "" }));
+    setData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
 
-  const handleCheckboxGroupChange = (name: string, value: string) => {
-    // Clear field error when user makes selection
-    if (fieldErrors[name]) {
-      setFieldErrors(prev => ({
-        ...prev,
-        [name]: ""
-      }));
-    }
-    
-    setFormData(prev => {
-      const currentArray = prev[name as keyof HousekeepingFormData] as string[];
-      const updatedArray = currentArray.includes(value)
-        ? currentArray.filter(item => item !== value)
-        : [...currentArray, value];
-      
-      return {
-        ...prev,
-        [name]: updatedArray,
-      };
-    });
+  const toggleArray = (field: 'serviceTypes' | 'daysAvailable', value: string) => {
+    if (errors[field]) setErrors(prev => ({ ...prev, [field]: "" }));
+    setData(prev => ({
+      ...prev,
+      [field]: prev[field].includes(value) 
+        ? prev[field].filter(item => item !== value)
+        : [...prev[field], value]
+    }));
   };
 
-  const nextStep = () => {
-    const errors = validateStep(currentStep);
-    setFieldErrors(errors);
+  const next = () => {
+    const stepErrors = validate();
+    const stepFields = {
+      1: ['businessName', 'ownerFullName', 'contactPhone', 'contactEmail', 'alternatePhone', 'websiteUrl', 'businessDescription'],
+      2: ['serviceTypes', 'pricingMethod', 'serviceArea', 'addressOrLandmark', 'googleMapsLink']
+    };
     
-    if (Object.keys(errors).length === 0) {
-      setCurrentStep(prev => Math.min(prev + 1, 3));
+    const currentErrors = Object.keys(stepErrors).filter(key => 
+      stepFields[step as keyof typeof stepFields]?.includes(key)
+    );
+    
+    if (currentErrors.length === 0) {
+      setStep(prev => Math.min(prev + 1, 3));
       setMessage('');
     } else {
-      setMessage('Please fix the errors below before proceeding.');
+      const filtered: {[key: string]: string} = {};
+      currentErrors.forEach(key => filtered[key] = stepErrors[key]);
+      setErrors(filtered);
+      setMessage('Fix errors below');
     }
   };
 
-  const prevStep = () => {
-    setCurrentStep(prev => Math.max(prev - 1, 1));
-    setMessage('');
-    setFieldErrors({});
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Validate all steps
-    const step1Errors = validateStep(1);
-    const step2Errors = validateStep(2);
-    const step3Errors = validateStep(3);
-    const allErrors = { ...step1Errors, ...step2Errors, ...step3Errors };
-    
-    setFieldErrors(allErrors);
-    
+  const submit = async () => {
+    const allErrors = validate();
     if (Object.keys(allErrors).length > 0) {
-      setMessage('Please fix all errors before submitting.');
+      setErrors(allErrors);
+      setMessage('Fix all errors before submitting');
       return;
     }
-    
-    setLoading(true);
-    setMessage('');
 
+    setLoading(true);
     try {
       const response = await fetch('http://localhost:2000/api/addHousekeeping', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
       });
-
       if (response.ok) {
-        setIsSuccess(true);
+        setSuccess(true);
       } else {
-        const errorData = await response.json();
-        setMessage(`Error: ${errorData.message || 'Failed to register housekeeping service'}`);
+        const result = await response.json();
+        setMessage(`Error: ${result.message || 'Registration failed'}`);
       }
-    } catch (error) {
-      setMessage('Error: Failed to connect to server');
+    } catch {
+      setMessage('Error: Server connection failed');
     } finally {
       setLoading(false);
     }
   };
 
-  const redirectDashboard = () => {
-    router.push('/Dashboard');
-  }
-
-  const resetForm = () => {
-    setIsSuccess(false);
-    setCurrentStep(1);
-    setFieldErrors({});
+  const reset = () => {
+    setSuccess(false);
+    setStep(1);
+    setErrors({});
     setMessage('');
-    setFormData({
-      businessName: '',
-      ownerFullName: '',
-      contactPhone: '',
-      contactEmail: '',
-      alternatePhone: '',
-      websiteUrl: '',
-      businessDescription: '',
-      serviceTypes: [],
-      pricingMethod: '',
-      serviceArea: '',
-      addressOrLandmark: '',
-      googleMapsLink: '',
-      daysAvailable: [],
-      timeSlot: '',
-      emergencyServiceAvailable: false,
-      businessRegistrationNumber: '',
-      licensesCertificates: '',
-      termsAgreed: false,
+    setData({
+      businessName: '', ownerFullName: '', contactPhone: '', contactEmail: '', alternatePhone: '',
+      websiteUrl: '', businessDescription: '', serviceTypes: [], pricingMethod: '', serviceArea: '',
+      addressOrLandmark: '', googleMapsLink: '', daysAvailable: [], timeSlot: '',
+      emergencyServiceAvailable: false, businessRegistrationNumber: '', licensesCertificates: '', termsAgreed: false
     });
   };
 
-  if (isSuccess) {
+  if (success) {
     return (
       <div className={styles.container}>
         <div className={styles.successWrapper}>
-          <div className={styles.successIcon}>
-            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-              <polyline points="22,4 12,14.01 9,11.01"></polyline>
-            </svg>
-          </div>
-          <h1 className={styles.successTitle}>Housekeeping Service Successfully Registered!</h1>
+          <div className={styles.successIcon}>✓</div>
+          <h1 className={styles.successTitle}>Housekeeping Service Registered!</h1>
           <p className={styles.successMessage}>
-            Congratulations! <strong>{formData.businessName}</strong> has been successfully registered as a housekeeping service in our system.
+            <strong>{data.businessName}</strong> has been registered successfully.
           </p>
           <div className={styles.successDetails}>
-            <p><strong>Business:</strong> {formData.businessName}</p>
-            <p><strong>Owner:</strong> {formData.ownerFullName}</p>
-            <p><strong>Email:</strong> {formData.contactEmail}</p>
-            <p><strong>Services:</strong> {formData.serviceTypes.length} services offered</p>
-            <p><strong>Service Area:</strong> {formData.serviceArea}</p>
+            <p><strong>Business:</strong> {data.businessName}</p>
+            <p><strong>Owner:</strong> {data.ownerFullName}</p>
+            <p><strong>Services:</strong> {data.serviceTypes.length} selected</p>
+            <p><strong>Area:</strong> {data.serviceArea}</p>
           </div>
-          <button onClick={resetForm} className={styles.newRegistrationButton}>
-            Register Another Service
-          </button>
-      
-          <button onClick={redirectDashboard} className={styles.newRegistrationButton}>
-            Go to Dashboard
-          </button>
+          <button onClick={reset} className={styles.newRegistrationButton}>Register Another</button>
+          <button onClick={() => router.push('/Dashboard')} className={styles.newRegistrationButton}>Dashboard</button>
         </div>
       </div>
     );
@@ -429,355 +247,219 @@ const HousekeepingRegistrationForm: React.FC = () => {
   return (
     <div className={styles.container}>
       <div className={styles.formWrapper}>
-        {/* Progress Bar */}
+        {/* Progress */}
         <div className={styles.progressContainer}>
           <div className={styles.progressBar}>
-            <div 
-              className={styles.progressFill} 
-              style={{ width: `${(currentStep / 3) * 100}%` }}
-            ></div>
+            <div className={styles.progressFill} style={{ width: `${(step / 3) * 100}%` }}></div>
           </div>
           <div className={styles.stepIndicators}>
-            {[1, 2, 3].map(step => (
-              <div 
-                key={step}
-                className={`${styles.stepIndicator} ${currentStep >= step ? styles.active : ''}`}
-              >
-                <div className={styles.stepNumber}>{step}</div>
-                <div className={styles.stepLabel}>
-                  {step === 1 && 'Basic Info'}
-                  {step === 2 && 'Service Details'}
-                  {step === 3 && 'Availability & Legal'}
-                </div>
+            {[1, 2, 3].map(s => (
+              <div key={s} className={`${styles.stepIndicator} ${step >= s ? styles.active : ''}`}>
+                <div className={styles.stepNumber}>{s}</div>
+                <div className={styles.stepLabel}>{s === 1 ? 'Basic' : s === 2 ? 'Services' : 'Legal'}</div>
               </div>
             ))}
           </div>
         </div>
 
         <h1 className={styles.title}>Housekeeping Service Registration</h1>
-        
-        {message && (
-          <div className={`${styles.message} ${message.includes('Error') ? styles.error : styles.warning}`}>
-            {message}
-          </div>
-        )}
+        {message && <div className={`${styles.message} ${message.includes('Error') || message.includes('failed') ? styles.error : styles.warning}`}>{message}</div>}
 
-        <form onSubmit={handleSubmit} className={styles.form}>
+        <div className={styles.form}>
           {/* Step 1: Basic Information */}
-          {currentStep === 1 && (
+          {step === 1 && (
             <div className={styles.step}>
-              <h2 className={styles.stepTitle}>Step 1: Basic Information</h2>
+              <h2>Basic Information</h2>
               
               <div className={styles.field}>
-                <label htmlFor="businessName" className={styles.label}>Business Name *</label>
-                <input
-                  type="text"
-                  id="businessName"
-                  name="businessName"
-                  value={formData.businessName}
-                  onChange={handleInputChange}
-                  className={`${styles.input} ${fieldErrors.businessName ? styles.inputError : ''}`}
-                  placeholder="Enter your business name"
-                />
-                {fieldErrors.businessName && <p className={styles.fieldError}>{fieldErrors.businessName}</p>}
+                <label>Business Name *</label>
+                <input name="businessName" value={data.businessName} onChange={handleChange}
+                       className={`${styles.input} ${errors.businessName ? styles.inputError : ''}`}
+                       placeholder="Your business name" />
+                {errors.businessName && <span className={styles.fieldError}>{errors.businessName}</span>}
               </div>
 
               <div className={styles.field}>
-                <label htmlFor="ownerFullName" className={styles.label}>Owner Full Name *</label>
-                <input
-                  type="text"
-                  id="ownerFullName"
-                  name="ownerFullName"
-                  value={formData.ownerFullName}
-                  onChange={handleInputChange}
-                  className={`${styles.input} ${fieldErrors.ownerFullName ? styles.inputError : ''}`}
-                  placeholder="Enter owner's full name"
-                />
-                {fieldErrors.ownerFullName && <p className={styles.fieldError}>{fieldErrors.ownerFullName}</p>}
+                <label>Owner Full Name *</label>
+                <input name="ownerFullName" value={data.ownerFullName} onChange={handleChange}
+                       className={`${styles.input} ${errors.ownerFullName ? styles.inputError : ''}`}
+                       placeholder="Owner's full name" />
+                {errors.ownerFullName && <span className={styles.fieldError}>{errors.ownerFullName}</span>}
               </div>
 
               <div className={styles.row}>
                 <div className={styles.field}>
-                  <label htmlFor="contactPhone" className={styles.label}>Contact Phone *</label>
-                  <input
-                    type="tel"
-                    id="contactPhone"
-                    name="contactPhone"
-                    value={formData.contactPhone}
-                    onChange={handleInputChange}
-                    className={`${styles.input} ${fieldErrors.contactPhone ? styles.inputError : ''}`}
-                    placeholder="Enter contact phone"
-                  />
-                  {fieldErrors.contactPhone && <p className={styles.fieldError}>{fieldErrors.contactPhone}</p>}
+                  <label>Contact Phone * <small>(10 digits)</small></label>
+                  <input name="contactPhone" value={data.contactPhone} onChange={handleChange}
+                         className={`${styles.input} ${errors.contactPhone ? styles.inputError : ''}`}
+                         placeholder="0771234567" />
+                  {errors.contactPhone && <span className={styles.fieldError}>{errors.contactPhone}</span>}
                 </div>
-
                 <div className={styles.field}>
-                  <label htmlFor="alternatePhone" className={styles.label}>Alternate Phone</label>
-                  <input
-                    type="tel"
-                    id="alternatePhone"
-                    name="alternatePhone"
-                    value={formData.alternatePhone}
-                    onChange={handleInputChange}
-                    className={`${styles.input} ${fieldErrors.alternatePhone ? styles.inputError : ''}`}
-                    placeholder="Enter alternate phone"
-                  />
-                  {fieldErrors.alternatePhone && <p className={styles.fieldError}>{fieldErrors.alternatePhone}</p>}
+                  <label>Alternate Phone <small>(Optional, 10 digits)</small></label>
+                  <input name="alternatePhone" value={data.alternatePhone} onChange={handleChange}
+                         className={`${styles.input} ${errors.alternatePhone ? styles.inputError : ''}`}
+                         placeholder="0112345678" />
+                  {errors.alternatePhone && <span className={styles.fieldError}>{errors.alternatePhone}</span>}
                 </div>
               </div>
 
               <div className={styles.field}>
-                <label htmlFor="contactEmail" className={styles.label}>Contact Email *</label>
-                <input
-                  type="email"
-                  id="contactEmail"
-                  name="contactEmail"
-                  value={formData.contactEmail}
-                  onChange={handleInputChange}
-                  className={`${styles.input} ${fieldErrors.contactEmail ? styles.inputError : ''}`}
-                  placeholder="Enter contact email"
-                />
-                {fieldErrors.contactEmail && <p className={styles.fieldError}>{fieldErrors.contactEmail}</p>}
+                <label>Contact Email *</label>
+                <input type="email" name="contactEmail" value={data.contactEmail} onChange={handleChange}
+                       className={`${styles.input} ${errors.contactEmail ? styles.inputError : ''}`}
+                       placeholder="business@email.com" />
+                {errors.contactEmail && <span className={styles.fieldError}>{errors.contactEmail}</span>}
               </div>
 
               <div className={styles.field}>
-                <label htmlFor="websiteUrl" className={styles.label}>Website URL</label>
-                <input
-                  type="url"
-                  id="websiteUrl"
-                  name="websiteUrl"
-                  value={formData.websiteUrl}
-                  onChange={handleInputChange}
-                  className={`${styles.input} ${fieldErrors.websiteUrl ? styles.inputError : ''}`}
-                  placeholder="Enter website URL"
-                />
-                {fieldErrors.websiteUrl && <p className={styles.fieldError}>{fieldErrors.websiteUrl}</p>}
+                <label>Website URL <small>(Optional)</small></label>
+                <input type="url" name="websiteUrl" value={data.websiteUrl} onChange={handleChange}
+                       className={`${styles.input} ${errors.websiteUrl ? styles.inputError : ''}`}
+                       placeholder="https://yourwebsite.com" />
+                {errors.websiteUrl && <span className={styles.fieldError}>{errors.websiteUrl}</span>}
               </div>
 
               <div className={styles.field}>
-                <label htmlFor="businessDescription" className={styles.label}>
-                  Business Description {formData.businessDescription.length > 0 && `(${formData.businessDescription.length}/1000)`}
-                </label>
-                <textarea
-                  id="businessDescription"
-                  name="businessDescription"
-                  value={formData.businessDescription}
-                  onChange={handleInputChange}
-                  className={`${styles.textarea} ${fieldErrors.businessDescription ? styles.inputError : ''}`}
-                  rows={4}
-                  placeholder="Describe your business and services"
-                />
-                {fieldErrors.businessDescription && <p className={styles.fieldError}>{fieldErrors.businessDescription}</p>}
+                <label>Business Description <small>(Optional, max 1000 chars)</small></label>
+                <textarea name="businessDescription" value={data.businessDescription} onChange={handleChange}
+                          className={`${styles.textarea} ${errors.businessDescription ? styles.inputError : ''}`}
+                          rows={3} placeholder="Describe your business and services" />
+                {errors.businessDescription && <span className={styles.fieldError}>{errors.businessDescription}</span>}
               </div>
             </div>
           )}
 
           {/* Step 2: Service Details */}
-          {currentStep === 2 && (
+          {step === 2 && (
             <div className={styles.step}>
-              <h2 className={styles.stepTitle}>Step 2: Service Details</h2>
+              <h2>Service Details</h2>
               
               <div className={styles.field}>
-                <label className={styles.label}>Service Types *</label>
+                <label>Service Types * (Select 1-8 services)</label>
                 <div className={styles.checkboxGrid}>
-                  {serviceTypeOptions.map((service) => (
+                  {serviceTypes.map(service => (
                     <label key={service} className={styles.checkboxLabel}>
-                      <input
-                        type="checkbox"
-                        checked={formData.serviceTypes.includes(service)}
-                        onChange={() => handleCheckboxGroupChange('serviceTypes', service)}
-                        className={styles.checkbox}
-                      />
+                      <input type="checkbox" checked={data.serviceTypes.includes(service)}
+                             onChange={() => toggleArray('serviceTypes', service)} />
                       {service}
                     </label>
                   ))}
                 </div>
-                {fieldErrors.serviceTypes && <p className={styles.fieldError}>{fieldErrors.serviceTypes}</p>}
+                {errors.serviceTypes && <span className={styles.fieldError}>{errors.serviceTypes}</span>}
               </div>
 
               <div className={styles.field}>
-                <label htmlFor="pricingMethod" className={styles.label}>Pricing Method *</label>
-                <select
-                  id="pricingMethod"
-                  name="pricingMethod"
-                  value={formData.pricingMethod}
-                  onChange={handleInputChange}
-                  className={`${styles.select} ${fieldErrors.pricingMethod ? styles.inputError : ''}`}
-                >
+                <label>Pricing Method *</label>
+                <select name="pricingMethod" value={data.pricingMethod} onChange={handleChange}
+                        className={`${styles.select} ${errors.pricingMethod ? styles.inputError : ''}`}>
                   <option value="">Select pricing method</option>
-                  {pricingMethodOptions.map((method) => (
-                    <option key={method} value={method}>
-                      {method}
-                    </option>
-                  ))}
+                  {pricingMethods.map(method => <option key={method} value={method}>{method}</option>)}
                 </select>
-                {fieldErrors.pricingMethod && <p className={styles.fieldError}>{fieldErrors.pricingMethod}</p>}
+                {errors.pricingMethod && <span className={styles.fieldError}>{errors.pricingMethod}</span>}
               </div>
 
               <div className={styles.field}>
-                <label htmlFor="serviceArea" className={styles.label}>Service Area *</label>
-                <input
-                  type="text"
-                  id="serviceArea"
-                  name="serviceArea"
-                  value={formData.serviceArea}
-                  onChange={handleInputChange}
-                  className={`${styles.input} ${fieldErrors.serviceArea ? styles.inputError : ''}`}
-                  placeholder="Enter service area (e.g., Downtown, North Zone)"
-                />
-                {fieldErrors.serviceArea && <p className={styles.fieldError}>{fieldErrors.serviceArea}</p>}
+                <label>Service Area *</label>
+                <input name="serviceArea" value={data.serviceArea} onChange={handleChange}
+                       className={`${styles.input} ${errors.serviceArea ? styles.inputError : ''}`}
+                       placeholder="e.g., Colombo, Gampaha, Kandy" />
+                {errors.serviceArea && <span className={styles.fieldError}>{errors.serviceArea}</span>}
               </div>
 
               <div className={styles.field}>
-                <label htmlFor="addressOrLandmark" className={styles.label}>Address or Landmark</label>
-                <input
-                  type="text"
-                  id="addressOrLandmark"
-                  name="addressOrLandmark"
-                  value={formData.addressOrLandmark}
-                  onChange={handleInputChange}
-                  className={`${styles.input} ${fieldErrors.addressOrLandmark ? styles.inputError : ''}`}
-                  placeholder="Enter address or nearby landmark"
-                />
-                {fieldErrors.addressOrLandmark && <p className={styles.fieldError}>{fieldErrors.addressOrLandmark}</p>}
+                <label>Address or Landmark <small>(Optional)</small></label>
+                <input name="addressOrLandmark" value={data.addressOrLandmark} onChange={handleChange}
+                       className={`${styles.input} ${errors.addressOrLandmark ? styles.inputError : ''}`}
+                       placeholder="Business address or nearby landmark" />
+                {errors.addressOrLandmark && <span className={styles.fieldError}>{errors.addressOrLandmark}</span>}
               </div>
 
               <div className={styles.field}>
-                <label htmlFor="googleMapsLink" className={styles.label}>Google Maps Link</label>
-                <input
-                  type="url"
-                  id="googleMapsLink"
-                  name="googleMapsLink"
-                  value={formData.googleMapsLink}
-                  onChange={handleInputChange}
-                  className={`${styles.input} ${fieldErrors.googleMapsLink ? styles.inputError : ''}`}
-                  placeholder="Enter Google Maps link"
-                />
-                {fieldErrors.googleMapsLink && <p className={styles.fieldError}>{fieldErrors.googleMapsLink}</p>}
+                <label>Google Maps Link <small>(Optional - Google Maps only)</small></label>
+                <input type="url" name="googleMapsLink" value={data.googleMapsLink} onChange={handleChange}
+                       className={`${styles.input} ${errors.googleMapsLink ? styles.inputError : ''}`}
+                       placeholder="Google Maps URL to your location" />
+                {errors.googleMapsLink && <span className={styles.fieldError}>{errors.googleMapsLink}</span>}
               </div>
             </div>
           )}
 
           {/* Step 3: Availability & Legal */}
-          {currentStep === 3 && (
+          {step === 3 && (
             <div className={styles.step}>
-              <h2 className={styles.stepTitle}>Step 3: Availability & Legal</h2>
+              <h2>Availability & Legal</h2>
               
               <div className={styles.field}>
-                <label className={styles.label}>Days Available *</label>
+                <label>Days Available * (Select at least one)</label>
                 <div className={styles.checkboxGrid}>
-                  {dayOptions.map((day) => (
+                  {days.map(day => (
                     <label key={day} className={styles.checkboxLabel}>
-                      <input
-                        type="checkbox"
-                        checked={formData.daysAvailable.includes(day)}
-                        onChange={() => handleCheckboxGroupChange('daysAvailable', day)}
-                        className={styles.checkbox}
-                      />
-                      {day}
+                      <input type="checkbox" checked={data.daysAvailable.includes(day)}
+                             onChange={() => toggleArray('daysAvailable', day)} />
+                      {day.slice(0, 3)}
                     </label>
                   ))}
                 </div>
-                {fieldErrors.daysAvailable && <p className={styles.fieldError}>{fieldErrors.daysAvailable}</p>}
+                {errors.daysAvailable && <span className={styles.fieldError}>{errors.daysAvailable}</span>}
               </div>
 
               <div className={styles.field}>
-                <label htmlFor="timeSlot" className={styles.label}>Time Slot *</label>
-                <input
-                  type="text"
-                  id="timeSlot"
-                  name="timeSlot"
-                  value={formData.timeSlot}
-                  onChange={handleInputChange}
-                  className={`${styles.input} ${fieldErrors.timeSlot ? styles.inputError : ''}`}
-                  placeholder="e.g., 9:00 AM - 5:00 PM"
-                />
-                {fieldErrors.timeSlot && <p className={styles.fieldError}>{fieldErrors.timeSlot}</p>}
+                <label>Time Slot *</label>
+                <input name="timeSlot" value={data.timeSlot} onChange={handleChange}
+                       className={`${styles.input} ${errors.timeSlot ? styles.inputError : ''}`}
+                       placeholder="e.g., 9:00 AM - 5:00 PM" />
+                {errors.timeSlot && <span className={styles.fieldError}>{errors.timeSlot}</span>}
               </div>
 
               <div className={styles.field}>
                 <label className={styles.checkboxLabel}>
-                  <input
-                    type="checkbox"
-                    name="emergencyServiceAvailable"
-                    checked={formData.emergencyServiceAvailable}
-                    onChange={handleInputChange}
-                    className={styles.checkbox}
-                  />
+                  <input type="checkbox" name="emergencyServiceAvailable" checked={data.emergencyServiceAvailable} onChange={handleChange} />
                   Emergency Service Available
                 </label>
               </div>
 
               <div className={styles.field}>
-                <label htmlFor="businessRegistrationNumber" className={styles.label}>Business Registration Number</label>
-                <input
-                  type="text"
-                  id="businessRegistrationNumber"
-                  name="businessRegistrationNumber"
-                  value={formData.businessRegistrationNumber}
-                  onChange={handleInputChange}
-                  className={`${styles.input} ${fieldErrors.businessRegistrationNumber ? styles.inputError : ''}`}
-                  placeholder="Enter business registration number"
-                />
-                {fieldErrors.businessRegistrationNumber && <p className={styles.fieldError}>{fieldErrors.businessRegistrationNumber}</p>}
+                <label>Business Registration Number <small>(Optional - PV12345, HS12345, etc.)</small></label>
+                <input name="businessRegistrationNumber" value={data.businessRegistrationNumber} onChange={handleChange}
+                       className={`${styles.input} ${errors.businessRegistrationNumber ? styles.inputError : ''}`}
+                       placeholder="Business registration number" />
+                {errors.businessRegistrationNumber && <span className={styles.fieldError}>{errors.businessRegistrationNumber}</span>}
               </div>
 
               <div className={styles.field}>
-                <label htmlFor="licensesCertificates" className={styles.label}>Licenses & Certificates URL</label>
-                <input
-                  type="url"
-                  id="licensesCertificates"
-                  name="licensesCertificates"
-                  value={formData.licensesCertificates}
-                  onChange={handleInputChange}
-                  className={`${styles.input} ${fieldErrors.licensesCertificates ? styles.inputError : ''}`}
-                  placeholder="Enter licenses/certificates document URL"
-                />
-                {fieldErrors.licensesCertificates && <p className={styles.fieldError}>{fieldErrors.licensesCertificates}</p>}
+                <label>Licenses & Certificates URL <small>(Optional)</small></label>
+                <input type="url" name="licensesCertificates" value={data.licensesCertificates} onChange={handleChange}
+                       className={`${styles.input} ${errors.licensesCertificates ? styles.inputError : ''}`}
+                       placeholder="Document URL" />
+                {errors.licensesCertificates && <span className={styles.fieldError}>{errors.licensesCertificates}</span>}
               </div>
 
               <div className={styles.field}>
                 <label className={styles.checkboxLabel}>
-                  <input
-                    type="checkbox"
-                    name="termsAgreed"
-                    checked={formData.termsAgreed}
-                    onChange={handleInputChange}
-                    className={styles.checkbox}
-                  />
+                  <input type="checkbox" name="termsAgreed" checked={data.termsAgreed} onChange={handleChange} />
                   I agree to the terms and conditions *
                 </label>
-                {fieldErrors.termsAgreed && <p className={styles.fieldError}>{fieldErrors.termsAgreed}</p>}
+                {errors.termsAgreed && <span className={styles.fieldError}>{errors.termsAgreed}</span>}
               </div>
             </div>
           )}
 
-          {/* Navigation Buttons */}
+          {/* Navigation */}
           <div className={styles.buttonContainer}>
-            {currentStep > 1 && (
-              <button type="button" onClick={prevStep} className={styles.prevButton}>
-                Previous
-              </button>
-            )}
-            
-            {currentStep < 3 ? (
-              <button type="button" onClick={nextStep} className={styles.nextButton}>
-                Next
-              </button>
+            {step > 1 && <button onClick={() => setStep(step - 1)} className={styles.prevButton}>Previous</button>}
+            {step < 3 ? (
+              <button onClick={next} className={styles.nextButton}>Next</button>
             ) : (
-              <button
-                type="submit"
-                className={styles.submitButton}
-                disabled={loading}
-              >
+              <button onClick={submit} disabled={loading} className={styles.submitButton}>
                 {loading ? 'Registering...' : 'Submit Registration'}
               </button>
             )}
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );
 };
 
-export default HousekeepingRegistrationForm;
+export default HousekeepingForm;

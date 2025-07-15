@@ -58,7 +58,7 @@ const GuideRegistrationForm: React.FC = () => {
     'English', 'Sinhala', 'Tamil', 'Japanese', 'German', 'French'
   ];
 
-  // Updated validation functions to match your backend rules
+  // Updated validation functions
   const validateName = (name: string): string => {
     if (!name.trim()) return "Full name is required";
     return "";
@@ -71,13 +71,47 @@ const GuideRegistrationForm: React.FC = () => {
     return "";
   };
 
+  // ✅ UPDATED: Sri Lankan NIC validation
   const validateNIC = (nic: string): string => {
     if (!nic.trim()) return "National ID is required";
+    
+    const cleanedNIC = nic.trim().toUpperCase();
+    
+    // Old NIC format: 9 digits + V/X (e.g., 123456789V)
+    const oldNICPattern = /^[0-9]{9}[VX]$/;
+    
+    // New NIC format: 12 digits (e.g., 123456789012)
+    const newNICPattern = /^[0-9]{12}$/;
+    
+    if (!oldNICPattern.test(cleanedNIC) && !newNICPattern.test(cleanedNIC)) {
+      return "Please enter a valid Sri Lankan NIC (9 digits + V/X or 12 digits)";
+    }
+    
     return "";
   };
 
+  // ✅ UPDATED: Sri Lankan contact number validation
   const validateContact = (contact: string): string => {
     if (!contact.trim()) return "Contact number is required";
+    
+    // Remove any spaces, dashes, or other non-digit characters
+    const cleanedContact = contact.replace(/\D/g, '');
+    
+    // Check if it's exactly 10 digits
+    if (cleanedContact.length !== 10) {
+      return "Contact number must be exactly 10 digits";
+    }
+    
+    // Sri Lankan mobile number patterns
+    // Pattern 1: 07XXXXXXXX (mobile numbers)
+    // Pattern 2: 01XXXXXXXX (landline numbers)
+    const mobilePattern = /^07[0-9]{8}$/;
+    const landlinePattern = /^01[0-9]{8}$/;
+    
+    if (!mobilePattern.test(cleanedContact) && !landlinePattern.test(cleanedContact)) {
+      return "Please enter a valid Sri Lankan phone number (07XXXXXXXX for mobile or 01XXXXXXXX for landline)";
+    }
+    
     return "";
   };
 
@@ -411,7 +445,7 @@ const GuideRegistrationForm: React.FC = () => {
                 </div>
 
                 <div className={styles.field}>
-                  <label htmlFor="nic" className={styles.label}>National ID Number *</label>
+                  <label htmlFor="nic" className={styles.label}>National ID Number * <span className={styles.helpText}>(9 digits + V/X or 12 digits)</span></label>
                   <input
                     type="text"
                     id="nic"
@@ -427,7 +461,7 @@ const GuideRegistrationForm: React.FC = () => {
 
               <div className={styles.row}>
                 <div className={styles.field}>
-                  <label htmlFor="contact" className={styles.label}>Contact Number *</label>
+                  <label htmlFor="contact" className={styles.label}>Contact Number * <span className={styles.helpText}>(10 digits: 07XXXXXXXX or 01XXXXXXXX)</span></label>
                   <input
                     type="tel"
                     id="contact"

@@ -200,7 +200,7 @@
 }
 
 .menuItemActive {
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, #667eea, #170674);
   color: white;
   box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
 }
@@ -391,7 +391,7 @@
 .serviceIcon {
   width: 72px;
   height: 72px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, #667eea, #0b1475);
   border-radius: 16px;
   display: flex;
   align-items: center;
@@ -539,7 +539,7 @@
 }
 
 .backButton {
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, #667eea, #161489);
   color: white;
   border: none;
   border-radius: 12px;
