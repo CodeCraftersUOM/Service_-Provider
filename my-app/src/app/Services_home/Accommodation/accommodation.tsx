@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation'; // Add this import for navigation
 import styles from './accommodation.module.css';
 
 interface FormData {
@@ -48,6 +49,7 @@ interface FormData {
 }
 
 const AccommodationForm: React.FC = () => {
+  const router = useRouter(); // Add router hook
   const [step, setStep] = useState(1);
   const [success, setSuccess] = useState(false);
   const [data, setData] = useState<FormData>({
@@ -73,6 +75,11 @@ const AccommodationForm: React.FC = () => {
     'Boutique Hotel', 'Motel', 'Bed and Breakfast', 'Other'
   ];
   const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+  // Add navigation function
+  const goToDashboard = () => {
+  router.push('/Dashboard'); // Change this to your dashboard route
+  };
 
   // ✅ CONSOLIDATED VALIDATION with same patterns
   const validate = () => {
@@ -209,8 +216,8 @@ const AccommodationForm: React.FC = () => {
   const next = () => {
     const stepErrors = validate();
     const stepFields = {
-      1: ['accommodationName', 'ownerFullName', 'phoneNumber', 'emailAddress', 'alternateContactNumber', 'propertyType'],
-      2: ['locationAddress', 'googleMapsLink', 'propertyDescription', 'starRating', 'checkInTime', 'checkOutTime']
+      1: ['accommodationName', 'ownerFullName', 'phoneNumber', 'emailAddress', 'propertyType'], // Removed alternateContactNumber - it's optional
+      2: ['locationAddress', 'propertyDescription', 'checkInTime', 'checkOutTime'] // Removed googleMapsLink and starRating - they're optional
     };
     
     const currentErrors = Object.keys(stepErrors).filter(key => 
@@ -224,7 +231,24 @@ const AccommodationForm: React.FC = () => {
       const filtered: {[key: string]: string} = {};
       currentErrors.forEach(key => filtered[key] = stepErrors[key]);
       setErrors(filtered);
-      setMessage('Fill required fields');
+      
+      // Show which specific fields are missing
+      const missingFields = currentErrors.map(key => {
+        const fieldNames: {[key: string]: string} = {
+          accommodationName: 'Accommodation Name',
+          ownerFullName: 'Owner Full Name',
+          phoneNumber: 'Phone Number',
+          emailAddress: 'Email Address',
+          propertyType: 'Property Type',
+          locationAddress: 'Location Address',
+          propertyDescription: 'Property Description',
+          checkInTime: 'Check-in Time',
+          checkOutTime: 'Check-out Time'
+        };
+        return fieldNames[key] || key;
+      });
+      
+      setMessage(`Please fill required fields: ${missingFields.join(', ')}`);
     }
   };
 
@@ -289,17 +313,26 @@ const AccommodationForm: React.FC = () => {
       <div className={styles.container}>
         <div className={styles.successWrapper}>
           <div className={styles.successIcon}>✓</div>
-          <h1 className={styles.successTitle}>Accommodation Successfully Registered!</h1>
+          <h1 className={styles.successTitle}>Registration Successful!</h1>
           <p className={styles.successMessage}>
-            <strong>{data.accommodationName}</strong> has been registered successfully.
+            Your accommodation <strong>{data.accommodationName}</strong> has been successfully registered and added to the system.
           </p>
           <div className={styles.successDetails}>
             <p><strong>Owner:</strong> {data.ownerFullName}</p>
             <p><strong>Type:</strong> {data.propertyType}</p>
             <p><strong>Rooms:</strong> {data.numberOfRooms}</p>
             <p><strong>Max Guests:</strong> {data.maxGuests}</p>
+            <p><strong>Contact:</strong> {data.phoneNumber}</p>
+            <p><strong>Email:</strong> {data.emailAddress}</p>
           </div>
-          <button onClick={reset} className={styles.newRegistrationButton}>Register Another</button>
+          <div className={styles.successActions}>
+            <button onClick={goToDashboard} className={styles.dashboardButton}>
+              Go to Dashboard
+            </button>
+            <button onClick={reset} className={styles.newRegistrationButton}>
+              Register Another
+            </button>
+          </div>
         </div>
       </div>
     );
