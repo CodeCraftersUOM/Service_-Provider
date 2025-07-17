@@ -1,0 +1,214 @@
+.register-container {
+  max-width: 40rem;
+  margin: 3rem auto 0 auto;
+  padding: 2rem;
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  border-radius: 1rem;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.register-title {
+  font-size: 2.25rem;
+  font-weight: 800;
+  text-align: center;
+  color: #2563eb;
+  margin-bottom: 2rem;
+}
+
+.register-label {
+  display: block;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+}
+
+.register-select {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 1rem;
+  padding: 0.75rem 1rem;
+  background-color: #fff;
+  color: #374151;
+  font-size: 1rem;
+  outline: none;
+  transition: box-shadow 0.3s ease;
+}
+
+.register-select:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+}
+
+.register-input,
+.register-textarea {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 1rem;
+  padding: 0.75rem 1rem;
+  background-color: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(12px);
+  font-size: 1rem;
+  color: #374151;
+  outline: none;
+  transition: box-shadow 0.3s ease;
+  resize: vertical;
+}
+
+.register-input:focus,
+.register-textarea:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+}
+
+.form-field {
+  margin-bottom: 1.25rem;
+}
+
+.register-button {
+  width: 100%;
+  padding: 0.75rem 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(90deg, #3b82f6, #1e40af);
+  border-radius: 1rem;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 6px 12px rgba(59, 130, 246, 0.5);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.register-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 10px 20px rgba(59, 130, 246, 0.7);
+}
+
+.progress-container {
+  margin-bottom: 2rem;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background-color: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #1e40af);
+  transition: width 0.3s ease;
+}
+
+.step-indicators {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.step-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 0.5;
+  transition: opacity 0.3s ease;
+}
+
+.step-indicator.active {
+  opacity: 1;
+}
+
+.step-number {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  transition: background-color 0.3s ease;
+}
+
+.step-indicator.active .step-number {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.step-label {
+  font-size: 0.875rem;
+  color: #6b7280;
+  text-align: center;
+}
+
+.step-indicator.active .step-label {
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.step-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2563eb;
+  margin-bottom: 1.5rem;
+}
+
+.button-container {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.prev-button,
+.next-button {
+  padding: 0.75rem 1.5rem;
+  border: 2px solid #3b82f6;
+  background-color: transparent;
+  color: #3b82f6;
+  border-radius: 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.prev-button:hover,
+.next-button:hover {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.next-button {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.next-button:hover {
+  background-color: #1e40af;
+}
+
+/* Custom styles for review box and checkmark */
+.review-box {
+  background-color: #f8fafc;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  margin-bottom: 1.5rem;
+}
+.success-icon {
+  font-size: 4rem;
+  color: #22c55e;
+  margin-bottom: 1rem;
+}
+.success-heading {
+  font-size: 2rem;
+  color: #2563eb;
+  margin-bottom: 1rem;
+}
+.success-info {
+  font-size: 1.1rem;
+  color: #374151;
+  margin-bottom: 1rem;
+}

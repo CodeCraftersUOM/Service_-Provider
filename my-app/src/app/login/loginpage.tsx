@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import styles from "./loginpage.module.css";
 
@@ -9,9 +9,91 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<{[key: string]: string}>({});
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams.get('redirect') || '/Dashboard';
+
+  // Check if user is already logged in
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch("http://localhost:2000/api/check-auth", {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (response.ok) {
+          // User is already logged in, redirect them
+          router.push(redirectUrl);
+        }
+      } catch (error) {
+        // User is not logged in, stay on login page
+        console.log("User not authenticated");
+      }
+    };
+
+    checkAuth();
+  }, [router, redirectUrl]);
+
+  // Validation functions
+  const validateEmail = (email: string): string => {
+    if (!email.trim()) return "Email is required";
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) return "Please enter a valid email address";
+    return "";
+  };
+
+  const validatePassword = (password: string): string => {
+    if (!password) return "Password is required";
+    if (password.length < 8) return "Password must be at least 8 characters";
+    return "";
+  };
+
+  const validateForm = (): boolean => {
+    const errors: {[key: string]: string} = {};
+    
+    errors.email = validateEmail(email);
+    errors.password = validatePassword(password);
+    
+    // Remove empty errors
+    Object.keys(errors).forEach(key => {
+      if (!errors[key]) delete errors[key];
+    });
+    
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    // Clear field error when user starts typing
+    if (fieldErrors[field]) {
+      setFieldErrors(prev => ({
+        ...prev,
+        [field]: ""
+      }));
+    }
+    
+    // Update the corresponding state
+    switch (field) {
+      case 'email':
+        setEmail(value);
+        break;
+      case 'password':
+        setPassword(value);
+        break;
+    }
+  };
 
   const handleLogin = async () => {
+    // Clear previous errors
+    setError('');
+    
+    // Validate form
+    if (!validateForm()) {
+      return;
+    }
+
     try {
       const response = await fetch("http://localhost:2000/api/login", {
         method: "POST",
@@ -27,10 +109,8 @@ export default function LoginPage() {
       if (response.ok) {
         console.log("Login successful:", data);
 
-        // Optional: Save user/token in localStorage if needed
-        // localStorage.setItem("token", data.token);
-
-        router.push("/Services_home"); // Navigate to Services_home
+        // Redirect to the originally requested page or dashboard
+        router.push(redirectUrl);
       } else {
         setError(data.message || "Login failed");
       }
@@ -44,24 +124,36 @@ export default function LoginPage() {
     <div className={styles.container}>
       <div className={styles.card}>
         <h2 className={styles.title}>Welcome Back!</h2>
-        <p className={styles.subtitle}>Login to your account</p>
-
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className={styles.input}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className={styles.input}
-        />
+        <p className={styles.subtitle}>
+          {searchParams.get('redirect') ? 
+            'Please log in to access this page' : 
+            'Login to your account'
+          }
+        </p>
 
         {error && <p className={styles.error}>{error}</p>}
+
+        <div>
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => handleInputChange('email', e.target.value)}
+            className={`${styles.input} ${fieldErrors.email ? styles.inputError : ''}`}
+          />
+          {fieldErrors.email && <p className={styles.fieldError}>{fieldErrors.email}</p>}
+        </div>
+
+        <div>
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => handleInputChange('password', e.target.value)}
+            className={`${styles.input} ${fieldErrors.password ? styles.inputError : ''}`}
+          />
+          {fieldErrors.password && <p className={styles.fieldError}>{fieldErrors.password}</p>}
+        </div>
 
         <button onClick={handleLogin} className={styles.button}>LOG IN</button>
 
