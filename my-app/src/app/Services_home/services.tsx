@@ -15,7 +15,9 @@ const serviceIcons: string[] = [
   "/taxi.png",
   "/communucation.png",
   "/house.png",
+  "/things_to_do.png",
   "/other.png"
+  
 ];
 
 const serviceNames: string[] = [
@@ -27,7 +29,9 @@ const serviceNames: string[] = [
   "Taxi",
   "Communication",
   "House Keeping",
+  "Things To Do",
   "Other Services"
+  
 ];
 
 const serviceLinks: string[] = [
@@ -39,7 +43,9 @@ const serviceLinks: string[] = [
   "Services_home/taxi",
   "Services_home/Communi",
   "Services_home/houes_kepping",
+  "Services_home/Things_to_do",
   "Services_home/other"
+  
 ];
 
 const ServiceSelector: React.FC = () => {
