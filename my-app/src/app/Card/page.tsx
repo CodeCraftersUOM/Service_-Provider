@@ -1,12 +1,5 @@
-import React from 'react';
 import Card from './card';
 
-function Page() {
-  return (
-    <div>
-      <Card />
-    </div>
-  );
+export default function CardPage() {
+  return <Card />;
 }
-
-export default Page;
