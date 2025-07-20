@@ -1,525 +1,692 @@
-'use client';
-import './StepForm.css';
-import { useState } from 'react';
+"use client"
+import "./guide.css" // Adjusted import path
+import type React from "react"
+import { useState } from "react"
 
+import ImageUpload, { ImageObject } from "./ImageUpload";
+ // Adjusted import path
+import {
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Building2,
+  Tag,
+  FileText,
+  Clock,
+  DollarSign,
+  CreditCard,
+  Banknote,
+  QrCode,
+  Car,
+  Globe,
+  Wifi,
+  Users,
+  Calendar,
+  Mountain,
+  Timer,
+  Star,
+  List,
+  Shirt,
+  Backpack,
+  AlertTriangle,
+} from "lucide-react"
+import type { CloudinaryUploadResult } from "./cloudinary" // Corrected import
+
+// Define the form data types
 type BaseFormData = {
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
-};
+  name: string
+  email: string
+  phone: string
+  address: string
+}
 
 type BuyThingsData = {
-  title: string;
-  category: string;
-  subcategory: string;
-  imageUrl: string;
-  description: string;
-  location: string;
-  googleMapsUrl: string;
-  openingHours: string;
-  contactInfo: string;
-  entryFee: string;
-  isCard: boolean;
-  isCash: boolean;
-  isQRScan: boolean;
-  isParking: string;
-  contactno: string;
-  websiteUrl: string;
-  wifi: string;
-  washrooms: string;
-  familyFriendly: string;
-};
+  title: string
+  category: string
+  subcategory: string
+  description: string
+  location: string
+  googleMapsUrl: string
+  openingHours: string
+  contactInfo: string
+  entryFee: string
+  isCard: boolean
+  isCash: boolean
+  isQRScan: boolean
+  isParking: string
+  contactno: string
+  websiteUrl: string
+  wifi: string
+  washrooms: string
+  familyFriendly: string
+}
 
 type AdventuresData = {
-  title: string;
-  category: string;
-  subcategory: string;
-  imageUrl: string;
-  description: string;
-  googleMapsUrl: string;
-  duration: string;
-  contactInfo: string;
-  bestfor: string;
-  price: string;
-  bestTimetoVisit: string;
-  activities: string;
-  whatToWear: string;
-  whatToBring: string;
-  precautions: string;
-  contactno: string;
-  websiteUrl: string;
-  address: string;
-};
+  title: string
+  category: string
+  subcategory: string
+  description: string
+  googleMapsUrl: string
+  duration: string
+  contactInfo: string
+  bestfor: string
+  price: string
+  bestTimetoVisit: string
+  activities: string
+  whatToWear: string
+  whatToBring: string
+  precautions: string
+  contactno: string
+  websiteUrl: string
+  address: string
+}
 
-export default function RegisterPublisher() {
-  const [category, setCategory] = useState<string>('');
-  const [currentStep, setCurrentStep] = useState(1);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [formData, setFormData] = useState<BaseFormData & Partial<BuyThingsData> & Partial<AdventuresData>>({
-    name: '',
-    email: '',
-    phone: '',
-    address: '',
-  });
-
-  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setCategory(e.target.value);
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === 'checkbox' ? checked : value,
-    });
-  };
-
-  
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-
-      console.log('Category:', category);
-      console.log('Form Data:', formData);
-
-      try {
-        const response = await fetch('http://localhost:2000/api/buythings', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            category,
-            ...formData
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const result = await response.json();
-
-        if (result.success) {
-          console.log('Data saved to MongoDB:', result.id);
-          setIsSuccess(true);
-        } else {
-          console.error('Server error:', result.error);
-          alert('Failed to submit the form. Please try again.');
-        }
-      } catch (error) {
-        console.error('Error submitting form:', error);
-        alert('An error occurred while submitting. Please check console.');
-      }
-  };
-
-
-    
-  
-
-  const nextStep = () => {
-    if (currentStep < 3) setCurrentStep(currentStep + 1);
-  };
-
-  const prevStep = () => {
-    if (currentStep > 1) setCurrentStep(currentStep - 1);
-  };
-
-  const resetForm = () => {
-    setIsSuccess(false);
-    setCurrentStep(1);
-    setCategory('');
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      address: '',
-    });
-  };
-  const renderCategorySpecificFields = () => {
-            let fields: { label: string; name: keyof (BuyThingsData & AdventuresData); type: string }[] = [];
-
-            if (category === 'buythings') {
-              fields = [
-                { label: 'Title', name: 'title', type: 'text' },
-                { label: 'Category', name: 'category', type: 'text' },
-                { label: 'Subcategory', name: 'subcategory', type: 'text' },
-                { label: 'Image URL', name: 'imageUrl', type: 'text' },
-                { label: 'Description', name: 'description', type: 'textarea' },
-                { label: 'Location', name: 'location', type: 'text' },
-                { label: 'Google Maps URL', name: 'googleMapsUrl', type: 'text' },
-                { label: 'Opening Hours', name: 'openingHours', type: 'text' },
-                { label: 'Contact Info', name: 'contactInfo', type: 'text' },
-                { label: 'Entry Fee', name: 'entryFee', type: 'text' },
-                { label: 'Accepts Card?', name: 'isCard', type: 'checkbox' },
-                { label: 'Accepts Cash?', name: 'isCash', type: 'checkbox' },
-                { label: 'Accepts QR Scan?', name: 'isQRScan', type: 'checkbox' },
-                { label: 'Parking', name: 'isParking', type: 'text' },
-                { label: 'Contact Number', name: 'contactno', type: 'text' },
-                { label: 'Website URL', name: 'websiteUrl', type: 'text' },
-                { label: 'WiFi', name: 'wifi', type: 'text' },
-                { label: 'Washrooms', name: 'washrooms', type: 'text' },
-                { label: 'Family Friendly', name: 'familyFriendly', type: 'text' },
-              ];
-            } else if (category === 'adventures') {
-              fields = [
-                { label: 'Title', name: 'title', type: 'text' },
-                { label: 'Category', name: 'category', type: 'text' },
-                { label: 'Subcategory', name: 'subcategory', type: 'text' },
-                { label: 'Image URL', name: 'imageUrl', type: 'text' },
-                { label: 'Description', name: 'description', type: 'textarea' },
-                { label: 'Google Maps URL', name: 'googleMapsUrl', type: 'text' },
-                { label: 'Duration', name: 'duration', type: 'text' },
-                { label: 'Contact Info', name: 'contactInfo', type: 'text' },
-                { label: 'Best For', name: 'bestfor', type: 'text' },
-                { label: 'Price', name: 'price', type: 'text' },
-                { label: 'Best Time to Visit', name: 'bestTimetoVisit', type: 'text' },
-                { label: 'Activities', name: 'activities', type: 'textarea' },
-                { label: 'What To Wear', name: 'whatToWear', type: 'textarea' },
-                { label: 'What To Bring', name: 'whatToBring', type: 'textarea' },
-                { label: 'Precautions', name: 'precautions', type: 'textarea' },
-                { label: 'Contact Number', name: 'contactno', type: 'text' },
-                { label: 'Website URL', name: 'websiteUrl', type: 'text' },
-                { label: 'Address', name: 'address', type: 'text' },
-              ];
-            }
-
-            return fields.map((field, index) => (
-              <div className="form-field" key={index}>
-                <label>{field.label}*</label>
-                {field.type === 'textarea' ? (
-                  <textarea
-                    name={field.name}
-                    value={formData[field.name] as string || ''}
-                    onChange={handleInputChange}
-                    required
-                    className="register-textarea"
-                    rows={3}
-                  />
-                ) : field.type === 'checkbox' ? (
-                  <input
-                    type="checkbox"
-                    name={field.name}
-                    checked={!!formData[field.name]}
-                    onChange={handleInputChange}
-                    className="register-checkbox"
-                  />
-                ) : (
-                  <input
-                    type={field.type}
-                    name={field.name}
-                    value={formData[field.name] as string || ''}
-                    onChange={handleInputChange}
-                    className="register-input"
-                  />
-                )}
-              </div>
-            ));
-          };
-
-
-  const steps = ['Select Category', 'Publisher Details', 'Category Specific'];
-
-  const getStepClass = (step: number) => {
-    if (currentStep > step) return 'step completed';
-    if (currentStep === step) return 'step active';
-    return 'step';
-  };
-
-  if (isSuccess) {
-    return (
-      <div className="register-container">
-        <div style={{ textAlign: 'center', padding: '2rem' }}>
-          <div style={{ fontSize: '4rem', color: '#22c55e', marginBottom: '1rem' }}>✓</div>
-          <h1 className="success-title">Publisher Successfully Registered!</h1>
-          <p className="success-text">
-            <strong>{formData.name}</strong> has been registered for <strong>{category}</strong>.
-          </p>
-          <button onClick={resetForm} className="btn btn-secondary">Register Another</button>
-        </div>
-      </div>
-    );
+// Combined form data type, now including the Cloudinary image result
+type RegisterPublisherFormData = BaseFormData &
+  Partial<BuyThingsData> &
+  Partial<AdventuresData> & {
+    images?: CloudinaryUploadResult[] // Array of image upload results
   }
 
-  const categoryTitles: Record<string, string> = {
-            buythings: 'Buy Things Details',
-            adventures: 'Adventures Details',
-            placestovisit: 'Places to Visit Details',
-            Learningpoints: 'Learning Points Details',
-            specialevents: 'Special Events Details',
-            ayurvedha: 'Ayurwedha Details'
-          };
+export default function RegisterPublisher() {
+  const [category, setCategory] = useState<string>("")
+  const [currentStep, setCurrentStep] = useState(1)
+  const [isSuccess, setIsSuccess] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState("")
+  // Removed uploadProgress as Cloudinary widget handles its own progress
 
-  return (
-    <>
-      <style jsx>{`
-        .register-container {
-          max-width: 42rem;
-          margin: 10rem auto;
-          padding: 2rem;
-          background: white;
-          border-radius: 1rem;
-          box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
-        .register-title {
-          font-size: 2.25rem;
-          font-weight: 700;
-          color: #2563eb;
-          text-align: center;
-          margin-bottom: 1.5rem;
-        }
-        .stepper {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 2rem;
-          position: relative;
-        }
-        .step {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          position: relative;
-          flex: 1;
-        }
-        .step:not(:last-child)::after {
-          content: '';
-          position: absolute;
-          top: 14px;
-          right: -50%;
-          width: 100%;
-          height: 2px;
-          background-color: #d1d5db;
-          z-index: -1;
-        }
-        .step.completed:not(:last-child)::after {
-          background-color: #2563eb;
-        }
-        .circle {
-          width: 30px;
-          height: 30px;
-          border-radius: 50%;
-          background-color: #d1d5db;
-          color: white;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: 600;
-        }
-        .active .circle {
-          background-color: #2563eb;
-        }
-        .completed .circle {
-          background-color: #22c55e;
-        }
-        .label {
-          margin-top: 0.5rem;
-          font-size: 0.9rem;
-          color: #6b7280;
-        }
-        .active .label {
-          color: #2563eb;
-          font-weight: 600;
-        }
-        .form-field {
-          margin-bottom: 1.25rem;
-        }
-        .register-input,
-        .register-textarea {
-          width: 100%;
-          padding: 0.75rem 1rem;
-          border: 1px solid #d1d5db;
-          border-radius: 0.75rem;
-          font-size: 1rem;
-          outline: none;
-        }
-        .btn {
-          display: inline-block;
-          padding: 0.75rem 1.5rem;
-          border-radius: 0.75rem;
-          font-weight: 600;
-          text-align: center;
-          cursor: pointer;
-          margin: 0.5rem 0.25rem;
-        }
-        .btn-primary {
-          background: linear-gradient(to right, #3b82f6, #1e3a8a);
-          color: white;
-          border: none;
-        }
-        .btn-secondary {
-          background: #f3f4f6;
-          color: #374151;
-          border: 1px solid #d1d5db;
-        }
-        .btn-primary:hover {
-          background: linear-gradient(to right, #2563eb, #1e40af);
-        }
-        .btn-secondary:hover {
-          background: #e5e7eb;
-        }
-      `}</style>
+  const [formData, setFormData] = useState<RegisterPublisherFormData>({
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    images: [], // Initialize image as undefined
+  })
 
-      <form className="register-container" onSubmit={handleSubmit}>
-        <div className="progress-bar-container">
-          <div
-            className="progress-bar-fill"
-            style={{ width: `${(currentStep / 3) * 100}%` }}
-          ></div>
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setCategory(e.target.value)
+  }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value, type } = e.target
+    const checked = type === "checkbox" ? (e.target as HTMLInputElement).checked : undefined
+    setFormData({
+      ...formData,
+      [name]: type === "checkbox" ? checked : value,
+    })
+  }
+
+  // New handler for Cloudinary image upload success
+  const [images, setImages] = useState<ImageObject[]>([]);
+
+  // Function to handle image changes from ImageUpload component
+  const handleImagesChange = (updatedImages: ImageObject[]) => {
+    setImages(updatedImages);
+  };
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setLoading(true)
+    setMessage("")
+    // Removed setUploadProgress(0)
+
+    try {
+      // Prepare data to send to your backend
+      const dataToSend = {
+        ...formData,
+        category: category, // Ensure category is included
+        images // Send the array of Cloudinary image results
+      }
+
+      console.log("📤 Sending form data:", dataToSend)
+
+      // Use fetch API for simplicity, as the image is already uploaded to Cloudinary
+      const response = await fetch("http://localhost:2000/api/buythings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(dataToSend),
+      })
+
+      const result = await response.json()
+
+      if (response.ok && result.success) {
+        console.log("✅ Submission successful:", result.data)
+        setIsSuccess(true)
+        setImages([]);
+      } else {
+        setMessage(`Failed to submit the form: ${result.message || "Unknown error"}`)
+      }
+    } catch (error) {
+      console.error("❌ Error submitting form:", error)
+      if (error instanceof Error) {
+        if (error.message.includes("Failed to fetch")) {
+          setMessage("Cannot connect to server. Please check if the server is running on localhost:2000")
+        } else {
+          setMessage(`Error: ${error.message}`)
+        }
+      } else {
+        setMessage("An unexpected error occurred. Please try again.")
+      }
+    } finally {
+      setLoading(false)
+      // Removed setUploadProgress(0)
+    }
+  }
+
+  const nextStep = () => {
+    if (currentStep < 3) setCurrentStep(currentStep + 1)
+  }
+
+  const prevStep = () => {
+    if (currentStep > 1) setCurrentStep(currentStep - 1)
+  }
+
+  const resetForm = () => {
+    setIsSuccess(false)
+    setCurrentStep(1)
+    setCategory("")
+    setMessage("")
+    // Removed setUploadProgress(0)
+    setFormData({
+      name: "",
+      email: "",
+      phone: "",
+      address: "",
+      images: [], // Reset image
+    })
+  }
+
+  const renderCategorySpecificFields = () => {
+    let fields: { label: string; name: keyof (BuyThingsData & AdventuresData); type: string; icon: React.ReactNode }[] =
+      []
+    if (category === "buythings") {
+      fields = [
+        { label: "Title", name: "title", type: "text", icon: <Tag className="labelIcon" /> },
+        { label: "Subcategory", name: "subcategory", type: "select", icon: <List className="labelIcon" /> },
+        { label: "Description", name: "description", type: "textarea", icon: <FileText className="labelIcon" /> },
+        { label: "Location", name: "location", type: "text", icon: <MapPin className="labelIcon" /> },
+        { label: "Google Maps URL", name: "googleMapsUrl", type: "text", icon: <Globe className="labelIcon" /> },
+        { label: "Opening Hours", name: "openingHours", type: "timerange", icon: <Clock className="labelIcon" /> },
+        { label: "Contact Info", name: "contactInfo", type: "text", icon: <Phone className="labelIcon" /> },
+        { label: "Entry Fee", name: "entryFee", type: "text", icon: <DollarSign className="labelIcon" /> },
+        { label: "Accepts Card?", name: "isCard", type: "checkbox", icon: <CreditCard className="labelIcon" /> },
+        { label: "Accepts Cash?", name: "isCash", type: "checkbox", icon: <Banknote className="labelIcon" /> },
+        { label: "Accepts QR Scan?", name: "isQRScan", type: "checkbox", icon: <QrCode className="labelIcon" /> },
+        { label: "Parking", name: "isParking", type: "dropdown", icon: <Car className="labelIcon" /> },
+        { label: "Contact Number", name: "contactno", type: "text", icon: <Phone className="labelIcon" /> },
+        { label: "Website URL", name: "websiteUrl", type: "text", icon: <Globe className="labelIcon" /> },
+        { label: "WiFi", name: "wifi", type: "dropdown", icon: <Wifi className="labelIcon" /> },
+        { label: "Washrooms", name: "washrooms", type: "dropdown", icon: <Building2 className="labelIcon" /> },
+        { label: "Family Friendly", name: "familyFriendly", type: "dropdown", icon: <Users className="labelIcon" /> },
+      ]
+    } else if (category === "adventures") {
+      fields = [
+        { label: "Title", name: "title", type: "text", icon: <Mountain className="labelIcon" /> },
+        { label: "Description", name: "description", type: "textarea", icon: <FileText className="labelIcon" /> },
+        { label: "Google Maps URL", name: "googleMapsUrl", type: "text", icon: <Globe className="labelIcon" /> },
+        { label: "Duration", name: "duration", type: "text", icon: <Timer className="labelIcon" /> },
+        { label: "Contact Info", name: "contactInfo", type: "text", icon: <Phone className="labelIcon" /> },
+        { label: "Best For", name: "bestfor", type: "text", icon: <Star className="labelIcon" /> },
+        { label: "Price", name: "price", type: "text", icon: <DollarSign className="labelIcon" /> },
+        {
+          label: "Best Time to Visit",
+          name: "bestTimetoVisit",
+          type: "text",
+          icon: <Calendar className="labelIcon" />,
+        },
+        { label: "Activities", name: "activities", type: "textarea", icon: <List className="labelIcon" /> },
+        { label: "What To Wear", name: "whatToWear", type: "textarea", icon: <Shirt className="labelIcon" /> },
+        { label: "What To Bring", name: "whatToBring", type: "textarea", icon: <Backpack className="labelIcon" /> },
+        { label: "Precautions", name: "precautions", type: "textarea", icon: <AlertTriangle className="labelIcon" /> },
+        { label: "Contact Number", name: "contactno", type: "text", icon: <Phone className="labelIcon" /> },
+        { label: "Website URL", name: "websiteUrl", type: "text", icon: <Globe className="labelIcon" /> },
+        { label: "Address", name: "address", type: "text", icon: <MapPin className="labelIcon" /> },
+      ]
+    }
+    const subcategoryOptions = [
+      { value: "", label: "-- Select Subcategory --" },
+      { value: "supermarket", label: "Supermarket" },
+      { value: "cafe", label: "Cafe" },
+      { value: "restaurant", label: "Restaurant" },
+      { value: "grocery", label: "Grocery Store" },
+      { value: "bakery", label: "Bakery" },
+      { value: "pharmacy", label: "Pharmacy" },
+      { value: "clothing", label: "Clothing Store" },
+      { value: "electronics", label: "Electronics Store" },
+    ]
+    const dropdownOptions = [
+      { value: "", label: "-- Select--" },
+      { value: "yes", label: "Yes" },
+      { value: "no", label: "No" },
+    ]
+    return (
+      <>
+        <div className="field">
+          <div className="labelWithIcon">
+            <Tag className="labelIcon" />
+            <span>Category*</span>
+          </div>
+          <input
+            type="text"
+            name="category"
+            className="input"
+            value={category === "buythings" ? "Buy Things" : category === "adventures" ? "Adventures" : ""}
+            readOnly
+          />
         </div>
 
-        {/* Step Progress Bar */}
-        
-        <div className="stepper">
-          {steps.map((label, index) => (
-            <div key={index} className={getStepClass(index + 1)}>
-              <div className="circle">
-                {currentStep > index + 1 ? '✓' : index + 1}
+        {formData.images && formData.images.length > 0 && (
+          <div className="bg-blue-50 p-4 rounded-lg">
+            <h4 className="font-medium text-blue-900 mb-2">Uploaded Image Details:</h4>
+            <ul className="list-disc list-inside text-sm text-blue-700 space-y-1">
+              {formData.images.map((image, index) => (
+                <li key={image.public_id || index}>
+                  <strong>Image {index + 1}:</strong>{" "}
+                  <a href={image.secure_url} target="_blank" rel="noopener noreferrer" className="underline">
+                    {image.original_filename || "Link"}
+                  </a>{" "}
+                  ({Math.round(image.bytes / 1024)} KB, {image.width}x{image.height})
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {/* Rest of the fields */}
+        <div className="row">
+          {fields.slice(0, 2).map((field, index) => (
+            <div className="field" key={index}>
+              <div className="labelWithIcon">
+                {field.icon}
+                <span>{field.label}*</span>
               </div>
-              <div className="label">{label}</div>
+              {field.type === "textarea" ? (
+                <textarea
+                  name={field.name}
+                  value={(formData[field.name] as string) || ""}
+                  onChange={handleInputChange}
+                  required
+                  className="textarea"
+                  rows={3}
+                />
+              ) : field.label === "Subcategory" ? (
+                <select
+                  name={field.name}
+                  value={(formData[field.name] as string) || ""}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      [field.name]: e.target.value,
+                    })
+                  }
+                  className="select"
+                  required
+                >
+                  {subcategoryOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  type={field.type}
+                  name={field.name}
+                  value={(formData[field.name] as string) || ""}
+                  onChange={handleInputChange}
+                  className="input"
+                />
+              )}
             </div>
           ))}
         </div>
-
-        <h1 className="register-title">Register Publisher</h1>
-
-        
-        {/* Step 1: Select Category */}
-        {currentStep === 1 && (
-          <div className="form-field">
-            <label>Select Category *</label>
-            <select
-              name="category"
-              value={category}
-              onChange={handleCategoryChange}
-              className="register-input"
-              required
-            >
-              <option value="">-- Select a Category --</option>
-              <option value="buythings">Buy Things</option>
-              <option value="adventures">Adventures</option>
-              <option value="placestovisit">Places To Visit</option>
-              <option value="learningpoints">Learning Points</option>
-              <option value="specialevents">Special Events</option>
-              <option value="ayurwedha">Ayurwedha</option>
-            </select>
+        {/* Remaining fields in rows of two */}
+        {(() => {
+          const rows = []
+          let idx = 2
+          while (idx < fields.length) {
+            if (["isCard", "isCash", "isQRScan"].includes(fields[idx]?.name)) {
+              idx += 1
+              continue
+            }
+            const firstField = fields[idx]
+            const secondField = fields[idx + 1]
+            rows.push(
+              <div className="row" key={idx}>
+                {[firstField, secondField].map((field, i) => {
+                  if (!field) return null
+                  return (
+                    <div className="field" key={field.name}>
+                      <div className="labelWithIcon">
+                        {field.icon}
+                        <span>{field.label}*</span>
+                      </div>
+                      {field.type === "textarea" ? (
+                        <textarea
+                          name={field.name}
+                          value={(formData[field.name] as string) || ""}
+                          onChange={handleInputChange}
+                          required
+                          className="textarea"
+                          rows={3}
+                        />
+                      ) : field.type === "dropdown" ? (
+                        <select
+                          name={field.name}
+                          value={(formData[field.name] as string) || ""}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              [field.name]: e.target.value,
+                            })
+                          }
+                          className="select"
+                          required
+                        >
+                          {dropdownOptions.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                      ) : field.type === "timerange" ? (
+                        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                          <input
+                            type="time"
+                            value={formData.openingHours?.split(" - ")[0] || ""}
+                            onChange={(e) => {
+                              const end = formData.openingHours?.split(" - ")[1] || ""
+                              setFormData({
+                                ...formData,
+                                openingHours: `${e.target.value} - ${end}`,
+                              })
+                            }}
+                            required
+                            className="input"
+                          />
+                          <span style={{ color: "#1e40af", fontWeight: "500" }}>to</span>
+                          <input
+                            type="time"
+                            value={formData.openingHours?.split(" - ")[1] || ""}
+                            onChange={(e) => {
+                              const start = formData.openingHours?.split(" - ")[0] || ""
+                              setFormData({
+                                ...formData,
+                                openingHours: `${start} - ${e.target.value}`,
+                              })
+                            }}
+                            required
+                            className="input"
+                          />
+                        </div>
+                      ) : (
+                        <input
+                          type={field.type}
+                          name={field.name}
+                          value={(formData[field.name] as string) || ""}
+                          onChange={handleInputChange}
+                          className="input"
+                        />
+                      )}
+                    </div>
+                  )
+                })}
+              </div>,
+            )
+            idx += 2
+          }
+          return rows
+        })()}
+        {/* Payment Methods Section */}
+        {category === "buythings" && (
+          <div className="field">
+            <div className="labelWithIcon" style={{ marginBottom: "1rem", fontSize: "1.2rem" }}>
+              <CreditCard className="labelIcon" />
+              <span>Payment Methods</span>
+            </div>
+            <div className="checkboxRow">
+              {["isCard", "isCash", "isQRScan"].map((name) => {
+                const field = fields.find((f) => f.name === name)
+                if (!field) return null
+                return (
+                  <div className="checkboxLabel" key={field.name}>
+                    <input
+                      type="checkbox"
+                      name={field.name}
+                      checked={!!formData[field.name]}
+                      onChange={handleInputChange}
+                      className="checkbox"
+                    />
+                    <div className="labelWithIcon" style={{ margin: 0 }}>
+                      {field.icon}
+                      <span>{field.label}</span>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
           </div>
         )}
+      </>
+    )
+  }
 
-        {/* Step 2: Publisher Details */}
-        {currentStep === 2 && (
-          <>
-            <div className="form-field">
-              <label>Publisher Name *</label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                required
-                className="register-input"
-              />
-            </div>
-            <div className="form-field">
-              <label>Email *</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                required
-                className="register-input"
-              />
-            </div>
-            <div className="form-field">
-              <label>Phone *</label>
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleInputChange}
-                required
-                className="register-input"
-              />
-            </div>
-            <div className="form-field">
-              <label>Address *</label>
-              <textarea
-                name="address"
-                value={formData.address}
-                onChange={handleInputChange}
-                rows={3}
-                required
-                className="register-textarea"
-              />
-            </div>
-          </>
-        )}
+  const steps = ["Select Category", "Publisher Details", "Category Specific"]
+  const categoryTitles: Record<string, string> = {
+    buythings: "Buy Things Details",
+    adventures: "Adventures Details",
+    placestovisit: "Places to Visit Details",
+    learningpoints: "Learning Points Details",
+    specialevents: "Special Events Details",
+    ayurwedha: "Ayurwedha Details",
+  }
 
-        {/* Step 3: Category Specific Details */}
-        {currentStep === 3 && (
-          <div className='step-form'>
-            
-
-  
-
-           <h2>{categoryTitles[category] || 'Category Details'}</h2>
-            {renderCategorySpecificFields()}
-            <div className="form-field">
-              <label>Title *</label>
-              <input
-                type="text"
-                name="title"
-                value={formData.title || ''}
-                onChange={handleInputChange}
-                required
-                className="register-input"
-                
-              />
-            </div>
-            <div className="form-field">
-              <label>Subcategory *</label>
-              <input
-                type="text"
-                name="subcategory"
-                value={formData.subcategory || ''}
-                onChange={handleInputChange}
-                required
-                className="register-input"
-              />
-            </div>
-            <div className="form-field">
-              <label>Image URL *</label>
-              <input
-                type="text"
-                name="imageUrl"
-                value={formData.imageUrl || ''}
-                onChange={handleInputChange}
-                required
-                className="register-input"
-              />
-            </div>
+  if (isSuccess) {
+    return (
+      <div className="container">
+        <div className="successWrapper">
+          <div className="successIcon">
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22,4 12,14.01 9,11.01"></polyline>
+            </svg>
           </div>
-        )}
-
-        {/* Navigation Buttons */}
-        <div>
-          {currentStep > 1 && (
-            <button type="button" onClick={prevStep} className="btn btn-secondary">
-              Previous
-            </button>
-          )}
-          {currentStep < 3 ? (
-            <button type="button" onClick={nextStep} className="btn btn-primary">
-              Next
-            </button>
-          ) : (
-            <button type="submit" className="btn btn-primary">
-              Register Publisher
-            </button>
-          )}
+          <h1 className="successTitle">Publisher Successfully Registered!</h1>
+          <p className="successMessage">
+            Congratulations! <strong>{formData.name}</strong> has been successfully registered as a publisher for{" "}
+            <strong>{category}</strong> with {formData.images?.length || 0} image(s) uploaded.
+          </p>
+          <div className="successDetails">
+            <p>
+              <strong>Name:</strong> {formData.name}
+            </p>
+            <p>
+              <strong>Email:</strong> {formData.email}
+            </p>
+            <p>
+              <strong>Category:</strong> {category}
+            </p>
+            <p>
+              <strong>Phone:</strong> {formData.phone}
+            </p>
+            {formData.images && formData.images.length > 0 && (
+              <p>
+                <strong>Images Uploaded:</strong> {formData.images.length}
+                {formData.images.map((img, idx) => (
+                  <span key={img.public_id || idx}>
+                    {" "}
+                    (
+                    <a href={img.secure_url} target="_blank" rel="noopener noreferrer">
+                      {idx + 1}
+                    </a>
+                    )
+                  </span>
+                ))}
+              </p>
+            )}
+          </div>
+          <button onClick={resetForm} className="newRegistrationButton">
+            Register Another Publisher
+          </button>
         </div>
-      </form>
-    </>
-  );
+      </div>
+    )
+  }
+
+  return (
+    <div className="container">
+      <div className="formWrapper">
+        {/* Progress Bar */}
+        <div className="progressContainer">
+          <div className="progressBar">
+            <div className="progressFill" style={{ width: `${(currentStep / 3) * 100}%` }}></div>
+          </div>
+          <div className="stepIndicators">
+            {[1, 2, 3].map((step) => (
+              <div key={step} className={`stepIndicator ${currentStep >= step ? "active" : ""}`}>
+                <div className="stepNumber">{step}</div>
+                <div className="stepLabel">{steps[step - 1]}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <h1 className="title">Register Publisher</h1>
+        {message && (
+          <div className={`message ${message.includes("Error") || message.includes("Failed") ? "error" : "warning"}`}>
+            {message}
+          </div>
+        )}
+        {/* Removed Upload Progress as it's handled by Cloudinary widget */}
+        <form onSubmit={handleSubmit} className="form">
+          {/* Step 1: Select Category */}
+          {currentStep === 1 && (
+            <div className="step">
+              <h2 className="stepTitle">Step 1: Select Category</h2>
+              <div className="field">
+                <div className="labelWithIcon">
+                  <Building2 className="labelIcon" />
+                  <span>Select Category *</span>
+                </div>
+                <select name="category" value={category} onChange={handleCategoryChange} className="select" required>
+                  <option value="">-- Select a Category --</option>
+                  <option value="buythings">Buy Things</option>
+                  <option value="adventures">Adventures</option>
+                  <option value="placestovisit">Places To Visit</option>
+                  <option value="learningpoints">Learning Points</option>
+                  <option value="specialevents">Special Events</option>
+                  <option value="ayurwedha">Ayurwedha</option>
+                </select>
+              </div>
+            </div>
+          )}
+          {/* Step 2: Publisher Details */}
+          {currentStep === 2 && (
+            <div className="step">
+              <h2 className="stepTitle">Step 2: Publisher Details</h2>
+              <div className="row">
+                <div className="field">
+                  <div className="labelWithIcon">
+                    <User className="labelIcon" />
+                    <span>Publisher Name *</span>
+                  </div>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    required
+                    className="input"
+                    placeholder="Enter publisher name"
+                  />
+                </div>
+                <div className="field">
+                  <div className="labelWithIcon">
+                    <Mail className="labelIcon" />
+                    <span>Email *</span>
+                  </div>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    required
+                    className="input"
+                    placeholder="Enter email address"
+                  />
+                </div>
+              </div>
+              <div className="row">
+                <div className="field">
+                  <div className="labelWithIcon">
+                    <Phone className="labelIcon" />
+                    <span>Phone *</span>
+                  </div>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    required
+                    className="input"
+                    placeholder="Enter phone number"
+                  />
+                </div>
+                <div className="field">
+                  <div className="labelWithIcon">
+                    <MapPin className="labelIcon" />
+                    <span>Address *</span>
+                  </div>
+                  <textarea
+                    name="address"
+                    value={formData.address}
+                    onChange={handleInputChange}
+                    rows={3}
+                    required
+                    className="textarea"
+                    placeholder="Enter address"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+          {/* Step 3: Category Specific Details */}
+          {currentStep === 3 && (
+            <div className="step">
+              <h2 className="stepTitle">Step 3: {categoryTitles[category] || "Category Details"}</h2>
+              {renderCategorySpecificFields()}
+              <ImageUpload
+          images={images}
+          onChange={(updatedImages) => {
+            console.log("📸 Updated images:", updatedImages);
+            setImages(updatedImages);
+          }}
+        />
+
+              {/* Moved CloudinaryImageUpload here */}
+              
+            </div>
+          )}
+          {/* Navigation Buttons */}
+          <div className="buttonContainer">
+            {currentStep > 1 && (
+              <button type="button" onClick={prevStep} className="prevButton" disabled={loading}>
+                Previous
+              </button>
+            )}
+            {currentStep < 3 ? (
+              <button type="button" onClick={nextStep} className="nextButton">
+                Next
+              </button>
+            ) : (
+              <button type="submit" className="submitButton" disabled={loading}>
+                {loading ? "Submitting..." : "Register Publisher"}
+              </button>
+            )}
+          </div>
+        </form>
+      </div>
+    </div>
+  )
 }
-
-

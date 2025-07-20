@@ -25,8 +25,7 @@ const serviceIcons: string[] = [
   "/things_to_do.png",
   "/other.png"
   
-  "/other.png",
-  "/thingstodo.png"
+  
 ];
 
 const serviceNames: string[] = [
@@ -41,8 +40,7 @@ const serviceNames: string[] = [
   "Things To Do",
   "Other Services"
   
-  "Other Services",
-  "Things to do"
+ 
 ];
 
 const serviceDescriptions: string[] = [
@@ -54,8 +52,9 @@ const serviceDescriptions: string[] = [
   "Reliable transportation and taxi services",
   "Telecom and communication solutions",
   "Professional cleaning and housekeeping",
-  "Various other professional services",
-  "Buythings, different adventures with special events"
+  "Buythings, different adventures with special events",
+  "Various other professional services"
+  
 ];
 
 const serviceLinks: string[] = [
@@ -66,11 +65,10 @@ const serviceLinks: string[] = [
   "Services_home/Vehicle_repair",
   "Services_home/taxi",
   "Services_home/Communi",
-  "Services_home/houes_kepping",
+  "Services_home/houes_kepping",  
+  "Services_home/Thingstodo",
   "Services_home/other",
-  "Services_home/Thingstodo"
-  "Services_home/Things_to_do",
-  "Services_home/other"
+  
   
 ];
 
