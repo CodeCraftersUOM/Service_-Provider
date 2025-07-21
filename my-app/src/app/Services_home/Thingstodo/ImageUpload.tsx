@@ -1,5 +1,6 @@
 "use client";
 
+import "./imageUpload.css"; // Assuming you have a CSS file for styles
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
@@ -13,7 +14,7 @@ export type CloudinaryUploadResult = {
   height: number;
   format: string;
   resource_type: string;
-  created_at: string; // ISO 8601 date string
+  created_at: string;
   tags: string[];
   bytes: number;
   type: string;
@@ -36,7 +37,6 @@ export default function ImageUpload({ images, onChange }: ImageUploadProps) {
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [isUploading, setIsUploading] = useState(false);
 
-  // Log incoming props on mount and whenever images change
   useEffect(() => {
     console.log("📦 Props received in ImageUpload:");
     console.log("Images:", images);
@@ -57,13 +57,13 @@ export default function ImageUpload({ images, onChange }: ImageUploadProps) {
   const uploadToCloudinary = async (file: File): Promise<ImageObject> => {
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("upload_preset", "ml_default"); // Replace with your Cloudinary upload preset
-    formData.append("cloud_name", "dejyhpa76"); // Replace with your Cloudinary cloud name
+    formData.append("upload_preset", "ml_default");
+    formData.append("cloud_name", "dejyhpa76");
 
     console.log(`🚀 Uploading file "${file.name}" to Cloudinary...`);
 
     const response = await axios.post<ImageObject>(
-      `https://api.cloudinary.com/v1_1/dejyhpa76/image/upload`, // Replace with your Cloudinary cloud name
+      `https://api.cloudinary.com/v1_1/dejyhpa76/image/upload`,
       formData,
       {
         onUploadProgress: (event) => {
@@ -71,15 +71,14 @@ export default function ImageUpload({ images, onChange }: ImageUploadProps) {
             const progress = Math.round((event.loaded * 100) / event.total);
             setUploadProgress(progress);
           } else {
-            setUploadProgress(0); // fallback if total is undefined
+            setUploadProgress(0);
           }
         },
       }
     );
 
     console.log("✅ Cloudinary upload successful:", response.data);
-
-    return response.data; // Return full Cloudinary response
+    return response.data;
   };
 
   const handleUpload = async () => {
@@ -102,7 +101,7 @@ export default function ImageUpload({ images, onChange }: ImageUploadProps) {
 
     const updatedImages = [...images, ...uploadedImages];
     console.log("📤 Updated images to send to parent:", updatedImages);
-    onChange(updatedImages); // Send updated images array to parent
+    onChange(updatedImages);
 
     setSelectedFiles([]);
     setUploadProgress(0);
@@ -118,7 +117,7 @@ export default function ImageUpload({ images, onChange }: ImageUploadProps) {
 
   return (
     <div className="image-upload">
-      <h2>Upload up to 5 Images</h2>
+      <h2 className="labelWithIcon">Upload up to 5 Images</h2>
 
       <input
         type="file"
@@ -126,48 +125,47 @@ export default function ImageUpload({ images, onChange }: ImageUploadProps) {
         accept="image/*"
         onChange={handleFileChange}
         disabled={isUploading || images.length >= 5}
+        className="file-input"
       />
 
       <button
         onClick={handleUpload}
         disabled={selectedFiles.length === 0 || isUploading}
+        className={`nextButton ${isUploading ? "uploading" : ""}`}
       >
         {isUploading ? `Uploading... ${uploadProgress}%` : "Upload"}
       </button>
 
       {uploadProgress > 0 && (
-        <div style={{ marginTop: "10px" }}>
+        <div className="progress-container">
           <div
-            style={{
-              width: `${uploadProgress}%`,
-              height: "8px",
-              backgroundColor: "green",
-            }}
+            className="progress-bar"
+            style={{ width: `${uploadProgress}%` }}
           ></div>
-          <p>{uploadProgress}%</p>
+          <p className="progress-text">{uploadProgress}%</p>
         </div>
       )}
 
-      <div className="uploaded-images" style={{ marginTop: "20px" }}>
-        <h3>Uploaded Images</h3>
-        <ul>
+      <div className="uploaded-images">
+       
+        <ul className="uploaded-list">
           {images.map((image) => (
-            <li key={image.asset_id} style={{ marginBottom: "10px" }}>
+            <li key={image.asset_id} className="uploaded-item">
               <img
                 src={image.secure_url}
                 alt={image.original_filename}
-                style={{
-                  width: "100px",
-                  height: "auto",
-                  marginRight: "10px",
-                  borderRadius: "8px",
-                }}
+                className="uploaded-image"
               />
-              <button onClick={() => handleRemoveImage(image.public_id)}>
+              <div className="image-details">
+                <p><strong>Public ID:</strong> {image.public_id}</p>
+                <p><strong>Uploaded At:</strong> {new Date(image.created_at).toLocaleString()}</p>
+              </div>
+              <button
+                onClick={() => handleRemoveImage(image.public_id)}
+                className="remove-button"
+              >
                 Remove
               </button>
-              <p>Public ID: {image.public_id}</p>
-              <p>Uploaded At: {new Date(image.created_at).toLocaleString()}</p>
             </li>
           ))}
         </ul>

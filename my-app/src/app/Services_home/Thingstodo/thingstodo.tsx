@@ -8,10 +8,13 @@ import ImageUpload, { ImageObject } from "./ImageUpload";
 import {
   User,
   Mail,
+  Bus,
+  Train,
   Phone,
   MapPin,
   Building2,
   Tag,
+  GlobeIcon,
   FileText,
   Clock,
   DollarSign,
@@ -40,6 +43,23 @@ type BaseFormData = {
   phone: string
   address: string
 }
+type LearningPointsData = {
+  title: string
+  category: string
+  subcategory: string
+  imageUrl: string
+  description: string
+  googleMapsUrl: string
+  duration: string
+  contactno: string
+  bestfor: string
+  avgprice: string
+  tourname: Record<string, any>
+  price: Record<string, any>
+  websiteUrl?: string
+  address: string
+}
+
 
 type BuyThingsData = {
   title: string
@@ -81,11 +101,58 @@ type AdventuresData = {
   websiteUrl: string
   address: string
 }
+type SpecialEventsData = {
+  title: string // Title
+  category: string // Category
+  subcategory: string // Subcategory
+  imageUrl: string // Image URL
+  description: string // Description
+  googleMapsUrl: string // Google Maps URL
+  date: string // Date
+  contactno: string // Contact Number
+  bestfor: string // Best For
+  ticketPrice: string // Ticket Price
+  dresscode: string // Dress Code
+  parking: string // Parking Details
+  address: string // Address
+  bus: boolean // Bus Available
+  taxi: boolean // Taxi Available
+  train: boolean // Train Available
+}
+type PlacesToVisitData = {
+  title: string
+  category: string
+  subcategory: string
+  imageUrl: string
+  description: string
+  googleMapsUrl: string
+  tripDuration: string
+  contactInfo: string
+  bestfor: string
+  ticketPrice: string
+  bestTimetoVisit: string // String for form input (Date ISO)
+  activities: string
+  whatToWear: string
+  whatToBring: string
+  precautions: string
+  time: string // Time in HH:MM format
+  contactno: string
+  address: string
+  bus: boolean
+  taxi: boolean
+  train: boolean
+  
+}
+
+
 
 // Combined form data type, now including the Cloudinary image result
 type RegisterPublisherFormData = BaseFormData &
   Partial<BuyThingsData> &
-  Partial<AdventuresData> & {
+  Partial<AdventuresData> & 
+  Partial<SpecialEventsData> & 
+  Partial<LearningPointsData> &
+  Partial<PlacesToVisitData> &{
     images?: CloudinaryUploadResult[] // Array of image upload results
   }
 
@@ -142,7 +209,7 @@ export default function RegisterPublisher() {
       console.log("📤 Sending form data:", dataToSend)
 
       // Use fetch API for simplicity, as the image is already uploaded to Cloudinary
-      const response = await fetch("http://localhost:2000/api/buythings", {
+      const response = await fetch(`http://localhost:2000/api/${category}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -152,7 +219,7 @@ export default function RegisterPublisher() {
 
       const result = await response.json()
 
-      if (response.ok && result.success) {
+      if (response.ok) {
         console.log("✅ Submission successful:", result.data)
         setIsSuccess(true)
         setImages([]);
@@ -200,8 +267,12 @@ export default function RegisterPublisher() {
   }
 
   const renderCategorySpecificFields = () => {
-    let fields: { label: string; name: keyof (BuyThingsData & AdventuresData); type: string; icon: React.ReactNode }[] =
-      []
+  let fields: {
+    label: string;
+    name: keyof (BuyThingsData & AdventuresData & SpecialEventsData & PlacesToVisitData & LearningPointsData);
+    type: string; 
+    icon: React.ReactNode;
+  }[] = [];
     if (category === "buythings") {
       fields = [
         { label: "Title", name: "title", type: "text", icon: <Tag className="labelIcon" /> },
@@ -234,7 +305,7 @@ export default function RegisterPublisher() {
         {
           label: "Best Time to Visit",
           name: "bestTimetoVisit",
-          type: "text",
+          type: "timerange",
           icon: <Calendar className="labelIcon" />,
         },
         { label: "Activities", name: "activities", type: "textarea", icon: <List className="labelIcon" /> },
@@ -245,7 +316,65 @@ export default function RegisterPublisher() {
         { label: "Website URL", name: "websiteUrl", type: "text", icon: <Globe className="labelIcon" /> },
         { label: "Address", name: "address", type: "text", icon: <MapPin className="labelIcon" /> },
       ]
-    }
+    } else if (category === "specialevents") {
+      fields = [
+          { label: "Title", name: "title", type: "text", icon: <Mountain className="labelIcon" /> },
+          
+          
+          
+          { label: "Description", name: "description", type: "textarea", icon: <FileText className="labelIcon" /> },
+          { label: "Google Maps URL", name: "googleMapsUrl", type: "text", icon: <Globe className="labelIcon" /> },
+          { label: "Date", name: "date", type: "date", icon: <Calendar className="labelIcon" /> },
+          { label: "Time", name: "time", type: "time", icon: <Clock className="labelIcon" /> },
+          
+          { label: "Contact Number", name: "contactno", type: "text", icon: <Phone className="labelIcon" /> },
+          { label: "Best For", name: "bestfor", type: "text", icon: <Star className="labelIcon" /> },
+          { label: "Ticket Price", name: "ticketPrice", type: "text", icon: <DollarSign className="labelIcon" /> },
+          { label: "Dress Code", name: "dresscode", type: "text", icon: <Shirt className="labelIcon" /> },
+          { label: "Parking Details", name: "parking", type: "text", icon: <Car className="labelIcon" /> },
+          { label: "Address", name: "address", type: "text", icon: <MapPin className="labelIcon" /> },
+          { label: "Bus Available", name: "bus", type: "checkbox", icon: <Bus className="labelIcon" /> },
+          { label: "Taxi Available", name: "taxi", type: "checkbox", icon: <Car className="labelIcon" /> },
+          { label: "Train Available", name: "train", type: "checkbox", icon: <Train className="labelIcon" /> },
+        ];
+      }else if (category === "placestovisit") {
+        fields = [
+        { label: "Title", name: "title", type: "text", icon: <Mountain className="labelIcon" /> },      
+       
+        { label: "Description", name: "description", type: "textarea", icon: <FileText className="labelIcon" /> },
+        { label: "Google Maps URL", name: "googleMapsUrl", type: "text", icon: <Globe className="labelIcon" /> },
+        { label: "Trip Duration", name: "tripDuration", type: "text", icon: <Timer className="labelIcon" /> },
+        { label: "Contact Info", name: "contactInfo", type: "text", icon: <Phone className="labelIcon" /> },
+        { label: "Best For", name: "bestfor", type: "text", icon: <Star className="labelIcon" /> },
+        { label: "Ticket Price", name: "ticketPrice", type: "text", icon: <DollarSign className="labelIcon" /> },
+        { label: "Best Time to Visit", name: "bestTimetoVisit", type: "timerange", icon: <Calendar className="labelIcon" /> },
+        { label: "Activities", name: "activities", type: "textarea", icon: <List className="labelIcon" /> },
+        { label: "What To Wear", name: "whatToWear", type: "textarea", icon: <Shirt className="labelIcon" /> },
+        { label: "What To Bring", name: "whatToBring", type: "textarea", icon: <Backpack className="labelIcon" /> },
+        { label: "Precautions", name: "precautions", type: "textarea", icon: <AlertTriangle className="labelIcon" /> },
+        { label: "Contact Number", name: "contactno", type: "text", icon: <Phone className="labelIcon" /> },
+        { label: "Address", name: "address", type: "text", icon: <MapPin className="labelIcon" /> },
+        { label: "Bus Available", name: "bus", type: "checkbox", icon: <Bus className="labelIcon" /> },
+        { label: "Taxi Available", name: "taxi", type: "checkbox", icon: <Car className="labelIcon" /> },
+        { label: "Train Available", name: "train", type: "checkbox", icon: <Train className="labelIcon" /> },
+       
+      ];
+      }else if (category === "learningpoints") {
+        fields = [
+          { label: "Title", name: "title", type: "text", icon: <Mountain className="labelIcon" /> },
+          { label: "Category", name: "category", type: "text", icon: <List className="labelIcon" /> },         
+          { label: "Description", name: "description", type: "textarea", icon: <FileText className="labelIcon" /> },
+          { label: "Google Maps URL", name: "googleMapsUrl", type: "text", icon: <GlobeIcon className="labelIcon" /> },
+          { label: "Duration", name: "duration", type: "text", icon: <Timer className="labelIcon" /> },
+          { label: "Contact Number", name: "contactno", type: "text", icon: <Phone className="labelIcon" /> },
+          { label: "Best For", name: "bestfor", type: "text", icon: <Star className="labelIcon" /> },
+          { label: "Average Price", name: "avgprice", type: "text", icon: <DollarSign className="labelIcon" /> },
+          { label: "Tour Name", name: "tourname", type: "object", icon: <List className="labelIcon" /> },
+          { label: "Price", name: "price", type: "object", icon: <DollarSign className="labelIcon" /> },
+          { label: "Website URL", name: "websiteUrl", type: "text", icon: <Globe className="labelIcon" /> },
+          { label: "Address", name: "address", type: "text", icon: <MapPin className="labelIcon" /> },
+        ];
+      }
     const subcategoryOptions = [
       { value: "", label: "-- Select Subcategory --" },
       { value: "supermarket", label: "Supermarket" },
@@ -273,7 +402,18 @@ export default function RegisterPublisher() {
             type="text"
             name="category"
             className="input"
-            value={category === "buythings" ? "Buy Things" : category === "adventures" ? "Adventures" : ""}
+            value={
+              category === "buythings" ? "Buy Things" 
+              : 
+              category === "adventures" ? "Adventures" 
+              : 
+              category === "placestovisit" ? "Places to Visit"
+              :
+              category === "learningpoints" ? "Learning Points"
+              :
+              category === "specialevents" ? "Special Events"
+              :
+              category === "ayurwedha" ? "Ayurwedha" : ""}
             readOnly
           />
         </div>
@@ -576,7 +716,7 @@ export default function RegisterPublisher() {
                   <option value="placestovisit">Places To Visit</option>
                   <option value="learningpoints">Learning Points</option>
                   <option value="specialevents">Special Events</option>
-                  <option value="ayurwedha">Ayurwedha</option>
+                  {/* <option value="ayurwedha">Ayurwedha</option> */}
                 </select>
               </div>
             </div>
@@ -654,19 +794,23 @@ export default function RegisterPublisher() {
           {/* Step 3: Category Specific Details */}
           {currentStep === 3 && (
             <div className="step">
-              <h2 className="stepTitle">Step 3: {categoryTitles[category] || "Category Details"}</h2>
-              {renderCategorySpecificFields()}
-              <ImageUpload
-          images={images}
-          onChange={(updatedImages) => {
-            console.log("📸 Updated images:", updatedImages);
-            setImages(updatedImages);
-          }}
-        />
+              <h2 className="stepTitle">
+                Step 3: {categoryTitles[category] || "Category Details"}
+              </h2>
 
-              {/* Moved CloudinaryImageUpload here */}
-              
+              <div className="category-fields">
+                {renderCategorySpecificFields()}
+              </div>
+
+              <ImageUpload
+                images={images}
+                onChange={(updatedImages) => {
+                  console.log("📸 Updated images:", updatedImages);
+                  setImages(updatedImages);
+                }}
+              />
             </div>
+
           )}
           {/* Navigation Buttons */}
           <div className="buttonContainer">
