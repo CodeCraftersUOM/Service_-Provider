@@ -314,18 +314,18 @@ export default function RegisterPublisher() {
         { label: "Precautions", name: "precautions", type: "textarea", icon: <AlertTriangle className="labelIcon" /> },
         { label: "Contact Number", name: "contactno", type: "text", icon: <Phone className="labelIcon" /> },
         { label: "Website URL", name: "websiteUrl", type: "text", icon: <Globe className="labelIcon" /> },
-        { label: "Address", name: "address", type: "text", icon: <MapPin className="labelIcon" /> },
+        { label: "Location", name: "address", type: "text", icon: <MapPin className="labelIcon" /> },
       ]
     } else if (category === "specialevents") {
       fields = [
           { label: "Title", name: "title", type: "text", icon: <Mountain className="labelIcon" /> },
-          
+          { label: "Location", name: "location", type: "text", icon: <MapPin className="labelIcon" /> },
           
           
           { label: "Description", name: "description", type: "textarea", icon: <FileText className="labelIcon" /> },
           { label: "Google Maps URL", name: "googleMapsUrl", type: "text", icon: <Globe className="labelIcon" /> },
-          { label: "Date", name: "date", type: "date", icon: <Calendar className="labelIcon" /> },
-          { label: "Time", name: "time", type: "time", icon: <Clock className="labelIcon" /> },
+          { label: "Date", name: "date", type: "date&time", icon: <Calendar className="labelIcon" /> },
+          
           
           { label: "Contact Number", name: "contactno", type: "text", icon: <Phone className="labelIcon" /> },
           { label: "Best For", name: "bestfor", type: "text", icon: <Star className="labelIcon" /> },
@@ -352,7 +352,7 @@ export default function RegisterPublisher() {
         { label: "What To Wear", name: "whatToWear", type: "textarea", icon: <Shirt className="labelIcon" /> },
         { label: "What To Bring", name: "whatToBring", type: "textarea", icon: <Backpack className="labelIcon" /> },
         { label: "Precautions", name: "precautions", type: "textarea", icon: <AlertTriangle className="labelIcon" /> },
-        { label: "Contact Number", name: "contactno", type: "text", icon: <Phone className="labelIcon" /> },
+        
         { label: "Address", name: "address", type: "text", icon: <MapPin className="labelIcon" /> },
         { label: "Bus Available", name: "bus", type: "checkbox", icon: <Bus className="labelIcon" /> },
         { label: "Taxi Available", name: "taxi", type: "checkbox", icon: <Car className="labelIcon" /> },
@@ -362,7 +362,7 @@ export default function RegisterPublisher() {
       }else if (category === "learningpoints") {
         fields = [
           { label: "Title", name: "title", type: "text", icon: <Mountain className="labelIcon" /> },
-          { label: "Category", name: "category", type: "text", icon: <List className="labelIcon" /> },         
+                   
           { label: "Description", name: "description", type: "textarea", icon: <FileText className="labelIcon" /> },
           { label: "Google Maps URL", name: "googleMapsUrl", type: "text", icon: <GlobeIcon className="labelIcon" /> },
           { label: "Duration", name: "duration", type: "text", icon: <Timer className="labelIcon" /> },
@@ -535,12 +535,12 @@ export default function RegisterPublisher() {
                         <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
                           <input
                             type="time"
-                            value={formData.openingHours?.split(" - ")[0] || ""}
+                            value={((formData[field.name] as string)?.split(" - ")[0]) || ""}
                             onChange={(e) => {
-                              const end = formData.openingHours?.split(" - ")[1] || ""
+                              const end = (formData[field.name] as string)?.split(" - ")[1] || ""
                               setFormData({
                                 ...formData,
-                                openingHours: `${e.target.value} - ${end}`,
+                                [field.name]: `${e.target.value} - ${end}`,
                               })
                             }}
                             required
@@ -549,19 +549,51 @@ export default function RegisterPublisher() {
                           <span style={{ color: "#1e40af", fontWeight: "500" }}>to</span>
                           <input
                             type="time"
-                            value={formData.openingHours?.split(" - ")[1] || ""}
+                            value={((formData[field.name] as string)?.split(" - ")[1]) || ""}
                             onChange={(e) => {
-                              const start = formData.openingHours?.split(" - ")[0] || ""
+                              const start = (formData[field.name] as string)?.split(" - ")[0] || ""
                               setFormData({
                                 ...formData,
-                                openingHours: `${start} - ${e.target.value}`,
+                                [field.name]: `${start} - ${e.target.value}`,
                               })
                             }}
                             required
                             className="input"
                           />
                         </div>
-                      ) : (
+
+                      ) : field.type === "date&time" ? (
+                        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                            <input
+                              type="date"
+                              value={((formData[field.name] as string)?.split(" ")[0]) || ""}
+                              onChange={(e) => {
+                                const time = (formData[field.name] as string)?.split(" ")[1] || ""
+                                setFormData({
+                                  ...formData,
+                                  [field.name]: `${e.target.value} ${time}`,
+                                })
+                              }}
+                              required
+                              className="input"
+                            />
+                            <input
+                              type="time"
+                              value={((formData[field.name] as string)?.split(" ")[1]) || ""}
+                              onChange={(e) => {
+                                const date = (formData[field.name] as string)?.split(" ")[0] || ""
+                                setFormData({
+                                  ...formData,
+                                  [field.name]: `${date} ${e.target.value}`,
+                                })
+                              }}
+                              required
+                              className="input"
+                            />
+                          </div>
+
+
+                      ) :(
                         <input
                           type={field.type}
                           name={field.name}
