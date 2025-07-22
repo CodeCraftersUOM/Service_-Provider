@@ -2,9 +2,8 @@
 import "./guide.css" // Adjusted import path
 import type React from "react"
 import { useState } from "react"
-
-import ImageUpload, { ImageObject } from "./ImageUpload";
- // Adjusted import path
+import ImageUpload, { type ImageObject } from "./ImageUpload" // Adjusted import path
+import { useFormValidation } from "./use-form-validation"
 import {
   User,
   Mail,
@@ -33,6 +32,7 @@ import {
   Shirt,
   Backpack,
   AlertTriangle,
+  AlertCircle,
 } from "lucide-react"
 import type { CloudinaryUploadResult } from "./cloudinary" // Corrected import
 
@@ -43,6 +43,7 @@ type BaseFormData = {
   phone: string
   address: string
 }
+
 type LearningPointsData = {
   title: string
   category: string
@@ -51,7 +52,6 @@ type LearningPointsData = {
   description: string
   googleMapsUrl: string
   duration: string
-  contactno: string
   bestfor: string
   avgprice: string
   tourname: Record<string, any>
@@ -59,7 +59,6 @@ type LearningPointsData = {
   websiteUrl?: string
   address: string
 }
-
 
 type BuyThingsData = {
   title: string
@@ -75,7 +74,6 @@ type BuyThingsData = {
   isCash: boolean
   isQRScan: boolean
   isParking: string
-  contactno: string
   websiteUrl: string
   wifi: string
   washrooms: string
@@ -97,10 +95,10 @@ type AdventuresData = {
   whatToWear: string
   whatToBring: string
   precautions: string
-  contactno: string
   websiteUrl: string
   address: string
 }
+
 type SpecialEventsData = {
   title: string // Title
   category: string // Category
@@ -109,7 +107,6 @@ type SpecialEventsData = {
   description: string // Description
   googleMapsUrl: string // Google Maps URL
   date: string // Date
-  contactno: string // Contact Number
   bestfor: string // Best For
   ticketPrice: string // Ticket Price
   dresscode: string // Dress Code
@@ -119,6 +116,7 @@ type SpecialEventsData = {
   taxi: boolean // Taxi Available
   train: boolean // Train Available
 }
+
 type PlacesToVisitData = {
   title: string
   category: string
@@ -136,25 +134,39 @@ type PlacesToVisitData = {
   whatToBring: string
   precautions: string
   time: string // Time in HH:MM format
-  contactno: string
   address: string
   bus: boolean
   taxi: boolean
   train: boolean
-  
 }
-
-
 
 // Combined form data type, now including the Cloudinary image result
 type RegisterPublisherFormData = BaseFormData &
   Partial<BuyThingsData> &
-  Partial<AdventuresData> & 
-  Partial<SpecialEventsData> & 
+  Partial<AdventuresData> &
+  Partial<SpecialEventsData> &
   Partial<LearningPointsData> &
-  Partial<PlacesToVisitData> &{
+  Partial<PlacesToVisitData> & {
     images?: CloudinaryUploadResult[] // Array of image upload results
+    submittedImageCount?: number
+    submittedImages?: ImageObject[]
   }
+
+// Error display component
+const FieldError: React.FC<{ errors?: string[] }> = ({ errors }) => {
+  if (!errors || errors.length === 0) return null
+
+  return (
+    <div className="field-error">
+      <AlertCircle size={16} />
+      <div>
+        {errors.map((error, index) => (
+          <div key={index}>{error}</div>
+        ))}
+      </div>
+    </div>
+  )
+}
 
 export default function RegisterPublisher() {
   const [category, setCategory] = useState<string>("")
@@ -162,18 +174,32 @@ export default function RegisterPublisher() {
   const [isSuccess, setIsSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState("")
-  // Removed uploadProgress as Cloudinary widget handles its own progress
-
+  // Add this state variable near the top with other state declarations
+  const [submittedImageCount, setSubmittedImageCount] = useState(0)
+  const [submittedImages, setSubmittedImages] = useState<ImageObject[]>([])
+  // Initialize form data with proper boolean defaults
   const [formData, setFormData] = useState<RegisterPublisherFormData>({
     name: "",
     email: "",
     phone: "",
     address: "",
-    images: [], // Initialize image as undefined
+    images: [],
+    // Initialize boolean fields
+    isCard: false,
+    isCash: false,
+    isQRScan: false,
+    bus: false,
+    taxi: false,
+    train: false,
   })
+
+  // Add validation hook
+  const { errors, validateStepData, markFieldAsTouched, clearErrors, getFieldError, hasErrors, debugErrors } =
+    useFormValidation()
 
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setCategory(e.target.value)
+    clearErrors()
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -183,27 +209,64 @@ export default function RegisterPublisher() {
       ...formData,
       [name]: type === "checkbox" ? checked : value,
     })
+    // Mark field as touched for validation
+    markFieldAsTouched(name)
+  }
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    markFieldAsTouched(e.target.name)
   }
 
   // New handler for Cloudinary image upload success
-  const [images, setImages] = useState<ImageObject[]>([]);
+  const [images, setImages] = useState<ImageObject[]>([])
 
   // Function to handle image changes from ImageUpload component
   const handleImagesChange = (updatedImages: ImageObject[]) => {
-    setImages(updatedImages);
-  };
+    setImages(updatedImages)
+  }
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+
+    // Debug current state
+    console.log("=== FORM SUBMISSION DEBUG ===")
+    console.log("Current form data:", formData)
+    console.log("Current category:", category)
+    debugErrors()
+
+    // Final validation with processed data
+    const processedFormData = {
+      ...formData,
+      // Ensure boolean fields are properly set
+      isCard: formData.isCard || false,
+      isCash: formData.isCash || false,
+      isQRScan: formData.isQRScan || false,
+      bus: formData.bus || false,
+      taxi: formData.taxi || false,
+      train: formData.train || false,
+    }
+
+    const isValid = validateStepData(3, category, processedFormData)
+    console.log("Validation result:", isValid)
+
+    if (!isValid) {
+      setMessage("Please fix the validation errors before submitting.")
+      return
+    }
+
     setLoading(true)
     setMessage("")
-    // Removed setUploadProgress(0)
 
     try {
+      // Store image count and data before clearing
+      const currentImageCount = images.length
+      const currentImages = [...images]
+
       // Prepare data to send to your backend
       const dataToSend = {
-        ...formData,
+        ...processedFormData,
         category: category, // Ensure category is included
-        images // Send the array of Cloudinary image results
+        images, // Send the array of Cloudinary image results
       }
 
       console.log("📤 Sending form data:", dataToSend)
@@ -221,8 +284,13 @@ export default function RegisterPublisher() {
 
       if (response.ok) {
         console.log("✅ Submission successful:", result.data)
+
+        // Store the submitted data for success display BEFORE clearing images
+        setSubmittedImageCount(currentImageCount)
+        setSubmittedImages(currentImages)
+
         setIsSuccess(true)
-        setImages([]);
+        setImages([])
       } else {
         setMessage(`Failed to submit the form: ${result.message || "Unknown error"}`)
       }
@@ -239,16 +307,23 @@ export default function RegisterPublisher() {
       }
     } finally {
       setLoading(false)
-      // Removed setUploadProgress(0)
     }
   }
 
   const nextStep = () => {
-    if (currentStep < 3) setCurrentStep(currentStep + 1)
+    // Validate current step before proceeding
+    const isValid = validateStepData(currentStep, category, { ...formData, category })
+
+    if (isValid && currentStep < 3) {
+      setCurrentStep(currentStep + 1)
+    }
   }
 
   const prevStep = () => {
-    if (currentStep > 1) setCurrentStep(currentStep - 1)
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1)
+      clearErrors()
+    }
   }
 
   const resetForm = () => {
@@ -256,27 +331,38 @@ export default function RegisterPublisher() {
     setCurrentStep(1)
     setCategory("")
     setMessage("")
-    // Removed setUploadProgress(0)
+    clearErrors()
+    setSubmittedImageCount(0)
+    setSubmittedImages([])
     setFormData({
       name: "",
       email: "",
       phone: "",
       address: "",
-      images: [], // Reset image
+      images: [],
+      // Reset boolean fields
+      isCard: false,
+      isCash: false,
+      isQRScan: false,
+      bus: false,
+      taxi: false,
+      train: false,
     })
+    setImages([])
   }
 
+  // Rest of your component remains the same...
   const renderCategorySpecificFields = () => {
-  let fields: {
-    label: string;
-    name: keyof (BuyThingsData & AdventuresData & SpecialEventsData & PlacesToVisitData & LearningPointsData);
-    type: string; 
-    icon: React.ReactNode;
-  }[] = [];
+    let fields: {
+      label: string
+      name: keyof (BuyThingsData & AdventuresData & SpecialEventsData & PlacesToVisitData & LearningPointsData)
+      type: string
+      icon: React.ReactNode
+    }[] = []
+
     if (category === "buythings") {
       fields = [
         { label: "Title", name: "title", type: "text", icon: <Tag className="labelIcon" /> },
-        { label: "Subcategory", name: "subcategory", type: "select", icon: <List className="labelIcon" /> },
         { label: "Description", name: "description", type: "textarea", icon: <FileText className="labelIcon" /> },
         { label: "Location", name: "location", type: "text", icon: <MapPin className="labelIcon" /> },
         { label: "Google Maps URL", name: "googleMapsUrl", type: "text", icon: <Globe className="labelIcon" /> },
@@ -287,7 +373,6 @@ export default function RegisterPublisher() {
         { label: "Accepts Cash?", name: "isCash", type: "checkbox", icon: <Banknote className="labelIcon" /> },
         { label: "Accepts QR Scan?", name: "isQRScan", type: "checkbox", icon: <QrCode className="labelIcon" /> },
         { label: "Parking", name: "isParking", type: "dropdown", icon: <Car className="labelIcon" /> },
-        { label: "Contact Number", name: "contactno", type: "text", icon: <Phone className="labelIcon" /> },
         { label: "Website URL", name: "websiteUrl", type: "text", icon: <Globe className="labelIcon" /> },
         { label: "WiFi", name: "wifi", type: "dropdown", icon: <Wifi className="labelIcon" /> },
         { label: "Washrooms", name: "washrooms", type: "dropdown", icon: <Building2 className="labelIcon" /> },
@@ -312,85 +397,68 @@ export default function RegisterPublisher() {
         { label: "What To Wear", name: "whatToWear", type: "textarea", icon: <Shirt className="labelIcon" /> },
         { label: "What To Bring", name: "whatToBring", type: "textarea", icon: <Backpack className="labelIcon" /> },
         { label: "Precautions", name: "precautions", type: "textarea", icon: <AlertTriangle className="labelIcon" /> },
-        { label: "Contact Number", name: "contactno", type: "text", icon: <Phone className="labelIcon" /> },
         { label: "Website URL", name: "websiteUrl", type: "text", icon: <Globe className="labelIcon" /> },
         { label: "Location", name: "address", type: "text", icon: <MapPin className="labelIcon" /> },
       ]
     } else if (category === "specialevents") {
       fields = [
-          { label: "Title", name: "title", type: "text", icon: <Mountain className="labelIcon" /> },
-          { label: "Location", name: "location", type: "text", icon: <MapPin className="labelIcon" /> },
-          
-          
-          { label: "Description", name: "description", type: "textarea", icon: <FileText className="labelIcon" /> },
-          { label: "Google Maps URL", name: "googleMapsUrl", type: "text", icon: <Globe className="labelIcon" /> },
-          { label: "Date", name: "date", type: "date&time", icon: <Calendar className="labelIcon" /> },
-          
-          
-          { label: "Contact Number", name: "contactno", type: "text", icon: <Phone className="labelIcon" /> },
-          { label: "Best For", name: "bestfor", type: "text", icon: <Star className="labelIcon" /> },
-          { label: "Ticket Price", name: "ticketPrice", type: "text", icon: <DollarSign className="labelIcon" /> },
-          { label: "Dress Code", name: "dresscode", type: "text", icon: <Shirt className="labelIcon" /> },
-          { label: "Parking Details", name: "parking", type: "text", icon: <Car className="labelIcon" /> },
-          { label: "Address", name: "address", type: "text", icon: <MapPin className="labelIcon" /> },
-          { label: "Bus Available", name: "bus", type: "checkbox", icon: <Bus className="labelIcon" /> },
-          { label: "Taxi Available", name: "taxi", type: "checkbox", icon: <Car className="labelIcon" /> },
-          { label: "Train Available", name: "train", type: "checkbox", icon: <Train className="labelIcon" /> },
-        ];
-      }else if (category === "placestovisit") {
-        fields = [
-        { label: "Title", name: "title", type: "text", icon: <Mountain className="labelIcon" /> },      
-       
+        { label: "Title", name: "title", type: "text", icon: <Mountain className="labelIcon" /> },
+        { label: "Location", name: "location", type: "text", icon: <MapPin className="labelIcon" /> },
+        { label: "Description", name: "description", type: "textarea", icon: <FileText className="labelIcon" /> },
+        { label: "Google Maps URL", name: "googleMapsUrl", type: "text", icon: <Globe className="labelIcon" /> },
+        { label: "Date", name: "date", type: "date&time", icon: <Calendar className="labelIcon" /> },
+        { label: "Best For", name: "bestfor", type: "text", icon: <Star className="labelIcon" /> },
+        { label: "Ticket Price", name: "ticketPrice", type: "text", icon: <DollarSign className="labelIcon" /> },
+        { label: "Dress Code", name: "dresscode", type: "text", icon: <Shirt className="labelIcon" /> },
+        { label: "Parking Details", name: "parking", type: "text", icon: <Car className="labelIcon" /> },
+        { label: "Address", name: "address", type: "text", icon: <MapPin className="labelIcon" /> },
+        { label: "Bus Available", name: "bus", type: "checkbox", icon: <Bus className="labelIcon" /> },
+        { label: "Taxi Available", name: "taxi", type: "checkbox", icon: <Car className="labelIcon" /> },
+        { label: "Train Available", name: "train", type: "checkbox", icon: <Train className="labelIcon" /> },
+      ]
+    } else if (category === "placestovisit") {
+      fields = [
+        { label: "Title", name: "title", type: "text", icon: <Mountain className="labelIcon" /> },
         { label: "Description", name: "description", type: "textarea", icon: <FileText className="labelIcon" /> },
         { label: "Google Maps URL", name: "googleMapsUrl", type: "text", icon: <Globe className="labelIcon" /> },
         { label: "Trip Duration", name: "tripDuration", type: "text", icon: <Timer className="labelIcon" /> },
         { label: "Contact Info", name: "contactInfo", type: "text", icon: <Phone className="labelIcon" /> },
         { label: "Best For", name: "bestfor", type: "text", icon: <Star className="labelIcon" /> },
         { label: "Ticket Price", name: "ticketPrice", type: "text", icon: <DollarSign className="labelIcon" /> },
-        { label: "Best Time to Visit", name: "bestTimetoVisit", type: "timerange", icon: <Calendar className="labelIcon" /> },
+        {
+          label: "Best Time to Visit",
+          name: "bestTimetoVisit",
+          type: "timerange",
+          icon: <Calendar className="labelIcon" />,
+        },
         { label: "Activities", name: "activities", type: "textarea", icon: <List className="labelIcon" /> },
         { label: "What To Wear", name: "whatToWear", type: "textarea", icon: <Shirt className="labelIcon" /> },
         { label: "What To Bring", name: "whatToBring", type: "textarea", icon: <Backpack className="labelIcon" /> },
         { label: "Precautions", name: "precautions", type: "textarea", icon: <AlertTriangle className="labelIcon" /> },
-        
         { label: "Address", name: "address", type: "text", icon: <MapPin className="labelIcon" /> },
         { label: "Bus Available", name: "bus", type: "checkbox", icon: <Bus className="labelIcon" /> },
         { label: "Taxi Available", name: "taxi", type: "checkbox", icon: <Car className="labelIcon" /> },
         { label: "Train Available", name: "train", type: "checkbox", icon: <Train className="labelIcon" /> },
-       
-      ];
-      }else if (category === "learningpoints") {
-        fields = [
-          { label: "Title", name: "title", type: "text", icon: <Mountain className="labelIcon" /> },
-                   
-          { label: "Description", name: "description", type: "textarea", icon: <FileText className="labelIcon" /> },
-          { label: "Google Maps URL", name: "googleMapsUrl", type: "text", icon: <GlobeIcon className="labelIcon" /> },
-          { label: "Duration", name: "duration", type: "text", icon: <Timer className="labelIcon" /> },
-          { label: "Contact Number", name: "contactno", type: "text", icon: <Phone className="labelIcon" /> },
-          { label: "Best For", name: "bestfor", type: "text", icon: <Star className="labelIcon" /> },
-          { label: "Average Price", name: "avgprice", type: "text", icon: <DollarSign className="labelIcon" /> },
-          { label: "Tour Name", name: "tourname", type: "object", icon: <List className="labelIcon" /> },
-          { label: "Price", name: "price", type: "object", icon: <DollarSign className="labelIcon" /> },
-          { label: "Website URL", name: "websiteUrl", type: "text", icon: <Globe className="labelIcon" /> },
-          { label: "Address", name: "address", type: "text", icon: <MapPin className="labelIcon" /> },
-        ];
-      }
-    const subcategoryOptions = [
-      { value: "", label: "-- Select Subcategory --" },
-      { value: "supermarket", label: "Supermarket" },
-      { value: "cafe", label: "Cafe" },
-      { value: "restaurant", label: "Restaurant" },
-      { value: "grocery", label: "Grocery Store" },
-      { value: "bakery", label: "Bakery" },
-      { value: "pharmacy", label: "Pharmacy" },
-      { value: "clothing", label: "Clothing Store" },
-      { value: "electronics", label: "Electronics Store" },
-    ]
+      ]
+    } else if (category === "learningpoints") {
+      fields = [
+        { label: "Title", name: "title", type: "text", icon: <Mountain className="labelIcon" /> },
+        { label: "Description", name: "description", type: "textarea", icon: <FileText className="labelIcon" /> },
+        { label: "Google Maps URL", name: "googleMapsUrl", type: "text", icon: <GlobeIcon className="labelIcon" /> },
+        { label: "Duration", name: "duration", type: "text", icon: <Timer className="labelIcon" /> },
+        { label: "Best For", name: "bestfor", type: "text", icon: <Star className="labelIcon" /> },
+        { label: "Average Price", name: "avgprice", type: "text", icon: <DollarSign className="labelIcon" /> },
+        { label: "Website URL", name: "websiteUrl", type: "text", icon: <Globe className="labelIcon" /> },
+        { label: "Address", name: "address", type: "text", icon: <MapPin className="labelIcon" /> },
+      ]
+    }
+
     const dropdownOptions = [
       { value: "", label: "-- Select--" },
       { value: "yes", label: "Yes" },
       { value: "no", label: "No" },
     ]
+
     return (
       <>
         <div className="field">
@@ -403,17 +471,20 @@ export default function RegisterPublisher() {
             name="category"
             className="input"
             value={
-              category === "buythings" ? "Buy Things" 
-              : 
-              category === "adventures" ? "Adventures" 
-              : 
-              category === "placestovisit" ? "Places to Visit"
-              :
-              category === "learningpoints" ? "Learning Points"
-              :
-              category === "specialevents" ? "Special Events"
-              :
-              category === "ayurwedha" ? "Ayurwedha" : ""}
+              category === "buythings"
+                ? "Buy Things"
+                : category === "adventures"
+                  ? "Adventures"
+                  : category === "placestovisit"
+                    ? "Places to Visit"
+                    : category === "learningpoints"
+                      ? "Learning Points"
+                      : category === "specialevents"
+                        ? "Special Events"
+                        : category === "ayurwedha"
+                          ? "Ayurwedha"
+                          : ""
+            }
             readOnly
           />
         </div>
@@ -434,54 +505,50 @@ export default function RegisterPublisher() {
             </ul>
           </div>
         )}
+
         {/* Rest of the fields */}
         <div className="row">
-          {fields.slice(0, 2).map((field, index) => (
-            <div className="field" key={index}>
-              <div className="labelWithIcon">
-                {field.icon}
-                <span>{field.label}*</span>
+          {fields.slice(0, 2).map((field, index) => {
+            const fieldErrors = getFieldError(field.name)
+            const hasError = fieldErrors && fieldErrors.length > 0
+
+            return (
+              <div className="field" key={index}>
+                <div className="labelWithIcon">
+                  {field.icon}
+                  <span>{field.label}*</span>
+                </div>
+                {field.type === "textarea" ? (
+                  <>
+                    <textarea
+                      name={field.name}
+                      value={(formData[field.name] as string) || ""}
+                      onChange={handleInputChange}
+                      onBlur={handleBlur}
+                      required
+                      className={`textarea ${hasError ? "error" : ""}`}
+                      rows={3}
+                    />
+                    <FieldError errors={fieldErrors} />
+                  </>
+                ) : (
+                  <>
+                    <input
+                      type={field.type}
+                      name={field.name}
+                      value={(formData[field.name] as string) || ""}
+                      onChange={handleInputChange}
+                      onBlur={handleBlur}
+                      className={`input ${hasError ? "error" : ""}`}
+                    />
+                    <FieldError errors={fieldErrors} />
+                  </>
+                )}
               </div>
-              {field.type === "textarea" ? (
-                <textarea
-                  name={field.name}
-                  value={(formData[field.name] as string) || ""}
-                  onChange={handleInputChange}
-                  required
-                  className="textarea"
-                  rows={3}
-                />
-              ) : field.label === "Subcategory" ? (
-                <select
-                  name={field.name}
-                  value={(formData[field.name] as string) || ""}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      [field.name]: e.target.value,
-                    })
-                  }
-                  className="select"
-                  required
-                >
-                  {subcategoryOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              ) : (
-                <input
-                  type={field.type}
-                  name={field.name}
-                  value={(formData[field.name] as string) || ""}
-                  onChange={handleInputChange}
-                  className="input"
-                />
-              )}
-            </div>
-          ))}
+            )
+          })}
         </div>
+
         {/* Remaining fields in rows of two */}
         {(() => {
           const rows = []
@@ -497,6 +564,9 @@ export default function RegisterPublisher() {
               <div className="row" key={idx}>
                 {[firstField, secondField].map((field, i) => {
                   if (!field) return null
+                  const fieldErrors = getFieldError(field.name)
+                  const hasError = fieldErrors && fieldErrors.length > 0
+
                   return (
                     <div className="field" key={field.name}>
                       <div className="labelWithIcon">
@@ -504,103 +574,122 @@ export default function RegisterPublisher() {
                         <span>{field.label}*</span>
                       </div>
                       {field.type === "textarea" ? (
-                        <textarea
-                          name={field.name}
-                          value={(formData[field.name] as string) || ""}
-                          onChange={handleInputChange}
-                          required
-                          className="textarea"
-                          rows={3}
-                        />
+                        <>
+                          <textarea
+                            name={field.name}
+                            value={(formData[field.name] as string) || ""}
+                            onChange={handleInputChange}
+                            onBlur={handleBlur}
+                            required
+                            className={`textarea ${hasError ? "error" : ""}`}
+                            rows={3}
+                          />
+                          <FieldError errors={fieldErrors} />
+                        </>
                       ) : field.type === "dropdown" ? (
-                        <select
-                          name={field.name}
-                          value={(formData[field.name] as string) || ""}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              [field.name]: e.target.value,
-                            })
-                          }
-                          className="select"
-                          required
-                        >
-                          {dropdownOptions.map((option) => (
-                            <option key={option.value} value={option.value}>
-                              {option.label}
-                            </option>
-                          ))}
-                        </select>
+                        <>
+                          <select
+                            name={field.name}
+                            value={(formData[field.name] as string) || ""}
+                            onChange={(e) => {
+                              setFormData({
+                                ...formData,
+                                [field.name]: e.target.value,
+                              })
+                              markFieldAsTouched(field.name)
+                            }}
+                            className={`select ${hasError ? "error" : ""}`}
+                            required
+                          >
+                            {dropdownOptions.map((option) => (
+                              <option key={option.value} value={option.value}>
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
+                          <FieldError errors={fieldErrors} />
+                        </>
                       ) : field.type === "timerange" ? (
-                        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-                          <input
-                            type="time"
-                            value={((formData[field.name] as string)?.split(" - ")[0]) || ""}
-                            onChange={(e) => {
-                              const end = (formData[field.name] as string)?.split(" - ")[1] || ""
-                              setFormData({
-                                ...formData,
-                                [field.name]: `${e.target.value} - ${end}`,
-                              })
-                            }}
-                            required
-                            className="input"
-                          />
-                          <span style={{ color: "#1e40af", fontWeight: "500" }}>to</span>
-                          <input
-                            type="time"
-                            value={((formData[field.name] as string)?.split(" - ")[1]) || ""}
-                            onChange={(e) => {
-                              const start = (formData[field.name] as string)?.split(" - ")[0] || ""
-                              setFormData({
-                                ...formData,
-                                [field.name]: `${start} - ${e.target.value}`,
-                              })
-                            }}
-                            required
-                            className="input"
-                          />
-                        </div>
-
+                        <>
+                          <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                            <input
+                              type="time"
+                              value={(formData[field.name] as string)?.split(" - ")[0] || ""}
+                              onChange={(e) => {
+                                const end = (formData[field.name] as string)?.split(" - ")[1] || ""
+                                setFormData({
+                                  ...formData,
+                                  [field.name]: `${e.target.value} - ${end}`,
+                                })
+                                markFieldAsTouched(field.name)
+                              }}
+                              required
+                              className={`input ${hasError ? "error" : ""}`}
+                            />
+                            <span style={{ color: "#1e40af", fontWeight: "500" }}>to</span>
+                            <input
+                              type="time"
+                              value={(formData[field.name] as string)?.split(" - ")[1] || ""}
+                              onChange={(e) => {
+                                const start = (formData[field.name] as string)?.split(" - ")[0] || ""
+                                setFormData({
+                                  ...formData,
+                                  [field.name]: `${start} - ${e.target.value}`,
+                                })
+                                markFieldAsTouched(field.name)
+                              }}
+                              required
+                              className={`input ${hasError ? "error" : ""}`}
+                            />
+                          </div>
+                          <FieldError errors={fieldErrors} />
+                        </>
                       ) : field.type === "date&time" ? (
-                        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                        <>
+                          <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
                             <input
                               type="date"
-                              value={((formData[field.name] as string)?.split(" ")[0]) || ""}
+                              value={(formData[field.name] as string)?.split(" ")[0] || ""}
                               onChange={(e) => {
                                 const time = (formData[field.name] as string)?.split(" ")[1] || ""
                                 setFormData({
                                   ...formData,
                                   [field.name]: `${e.target.value} ${time}`,
                                 })
+                                markFieldAsTouched(field.name)
                               }}
                               required
-                              className="input"
+                              className={`input ${hasError ? "error" : ""}`}
                             />
                             <input
                               type="time"
-                              value={((formData[field.name] as string)?.split(" ")[1]) || ""}
+                              value={(formData[field.name] as string)?.split(" ")[1] || ""}
                               onChange={(e) => {
                                 const date = (formData[field.name] as string)?.split(" ")[0] || ""
                                 setFormData({
                                   ...formData,
                                   [field.name]: `${date} ${e.target.value}`,
                                 })
+                                markFieldAsTouched(field.name)
                               }}
                               required
-                              className="input"
+                              className={`input ${hasError ? "error" : ""}`}
                             />
                           </div>
-
-
-                      ) :(
-                        <input
-                          type={field.type}
-                          name={field.name}
-                          value={(formData[field.name] as string) || ""}
-                          onChange={handleInputChange}
-                          className="input"
-                        />
+                          <FieldError errors={fieldErrors} />
+                        </>
+                      ) : (
+                        <>
+                          <input
+                            type={field.type}
+                            name={field.name}
+                            value={(formData[field.name] as string) || ""}
+                            onChange={handleInputChange}
+                            onBlur={handleBlur}
+                            className={`input ${hasError ? "error" : ""}`}
+                          />
+                          <FieldError errors={fieldErrors} />
+                        </>
                       )}
                     </div>
                   )
@@ -611,6 +700,7 @@ export default function RegisterPublisher() {
           }
           return rows
         })()}
+
         {/* Payment Methods Section */}
         {category === "buythings" && (
           <div className="field">
@@ -639,6 +729,39 @@ export default function RegisterPublisher() {
                 )
               })}
             </div>
+            <FieldError errors={getFieldError("paymentMethods")} />
+          </div>
+        )}
+
+        {/* Transportation Methods Section for Special Events and Places to Visit */}
+        {(category === "specialevents" || category === "placestovisit") && (
+          <div className="field">
+            <div className="labelWithIcon" style={{ marginBottom: "1rem", fontSize: "1.2rem" }}>
+              <Bus className="labelIcon" />
+              <span>Transportation Methods</span>
+            </div>
+            <div className="checkboxRow">
+              {["bus", "taxi", "train"].map((name) => {
+                const field = fields.find((f) => f.name === name)
+                if (!field) return null
+                return (
+                  <div className="checkboxLabel" key={field.name}>
+                    <input
+                      type="checkbox"
+                      name={field.name}
+                      checked={!!formData[field.name]}
+                      onChange={handleInputChange}
+                      className="checkbox"
+                    />
+                    <div className="labelWithIcon" style={{ margin: 0 }}>
+                      {field.icon}
+                      <span>{field.label}</span>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+            <FieldError errors={getFieldError("transportation")} />
           </div>
         )}
       </>
@@ -655,6 +778,9 @@ export default function RegisterPublisher() {
     ayurwedha: "Ayurwedha Details",
   }
 
+  const isSubmitDisabled = loading || hasErrors
+  console.log("Submit button disabled:", isSubmitDisabled, "Loading:", loading, "Has errors:", hasErrors)
+
   if (isSuccess) {
     return (
       <div className="container">
@@ -668,7 +794,7 @@ export default function RegisterPublisher() {
           <h1 className="successTitle">Publisher Successfully Registered!</h1>
           <p className="successMessage">
             Congratulations! <strong>{formData.name}</strong> has been successfully registered as a publisher for{" "}
-            <strong>{category}</strong> with {formData.images?.length || 0} image(s) uploaded.
+            <strong>{category}</strong> with {submittedImageCount} image(s) uploaded.
           </p>
           <div className="successDetails">
             <p>
@@ -683,14 +809,14 @@ export default function RegisterPublisher() {
             <p>
               <strong>Phone:</strong> {formData.phone}
             </p>
-            {formData.images && formData.images.length > 0 && (
+            {submittedImages && submittedImages.length > 0 && (
               <p>
-                <strong>Images Uploaded:</strong> {formData.images.length}
-                {formData.images.map((img, idx) => (
+                <strong>Images Uploaded:</strong> {submittedImages.length}
+                {submittedImages.map((img, idx) => (
                   <span key={img.public_id || idx}>
                     {" "}
                     (
-                    <a href={img.secure_url} target="_blank" rel="noopener noreferrer">
+                    <a href={img.url || img.secure_url} target="_blank" rel="noopener noreferrer">
                       {idx + 1}
                     </a>
                     )
@@ -724,13 +850,15 @@ export default function RegisterPublisher() {
             ))}
           </div>
         </div>
+
         <h1 className="title">Register Publisher</h1>
+
         {message && (
           <div className={`message ${message.includes("Error") || message.includes("Failed") ? "error" : "warning"}`}>
             {message}
           </div>
         )}
-        {/* Removed Upload Progress as it's handled by Cloudinary widget */}
+
         <form onSubmit={handleSubmit} className="form">
           {/* Step 1: Select Category */}
           {currentStep === 1 && (
@@ -741,18 +869,25 @@ export default function RegisterPublisher() {
                   <Building2 className="labelIcon" />
                   <span>Select Category *</span>
                 </div>
-                <select name="category" value={category} onChange={handleCategoryChange} className="select" required>
+                <select
+                  name="category"
+                  value={category}
+                  onChange={handleCategoryChange}
+                  className={`select ${getFieldError("category") ? "error" : ""}`}
+                  required
+                >
                   <option value="">-- Select a Category --</option>
                   <option value="buythings">Buy Things</option>
                   <option value="adventures">Adventures</option>
                   <option value="placestovisit">Places To Visit</option>
                   <option value="learningpoints">Learning Points</option>
                   <option value="specialevents">Special Events</option>
-                  {/* <option value="ayurwedha">Ayurwedha</option> */}
                 </select>
+                <FieldError errors={getFieldError("category")} />
               </div>
             </div>
           )}
+
           {/* Step 2: Publisher Details */}
           {currentStep === 2 && (
             <div className="step">
@@ -768,10 +903,12 @@ export default function RegisterPublisher() {
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
+                    onBlur={handleBlur}
                     required
-                    className="input"
+                    className={`input ${getFieldError("name") ? "error" : ""}`}
                     placeholder="Enter publisher name"
                   />
+                  <FieldError errors={getFieldError("name")} />
                 </div>
                 <div className="field">
                   <div className="labelWithIcon">
@@ -783,10 +920,12 @@ export default function RegisterPublisher() {
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
+                    onBlur={handleBlur}
                     required
-                    className="input"
+                    className={`input ${getFieldError("email") ? "error" : ""}`}
                     placeholder="Enter email address"
                   />
+                  <FieldError errors={getFieldError("email")} />
                 </div>
               </div>
               <div className="row">
@@ -800,10 +939,12 @@ export default function RegisterPublisher() {
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
+                    onBlur={handleBlur}
                     required
-                    className="input"
+                    className={`input ${getFieldError("phone") ? "error" : ""}`}
                     placeholder="Enter phone number"
                   />
+                  <FieldError errors={getFieldError("phone")} />
                 </div>
                 <div className="field">
                   <div className="labelWithIcon">
@@ -814,36 +955,33 @@ export default function RegisterPublisher() {
                     name="address"
                     value={formData.address}
                     onChange={handleInputChange}
+                    onBlur={handleBlur}
                     rows={3}
                     required
-                    className="textarea"
+                    className={`textarea ${getFieldError("address") ? "error" : ""}`}
                     placeholder="Enter address"
                   />
+                  <FieldError errors={getFieldError("address")} />
                 </div>
               </div>
             </div>
           )}
+
           {/* Step 3: Category Specific Details */}
           {currentStep === 3 && (
             <div className="step">
-              <h2 className="stepTitle">
-                Step 3: {categoryTitles[category] || "Category Details"}
-              </h2>
-
-              <div className="category-fields">
-                {renderCategorySpecificFields()}
-              </div>
-
+              <h2 className="stepTitle">Step 3: {categoryTitles[category] || "Category Details"}</h2>
+              <div className="category-fields">{renderCategorySpecificFields()}</div>
               <ImageUpload
                 images={images}
                 onChange={(updatedImages) => {
-                  console.log("📸 Updated images:", updatedImages);
-                  setImages(updatedImages);
+                  console.log("📸 Updated images:", updatedImages)
+                  setImages(updatedImages)
                 }}
               />
             </div>
-
           )}
+
           {/* Navigation Buttons */}
           <div className="buttonContainer">
             {currentStep > 1 && (
@@ -852,7 +990,7 @@ export default function RegisterPublisher() {
               </button>
             )}
             {currentStep < 3 ? (
-              <button type="button" onClick={nextStep} className="nextButton">
+              <button type="button" onClick={nextStep} className="nextButton" disabled={currentStep === 1 && !category}>
                 Next
               </button>
             ) : (
