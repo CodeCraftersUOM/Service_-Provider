@@ -110,7 +110,7 @@ type SpecialEventsData = {
   bestfor: string // Best For
   ticketPrice: string // Ticket Price
   dresscode: string // Dress Code
-  parking: string // Parking Details
+  isParking: string // Parking Details
   address: string // Address
   bus: boolean // Bus Available
   taxi: boolean // Taxi Available
@@ -185,17 +185,39 @@ export default function RegisterPublisher() {
     address: "",
     images: [],
     // Initialize boolean fields
-    isCard: false,
     isCash: false,
     isQRScan: false,
     bus: false,
     taxi: false,
     train: false,
+    isCard: false,
   })
 
   // Add validation hook
   const { errors, validateStepData, markFieldAsTouched, clearErrors, getFieldError, hasErrors, debugErrors } =
     useFormValidation()
+
+  // Add this function to convert 24-hour time to 12-hour format
+  const convertTo12HourFormat = (time24: string) => {
+    if (!time24) return ""
+
+    const [hours, minutes] = time24.split(":")
+    const hour = Number.parseInt(hours)
+    const ampm = hour >= 12 ? "PM" : "AM"
+    const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour
+
+    return `${hour12}:${minutes} ${ampm}`
+  }
+
+  const convertTimeRangeToString = (timeRange: string) => {
+    if (!timeRange || !timeRange.includes(" - ")) return timeRange
+
+    const [startTime, endTime] = timeRange.split(" - ")
+    const startTime12 = convertTo12HourFormat(startTime)
+    const endTime12 = convertTo12HourFormat(endTime)
+
+    return `${startTime12} - ${endTime12}`
+  }
 
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setCategory(e.target.value)
@@ -237,6 +259,11 @@ export default function RegisterPublisher() {
     // Final validation with processed data
     const processedFormData = {
       ...formData,
+      // Convert timerange fields to 12-hour format strings
+      openingHours: formData.openingHours ? convertTimeRangeToString(formData.openingHours) : formData.openingHours,
+      bestTimetoVisit: formData.bestTimetoVisit
+        ? convertTimeRangeToString(formData.bestTimetoVisit)
+        : formData.bestTimetoVisit,
       // Ensure boolean fields are properly set
       isCard: formData.isCard || false,
       isCash: formData.isCash || false,
@@ -341,12 +368,12 @@ export default function RegisterPublisher() {
       address: "",
       images: [],
       // Reset boolean fields
-      isCard: false,
       isCash: false,
       isQRScan: false,
       bus: false,
       taxi: false,
       train: false,
+      isCard: false,
     })
     setImages([])
   }
@@ -363,11 +390,13 @@ export default function RegisterPublisher() {
     if (category === "buythings") {
       fields = [
         { label: "Title", name: "title", type: "text", icon: <Tag className="labelIcon" /> },
+        
         { label: "Description", name: "description", type: "textarea", icon: <FileText className="labelIcon" /> },
         { label: "Location", name: "location", type: "text", icon: <MapPin className="labelIcon" /> },
         { label: "Google Maps URL", name: "googleMapsUrl", type: "text", icon: <Globe className="labelIcon" /> },
         { label: "Opening Hours", name: "openingHours", type: "timerange", icon: <Clock className="labelIcon" /> },
         { label: "Contact Info", name: "contactInfo", type: "text", icon: <Phone className="labelIcon" /> },
+        { label: "Subcategory", name: "subcategory", type: "dropdown", icon: <Building2 className="labelIcon" /> },
         { label: "Entry Fee", name: "entryFee", type: "text", icon: <DollarSign className="labelIcon" /> },
         { label: "Accepts Card?", name: "isCard", type: "checkbox", icon: <CreditCard className="labelIcon" /> },
         { label: "Accepts Cash?", name: "isCash", type: "checkbox", icon: <Banknote className="labelIcon" /> },
@@ -397,7 +426,7 @@ export default function RegisterPublisher() {
         { label: "What To Wear", name: "whatToWear", type: "textarea", icon: <Shirt className="labelIcon" /> },
         { label: "What To Bring", name: "whatToBring", type: "textarea", icon: <Backpack className="labelIcon" /> },
         { label: "Precautions", name: "precautions", type: "textarea", icon: <AlertTriangle className="labelIcon" /> },
-        { label: "Website URL", name: "websiteUrl", type: "text", icon: <Globe className="labelIcon" /> },
+       
         { label: "Location", name: "address", type: "text", icon: <MapPin className="labelIcon" /> },
       ]
     } else if (category === "specialevents") {
@@ -410,7 +439,7 @@ export default function RegisterPublisher() {
         { label: "Best For", name: "bestfor", type: "text", icon: <Star className="labelIcon" /> },
         { label: "Ticket Price", name: "ticketPrice", type: "text", icon: <DollarSign className="labelIcon" /> },
         { label: "Dress Code", name: "dresscode", type: "text", icon: <Shirt className="labelIcon" /> },
-        { label: "Parking Details", name: "parking", type: "text", icon: <Car className="labelIcon" /> },
+        { label: "Parking", name: "isParking", type: "dropdown", icon: <Car className="labelIcon" /> },
         { label: "Address", name: "address", type: "text", icon: <MapPin className="labelIcon" /> },
         { label: "Bus Available", name: "bus", type: "checkbox", icon: <Bus className="labelIcon" /> },
         { label: "Taxi Available", name: "taxi", type: "checkbox", icon: <Car className="labelIcon" /> },
@@ -450,6 +479,7 @@ export default function RegisterPublisher() {
         { label: "Average Price", name: "avgprice", type: "text", icon: <DollarSign className="labelIcon" /> },
         { label: "Website URL", name: "websiteUrl", type: "text", icon: <Globe className="labelIcon" /> },
         { label: "Address", name: "address", type: "text", icon: <MapPin className="labelIcon" /> },
+        { label: "Contact Info", name: "contactInfo", type: "text", icon: <Phone className="labelIcon" /> },
       ]
     }
 
@@ -458,6 +488,17 @@ export default function RegisterPublisher() {
       { value: "yes", label: "Yes" },
       { value: "no", label: "No" },
     ]
+
+    const subcategoryOptions = [
+      { value: "", label: "-- Select Subcategory --" },
+      { value: "supermarkets", label: "Supermarkets" },
+      { value: "cafe", label: "Cafe" },
+      { value: "clothing", label: "Clothing" },
+      { value: "pharmacies", label: "Pharmacies" },
+      { value: "electronics", label: "Electronics" },
+      { value: "sports_fitness", label: "Sports & Fitness" },
+    ]
+    
 
     return (
       <>
@@ -551,21 +592,23 @@ export default function RegisterPublisher() {
 
         {/* Remaining fields in rows of two */}
         {(() => {
+          // Filter out fields that should be handled separately
+          const filteredFields = fields.slice(2).filter(field => 
+            !["isCard", "isCash", "isQRScan", "bus", "taxi", "train"].includes(field.name)
+          )
+          
           const rows = []
-          let idx = 2
-          while (idx < fields.length) {
-            if (["isCard", "isCash", "isQRScan"].includes(fields[idx]?.name)) {
-              idx += 1
-              continue
-            }
-            const firstField = fields[idx]
-            const secondField = fields[idx + 1]
+          for (let i = 0; i < filteredFields.length; i += 2) {
+            const firstField = filteredFields[i]
+            const secondField = filteredFields[i + 1]
+            
             rows.push(
-              <div className="row" key={idx}>
-                {[firstField, secondField].map((field, i) => {
+              <div className="row" key={i}>
+                {[firstField, secondField].map((field, j) => {
                   if (!field) return null
                   const fieldErrors = getFieldError(field.name)
                   const hasError = fieldErrors && fieldErrors.length > 0
+                  const options = field.name === "subcategory" ? subcategoryOptions : dropdownOptions;
 
                   return (
                     <div className="field" key={field.name}>
@@ -587,29 +630,30 @@ export default function RegisterPublisher() {
                           <FieldError errors={fieldErrors} />
                         </>
                       ) : field.type === "dropdown" ? (
-                        <>
-                          <select
-                            name={field.name}
-                            value={(formData[field.name] as string) || ""}
-                            onChange={(e) => {
-                              setFormData({
-                                ...formData,
-                                [field.name]: e.target.value,
-                              })
-                              markFieldAsTouched(field.name)
-                            }}
-                            className={`select ${hasError ? "error" : ""}`}
-                            required
-                          >
-                            {dropdownOptions.map((option) => (
-                              <option key={option.value} value={option.value}>
-                                {option.label}
-                              </option>
-                            ))}
-                          </select>
-                          <FieldError errors={fieldErrors} />
-                        </>
-                      ) : field.type === "timerange" ? (
+                          <>
+                            <select
+                              name={field.name}
+                              value={(formData[field.name] as string) || ""}
+                              onChange={(e) => {
+                                setFormData({
+                                  ...formData,
+                                  [field.name]: e.target.value,
+                                });
+                                markFieldAsTouched(field.name);
+                              }}
+                              className={`select ${hasError ? "error" : ""}`}
+                              required
+                            >
+                              
+                              {options.map((option) => (
+                                <option key={option.value} value={option.value}>
+                                  {option.label}
+                                </option>
+                              ))}
+                            </select>
+                            <FieldError errors={fieldErrors} />
+                          </>
+                        )  : field.type === "timerange" ? (
                         <>
                           <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
                             <input
@@ -694,9 +738,8 @@ export default function RegisterPublisher() {
                     </div>
                   )
                 })}
-              </div>,
+              </div>
             )
-            idx += 2
           }
           return rows
         })()}
@@ -709,25 +752,25 @@ export default function RegisterPublisher() {
               <span>Payment Methods</span>
             </div>
             <div className="checkboxRow">
-              {["isCard", "isCash", "isQRScan"].map((name) => {
-                const field = fields.find((f) => f.name === name)
-                if (!field) return null
-                return (
-                  <div className="checkboxLabel" key={field.name}>
-                    <input
-                      type="checkbox"
-                      name={field.name}
-                      checked={!!formData[field.name]}
-                      onChange={handleInputChange}
-                      className="checkbox"
-                    />
-                    <div className="labelWithIcon" style={{ margin: 0 }}>
-                      {field.icon}
-                      <span>{field.label}</span>
-                    </div>
+              {[
+                { name: "isCard", label: "Accepts Card?", icon: <CreditCard className="labelIcon" /> },
+                { name: "isCash", label: "Accepts Cash?", icon: <Banknote className="labelIcon" /> },
+                { name: "isQRScan", label: "Accepts QR Scan?", icon: <QrCode className="labelIcon" /> },
+              ].map((paymentMethod) => (
+                <div className="checkboxLabel" key={paymentMethod.name}>
+                  <input
+                    type="checkbox"
+                    name={paymentMethod.name}
+                    checked={!!formData[paymentMethod.name as keyof RegisterPublisherFormData]}
+                    onChange={handleInputChange}
+                    className="checkbox"
+                  />
+                  <div className="labelWithIcon" style={{ margin: 0 }}>
+                    {paymentMethod.icon}
+                    <span>{paymentMethod.label}</span>
                   </div>
-                )
-              })}
+                </div>
+              ))}
             </div>
             <FieldError errors={getFieldError("paymentMethods")} />
           </div>
@@ -765,7 +808,7 @@ export default function RegisterPublisher() {
           </div>
         )}
       </>
-    )
+      )
   }
 
   const steps = ["Select Category", "Publisher Details", "Category Specific"]
