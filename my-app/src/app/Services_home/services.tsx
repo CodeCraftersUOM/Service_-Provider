@@ -22,7 +22,10 @@ const serviceIcons: string[] = [
   "/taxi.png",
   "/communucation.png",
   "/house.png",
+  "/things_to_do.png",
   "/other.png"
+  
+  
 ];
 
 const serviceNames: string[] = [
@@ -34,7 +37,10 @@ const serviceNames: string[] = [
   "Taxi",
   "Communication",
   "House Keeping",
+  "Things To Do",
   "Other Services"
+  
+ 
 ];
 
 const serviceDescriptions: string[] = [
@@ -46,7 +52,9 @@ const serviceDescriptions: string[] = [
   "Reliable transportation and taxi services",
   "Telecom and communication solutions",
   "Professional cleaning and housekeeping",
+  "Buythings, different adventures with special events",
   "Various other professional services"
+  
 ];
 
 const serviceLinks: string[] = [
@@ -57,8 +65,11 @@ const serviceLinks: string[] = [
   "Services_home/Vehicle_repair",
   "Services_home/taxi",
   "Services_home/Communi",
-  "Services_home/houes_kepping",
-  "Services_home/other"
+  "Services_home/houes_kepping",  
+  "Services_home/Thingstodo",
+  "Services_home/other",
+  
+  
 ];
 
 const ServiceSelector: React.FC = () => {
