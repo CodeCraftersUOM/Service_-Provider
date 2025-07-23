@@ -2,10 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { FaUser, FaBell } from "react-icons/fa";
+import { FaUser } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import styles from "./Navbar.module.css";
+import NotificationPanel from "./NotificationPanel";
 
 const Navbar = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -113,18 +114,14 @@ const Navbar = () => {
             >
               Log out
             </button>
-            <button className={styles.iconButton} aria-label="Notifications">
-              <FaBell />
-            </button>
+            <NotificationPanel />
           </>
         ) : (
           // Show these when user is NOT logged in
           <>
             <Link href="/login" className={styles.loginBtn}>Log in</Link>
             <Link href="/signup" className={styles.signupBtn}>Sign up</Link>
-            <button className={styles.iconButton} aria-label="Notifications">
-              <FaBell />
-            </button>
+            <NotificationPanel />
           </>
         )}
       </div>
