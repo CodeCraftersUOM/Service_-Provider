@@ -1,0 +1,136 @@
+/* styles/BookingDashboard.module.css */
+
+.container {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: #f4f7f6;
+  min-height: 100vh;
+}
+
+.title {
+  color: #333;
+  text-align: center;
+  margin-bottom: 10px;
+  font-size: 2.5em;
+}
+
+.subtitle {
+  color: #555;
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 1.2em;
+}
+
+.loading, .error, .noBookings {
+  text-align: center;
+  font-size: 1.2em;
+  color: #666;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.error {
+  color: #d9534f;
+  background-color: #fdf3f2;
+  border: 1px solid #d9534f;
+}
+
+.bookingList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.bookingCard {
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 25px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s ease-in-out;
+}
+
+.bookingCard:hover {
+  transform: translateY(-5px);
+}
+
+.cardTitle {
+  color: #4A90E2;
+  font-size: 1.6em;
+  margin-top: 0;
+  margin-bottom: 15px;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 10px;
+}
+
+.bookingCard p {
+  margin: 5px 0;
+  color: #666;
+  font-size: 0.95em;
+}
+
+.bookingCard p strong {
+  color: #333;
+}
+
+.cardStatus {
+  font-weight: bold;
+  margin-top: 15px;
+  font-size: 1.1em;
+}
+
+.statusPending {
+  color: #f0ad4e; /* Orange for pending */
+}
+
+.actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.button {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: bold;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  flex-grow: 1;
+}
+
+.button:hover {
+  transform: translateY(-2px);
+}
+
+.confirmButton {
+  background-color: #5cb85c; /* Green */
+  color: white;
+}
+
+.confirmButton:hover {
+  background-color: #4cae4c;
+}
+
+.rejectButton {
+  background-color: #d9534f; /* Red */
+  color: white;
+}
+
+.rejectButton:hover {
+  background-color: #c9302c;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .bookingList {
+    grid-template-columns: 1fr;
+  }
+}
