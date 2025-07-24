@@ -3,11 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { FaUser } from "react-icons/fa";
-<<<<<<< Updated upstream
-=======
+
 import dynamic from "next/dynamic";
 const NotificationDropdown = dynamic(() => import("./NotificationDropdown"), { ssr: false });
->>>>>>> Stashed changes
+
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import styles from "./Navbar.module.css";
@@ -45,7 +44,7 @@ const Navbar = () => {
 
   const handleRegisterServicesClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    
+
     if (!isAuthenticated) {
       // Redirect to login page with a return URL
       router.push("/login?redirect=/Services_home");
@@ -119,22 +118,18 @@ const Navbar = () => {
             >
               Log out
             </button>
-<<<<<<< Updated upstream
+
             <NotificationPanel />
-=======
             <NotificationDropdown />
->>>>>>> Stashed changes
           </>
         ) : (
           // Show these when user is NOT logged in
           <>
             <Link href="/login" className={styles.loginBtn}>Log in</Link>
             <Link href="/signup" className={styles.signupBtn}>Sign up</Link>
-<<<<<<< Updated upstream
+
             <NotificationPanel />
-=======
             <NotificationDropdown />
->>>>>>> Stashed changes
           </>
         )}
       </div>

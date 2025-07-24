@@ -64,10 +64,14 @@ const Dashboard = () => {
 
       if (response.ok) {
         const data = await response.json();
+        console.log('Auth check response:', data); // Debug log
         setIsAuthenticated(true);
         setUser(data.user);
-        fetchUserData();
+        
+        // Fetch user data after successful auth check
+        await fetchUserData();
       } else {
+        console.log('Auth check failed, redirecting to login');
         router.push("/login?redirect=/Dashboard");
         return;
       }
@@ -82,12 +86,32 @@ const Dashboard = () => {
 
   const fetchUserData = async () => {
     try {
+      console.log('Fetching user data...'); // Debug log
       const response = await axios.get('http://localhost:2000/api/getSingleUser', {
         withCredentials: true,
       });
-      setUserData(response.data.data);
+      
+      console.log('User data response:', response.data); // Debug log
+      
+      if (response.data && response.data.data) {
+        setUserData(response.data.data);
+        console.log('User data set:', response.data.data); // Debug log
+      } else {
+        console.error('Invalid user data structure:', response.data);
+      }
     } catch (err) {
       console.error('Failed to fetch user data:', err);
+      
+      // If the specific endpoint fails, try to get user info from auth check
+      if (user) {
+        setUserData({
+          fullName: user.fullName || '',
+          username: user.username || '',
+          email: user.email || '',
+          createdAt: user.createdAt || '',
+          updatedAt: user.updatedAt || ''
+        });
+      }
     }
   };
 
@@ -100,6 +124,13 @@ const Dashboard = () => {
       
       setIsAuthenticated(false);
       setUser(null);
+      setUserData({
+        fullName: '',
+        username: '',
+        email: '',
+        createdAt: '',
+        updatedAt: ''
+      });
       router.push("/");
     } catch (error) {
       console.error("Logout error:", error);
@@ -146,23 +177,26 @@ const Dashboard = () => {
             <div className={styles.header}>
               <div className={styles.headerText}>
                 <h1 className={styles.heading}>
-                  Welcome back, {userData.fullName || user?.fullName || user?.username}!
+                  Welcome back, {userData.fullName || user?.fullName || user?.username || 'User'}!
                 </h1>
                 <p className={styles.subheading}>Here's your dashboard overview</p>
               </div>
-              
             </div>
             
             <div className={styles.profileCard}>
               <div className={styles.profileHeader}>
                 <div className={styles.profileAvatar}>
                   <span className={styles.profileInitial}>
-                    {userData.fullName ? userData.fullName.charAt(0).toUpperCase() : 'U'}
+                    {(userData.fullName || user?.fullName || user?.username || 'U').charAt(0).toUpperCase()}
                   </span>
                 </div>
                 <div className={styles.profileInfo}>
-                  <h2 className={styles.profileName}>{userData.fullName || 'User Name'}</h2>
-                  <p className={styles.profileEmail}>{userData.email || 'user@example.com'}</p>
+                  <h2 className={styles.profileName}>
+                    {userData.fullName || user?.fullName || user?.username || 'User Name'}
+                  </h2>
+                  <p className={styles.profileEmail}>
+                    {userData.email || user?.email || 'user@example.com'}
+                  </p>
                 </div>
               </div>
 
@@ -170,18 +204,24 @@ const Dashboard = () => {
                 <div className={styles.profileRow}>
                   <div className={styles.profileField}>
                     <span className={styles.fieldLabel}>Full Name</span>
-                    <span className={styles.fieldValue}>{userData.fullName || '--'}</span>
+                    <span className={styles.fieldValue}>
+                      {userData.fullName || user?.fullName || '--'}
+                    </span>
                   </div>
                   <div className={styles.profileField}>
                     <span className={styles.fieldLabel}>Username</span>
-                    <span className={styles.fieldValue}>{userData.username || '--'}</span>
+                    <span className={styles.fieldValue}>
+                      {userData.username || user?.username || '--'}
+                    </span>
                   </div>
                 </div>
 
                 <div className={styles.profileRow}>
                   <div className={styles.profileField}>
                     <span className={styles.fieldLabel}>Email Address</span>
-                    <span className={styles.fieldValue}>{userData.email || '--'}</span>
+                    <span className={styles.fieldValue}>
+                      {userData.email || user?.email || '--'}
+                    </span>
                   </div>
                 </div>
 
@@ -189,13 +229,19 @@ const Dashboard = () => {
                   <div className={styles.profileStat}>
                     <span className={styles.statLabel}>Joined On</span>
                     <span className={styles.statValue}>
-                      {userData.createdAt ? new Date(userData.createdAt).toLocaleDateString() : '--'}
+                      {(userData.createdAt || user?.createdAt) ? 
+                        new Date(userData.createdAt || user?.createdAt).toLocaleDateString() : 
+                        '--'
+                      }
                     </span>
                   </div>
                   <div className={styles.profileStat}>
                     <span className={styles.statLabel}>Last Updated</span>
                     <span className={styles.statValue}>
-                      {userData.updatedAt ? new Date(userData.updatedAt).toLocaleDateString() : '--'}
+                      {(userData.updatedAt || user?.updatedAt) ? 
+                        new Date(userData.updatedAt || user?.updatedAt).toLocaleDateString() : 
+                        '--'
+                      }
                     </span>
                   </div>
                 </div>
@@ -238,8 +284,8 @@ const Dashboard = () => {
       {/* Sidebar */}
       <div className={`${styles.sidebar} ${isSidebarOpen ? styles.sidebarOpen : styles.sidebarClosed}`}>
         <div className={styles.userInfo}>
-          <p>Welcome, {userData.fullName || user?.fullName || user?.username}</p>
-          <small>{userData.email || user?.email}</small>
+          <p>Welcome, {userData.fullName || user?.fullName || user?.username || 'User'}</p>
+          <small>{userData.email || user?.email || 'No email'}</small>
         </div>
         <nav className={styles.sidebarNav}>
           {menuItems.map((item) => (
