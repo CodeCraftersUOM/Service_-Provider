@@ -115,7 +115,7 @@ const ServiceSelector: React.FC = () => {
     { name: 'Dashboard', icon: '🏠', route: '../Dashboard' },
     { name: 'Services', icon: '🛠️', route: '/services' },
     { name: 'My Listings', icon: '📋', route: '/listings' },
-    { name: 'Bookings', icon: '📅', route: '/bookings' },
+   // { name: 'Bookings', icon: '📅', route: '/bookings' },
     { name: 'Analytics', icon: '📊', route: '/analytics' },
     { name: 'Messages', icon: '💬', route: '/messages' },
     { name: 'Payments', icon: '💳', route: '/payments' },

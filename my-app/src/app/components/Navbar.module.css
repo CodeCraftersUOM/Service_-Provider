@@ -63,7 +63,8 @@
 }
 
 .iconButton {
-  background: none;
+  background: transparent !important;
+  background-color: transparent !important;
   border: none;
   color: #e3e9f7;
   font-size: 1.3rem;
@@ -73,9 +74,120 @@
   transition: background 0.18s, color 0.2s;
   outline: none;
 }
+
 .iconButton:hover {
-  background: rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.14) !important;
   color: #3da6f1;
+}
+
+.iconButton:focus {
+  background: rgba(255,255,255,0.14) !important;
+  color: #3da6f1;
+  outline: none;
+}
+
+/* Specific styles for bell icon buttons */
+.bellButton {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+  border-radius: 50%;
+  transition: background 0.18s, color 0.2s;
+}
+
+.bellButton:hover {
+  background: rgba(255,255,255,0.14) !important;
+}
+
+.bellButton:focus {
+  outline: none;
+  background: rgba(255,255,255,0.14) !important;
+}
+
+.bellIcon {
+  color: #e3e9f7 !important;
+  font-size: 1.3rem !important;
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+.bellButton:hover .bellIcon {
+  color: #3da6f1 !important;
+}
+
+.newNotificationDot {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 10px;
+  height: 10px;
+  background: #ff3b3b;
+  border-radius: 50%;
+  display: inline-block;
+  border: 2px solid #fff;
+}
+
+/* Notification dropdown wrapper */
+.notificationDropdownWrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdownMenu {
+  position: absolute;
+  right: 0;
+  top: 120%;
+  min-width: 320px;
+  background: #fff;
+  color: #222;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  z-index: 1000;
+  padding: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.dropdownHeader {
+  font-weight: 700;
+  font-size: 16px;
+  margin-bottom: 8px;
+  color: #222;
+}
+
+.noNotifications {
+  color: #888;
+  font-size: 14px;
+  padding: 12px;
+}
+
+.notificationDropdownItem {
+  border-bottom: 1px solid #eee;
+  padding: 8px 0;
+}
+
+.notificationTitle {
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 4px;
+}
+
+.notificationDates {
+  font-size: 13px;
+  color: #555;
+  margin-bottom: 2px;
+}
+
+.notificationTimestamp {
+  font-size: 12px;
+  color: #aaa;
 }
 
 .loginBtn, .signupBtn {

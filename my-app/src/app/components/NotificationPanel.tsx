@@ -93,7 +93,6 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({
       );
 
       if (response.ok) {
-        // Update local state
         setNotifications((prev) =>
           prev.map((notif) =>
             notif.id === notificationId ? { ...notif, read: true } : notif
@@ -108,15 +107,12 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({
   };
 
   const handleNotificationClick = async (notification: Notification) => {
-    // Mark notification as read
     if (!notification.read) {
       await markNotificationAsRead(notification.id);
     }
     
-    // Close the notification panel
     setShowNotifications(false);
     
-    // Navigate based on notification type
     if (notification.type === "new_booking" || 
         notification.type === "booking_confirmed" || 
         notification.type === "booking_rejected" || 
@@ -131,7 +127,6 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({
     if (unreadNotifications.length === 0) return;
     
     try {
-      // Mark all unread notifications as read
       const promises = unreadNotifications.map(notification =>
         fetch(`${apiBaseUrl}/notifications/${notification.id}/read`, {
           method: "PUT",
@@ -143,7 +138,6 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({
       
       await Promise.all(promises);
       
-      // Update local state - mark all as read
       setNotifications(prev => prev.map(notif => ({ ...notif, read: true })));
       setUnreadCount(0);
       await fetchNotificationStats();
@@ -199,7 +193,7 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({
         onClick={() => setShowNotifications(!showNotifications)}
         aria-label="Notifications"
       >
-        <FaBell />
+        <FaBell className={styles.bellIcon} />
         {unreadCount > 0 && (
           <span className={styles.notificationBadge}></span>
         )}

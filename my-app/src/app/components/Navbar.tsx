@@ -120,7 +120,7 @@ const Navbar = () => {
             </button>
 
             <NotificationPanel />
-            <NotificationDropdown />
+            {/* REMOVED: <NotificationDropdown /> */}
           </>
         ) : (
           // Show these when user is NOT logged in
@@ -129,7 +129,7 @@ const Navbar = () => {
             <Link href="/signup" className={styles.signupBtn}>Sign up</Link>
 
             <NotificationPanel />
-            <NotificationDropdown />
+            {/* REMOVED: <NotificationDropdown /> */}
           </>
         )}
       </div>
