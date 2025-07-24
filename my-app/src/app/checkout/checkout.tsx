@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import styles from './card.module.css';
+import styles from './checkout.module.css';
 import { loadStripe } from '@stripe/stripe-js';
 import {
   CardNumberElement,
@@ -12,7 +12,6 @@ import {
   useElements,
 } from '@stripe/react-stripe-js';
 
-// Replace with your own publishable key
 const stripePromise = loadStripe('pk_test_51RlV0ULm4wWgyhyBvv0KqRNtKgvbBZVv1Z0uwHhygxjbiXmRuEWic2jFgR8TgcyoeGmWVsZWwWlSxYPEXPflA9o300udbmpj4W');
 
 const CARD_STYLE = {
@@ -35,13 +34,13 @@ const CheckoutForm = () => {
   const elements = useElements();
 
   const [cardholderName, setCardholderName] = useState('');
+  const [saveCard, setSaveCard] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [processing, setProcessing] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!stripe || !elements) return;
 
     setProcessing(true);
@@ -67,21 +66,27 @@ const CheckoutForm = () => {
       setError(error.message || 'An error occurred');
       setProcessing(false);
     } else {
-      setSuccess(true);
       console.log('PaymentMethod ID:', paymentMethod?.id);
-      alert('Card details saved successfully!');
+      alert('Payment Successful!');
+      setSuccess(true);
       setProcessing(false);
     }
   };
 
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
-      <h2 className={styles.title}>Enter Card Details</h2>
+      <div className={styles.fee}>Your fee is Rs.24000.00</div>
+
+      <div className={styles.subheading}>Saved Card</div>
+      <div className={styles.cardPreview}>**** **** **** 1234 - Abcd Efgh</div>
+
+      <div className={styles.subheading}>Pay with Another Card</div>
+      <p className={styles.label}>Card Details</p>
 
       <label className={styles.label}>Cardholder Name</label>
       <input
         className={styles.input}
-        type="text" 
+        type="text"
         value={cardholderName}
         onChange={(e) => setCardholderName(e.target.value)}
         required
@@ -100,7 +105,6 @@ const CheckoutForm = () => {
             <CardExpiryElement options={CARD_STYLE} />
           </div>
         </div>
-
         <div className={styles.rowColumn}>
           <label className={styles.label}>CVC</label>
           <div className={styles.input}>
@@ -109,17 +113,26 @@ const CheckoutForm = () => {
         </div>
       </div>
 
+      <div className={styles.checkbox}>
+        <input
+          type="checkbox"
+          checked={saveCard}
+          onChange={() => setSaveCard(!saveCard)}
+        />
+        <label>Save card for future payments</label>
+      </div>
+
       {error && <div style={{ color: 'red' }}>{error}</div>}
-      {success && <div style={{ color: 'green' }}>Card added successfully!</div>}
+      {success && <div style={{ color: 'green' }}>Payment completed!</div>}
 
       <button type="submit" className={styles.submitButton} disabled={processing || !stripe}>
-        {processing ? 'Processing...' : 'Submit'}
+        {processing ? 'Processing...' : 'Pay'}
       </button>
     </form>
   );
 };
 
-const Card = () => {
+const Checkout = () => {
   return (
     <div className={styles.container}>
       <Elements stripe={stripePromise}>
@@ -129,4 +142,4 @@ const Card = () => {
   );
 };
 
-export default Card;
+export default Checkout;
