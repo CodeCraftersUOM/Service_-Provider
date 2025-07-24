@@ -3,11 +3,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import { FaUser } from "react-icons/fa";
+
 import dynamic from "next/dynamic";
 const NotificationDropdown = dynamic(() => import("./NotificationDropdown"), { ssr: false });
+
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import styles from "./Navbar.module.css";
+import NotificationPanel from "./NotificationPanel";
 
 const Navbar = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -41,7 +44,7 @@ const Navbar = () => {
 
   const handleRegisterServicesClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    
+
     if (!isAuthenticated) {
       // Redirect to login page with a return URL
       router.push("/login?redirect=/Services_home");
@@ -115,6 +118,8 @@ const Navbar = () => {
             >
               Log out
             </button>
+
+            <NotificationPanel />
             <NotificationDropdown />
           </>
         ) : (
@@ -122,6 +127,8 @@ const Navbar = () => {
           <>
             <Link href="/login" className={styles.loginBtn}>Log in</Link>
             <Link href="/signup" className={styles.signupBtn}>Sign up</Link>
+
+            <NotificationPanel />
             <NotificationDropdown />
           </>
         )}

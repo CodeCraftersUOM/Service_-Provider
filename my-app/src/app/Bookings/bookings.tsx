@@ -116,8 +116,12 @@ const BookingDashboard: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>Service Provider Dashboard</h1>
-      <p className={styles.subtitle}>Manage Pending Bookings</p>
+      <div className={styles.header}>
+        <div>
+          <h1 className={styles.title}>Service Provider Dashboard</h1>
+          <p className={styles.subtitle}>Manage Pending Bookings</p>
+        </div>
+      </div>
 
       {bookings.length === 0 ? (
         <p className={styles.noBookings}>No pending bookings found. 🎉</p>
