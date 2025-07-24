@@ -2,7 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { FaUser, FaBell } from "react-icons/fa";
+import { FaUser } from "react-icons/fa";
+import dynamic from "next/dynamic";
+const NotificationDropdown = dynamic(() => import("./NotificationDropdown"), { ssr: false });
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import styles from "./Navbar.module.css";
@@ -113,18 +115,14 @@ const Navbar = () => {
             >
               Log out
             </button>
-            <button className={styles.iconButton} aria-label="Notifications">
-              <FaBell />
-            </button>
+            <NotificationDropdown />
           </>
         ) : (
           // Show these when user is NOT logged in
           <>
             <Link href="/login" className={styles.loginBtn}>Log in</Link>
             <Link href="/signup" className={styles.signupBtn}>Sign up</Link>
-            <button className={styles.iconButton} aria-label="Notifications">
-              <FaBell />
-            </button>
+            <NotificationDropdown />
           </>
         )}
       </div>
