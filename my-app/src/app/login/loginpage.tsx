@@ -85,6 +85,16 @@ export default function LoginPage() {
     }
   };
 
+  // Function to notify navbar and other components about auth state change
+  const notifyAuthStateChange = () => {
+    // Trigger custom event to notify navbar and other components
+    window.dispatchEvent(new CustomEvent('authStateChanged'));
+    
+    // Also trigger storage event for cross-tab updates
+    localStorage.setItem('auth_status_changed', Date.now().toString());
+    localStorage.removeItem('auth_status_changed');
+  };
+
   const handleLogin = async () => {
     // Clear previous errors
     setError('');
@@ -109,8 +119,14 @@ export default function LoginPage() {
       if (response.ok) {
         console.log("Login successful:", data);
 
-        // Redirect to the originally requested page or dashboard
-        router.push(redirectUrl);
+        // Notify all components about the authentication state change
+        notifyAuthStateChange();
+
+        // Small delay to ensure the navbar updates before navigation
+        setTimeout(() => {
+          // Redirect to the originally requested page or dashboard
+          router.push(redirectUrl);
+        }, 100);
       } else {
         setError(data.message || "Login failed");
       }
