@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import styles from './vehicleRepair.module.css';
+import styles from './repair.module.css';
 import { useRouter } from 'next/navigation';
 
 interface FormData {
