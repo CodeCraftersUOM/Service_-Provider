@@ -5,7 +5,7 @@ import Link from "next/link";
 import { FaUser } from "react-icons/fa";
 
 import { useRouter, usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import styles from "./Navbar.module.css";
 import NotificationPanel from "./NotificationPanel";
 
@@ -15,10 +15,33 @@ const Navbar = () => {
   const router = useRouter();
   const pathname = usePathname();
 
+  const checkAuthStatus = useCallback(async () => {
+    try {
+      const response = await fetch("http://localhost:2000/api/check-auth", {
+        method: "GET",
+        credentials: "include", // Include cookies
+      });
+
+      const newAuthStatus = response.ok;
+      
+      // Only update state if it actually changed to prevent unnecessary re-renders
+      if (newAuthStatus !== isAuthenticated) {
+        setIsAuthenticated(newAuthStatus);
+      }
+    } catch (error) {
+      console.error("Auth check error:", error);
+      if (isAuthenticated !== false) {
+        setIsAuthenticated(false);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isAuthenticated]);
+
   // Check authentication status on component mount and when pathname changes
   useEffect(() => {
     checkAuthStatus();
-  }, [pathname]); // Add pathname as dependency
+  }, [pathname, checkAuthStatus]);
 
   // Listen for custom auth events
   useEffect(() => {
@@ -41,7 +64,7 @@ const Navbar = () => {
       window.removeEventListener('authStateChanged', handleAuthChange);
       window.removeEventListener('storage', handleStorageChange);
     };
-  }, []);
+  }, [checkAuthStatus]);
 
   // Periodic auth check (optional - for extra reliability)
   useEffect(() => {
@@ -50,30 +73,7 @@ const Navbar = () => {
     }, 30000); // Check every 30 seconds
 
     return () => clearInterval(interval);
-  }, []);
-
-  const checkAuthStatus = async () => {
-    try {
-      const response = await fetch("http://localhost:2000/api/check-auth", {
-        method: "GET",
-        credentials: "include", // Include cookies
-      });
-
-      const newAuthStatus = response.ok;
-      
-      // Only update state if it actually changed to prevent unnecessary re-renders
-      if (newAuthStatus !== isAuthenticated) {
-        setIsAuthenticated(newAuthStatus);
-      }
-    } catch (error) {
-      console.error("Auth check error:", error);
-      if (isAuthenticated !== false) {
-        setIsAuthenticated(false);
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [checkAuthStatus]);
 
   const handleRegisterServicesClick = (e: React.MouseEvent) => {
     e.preventDefault();
