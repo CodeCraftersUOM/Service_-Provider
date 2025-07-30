@@ -44,7 +44,7 @@ const Dashboard = () => {
     //{ name: 'Bookings', icon: '📅', route: '/bookings' },
     { name: 'Analytics', icon: '📊', route: '/analytics' },
     { name: 'Messages', icon: '💬', route: '/messages' },
-    { name: 'Payments', icon: '💳', route: '/payments' },
+    { name: 'Payments', icon: '💳', route: '/Card' },
     { name: 'Settings', icon: '⚙️', route: '/settings' },
     { name: 'Help', icon: '💡', route: '/Services_home/help' },
     { name: 'Log Out', icon: '🚪', route: '/logout' }
@@ -151,6 +151,10 @@ const Dashboard = () => {
       router.push(route);
       return;
     }
+    if (menuName === 'Payments') {
+      router.push(route);
+      return;
+    }
     setActiveMenuItem(menuName);
     // Uncomment to enable navigation for other pages
     // router.push(route);
@@ -179,7 +183,7 @@ const Dashboard = () => {
                 <h1 className={styles.heading}>
                   Welcome back, {userData.fullName || user?.fullName || user?.username || 'User'}!
                 </h1>
-                <p className={styles.subheading}>Here's your dashboard overview</p>
+                <p className={styles.subheading}>Here&apos;s your dashboard overview</p>
               </div>
             </div>
             

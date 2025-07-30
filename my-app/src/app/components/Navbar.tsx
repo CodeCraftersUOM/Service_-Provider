@@ -4,9 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { FaUser } from "react-icons/fa";
 
-import dynamic from "next/dynamic";
-const NotificationDropdown = dynamic(() => import("./NotificationDropdown"), { ssr: false });
-
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import styles from "./Navbar.module.css";
@@ -101,6 +98,8 @@ const Navbar = () => {
         </button>
         <Link href="../aboutus" className={styles.navLink}>About Us</Link>
         <Link href="../contactUs" className={styles.navLink}>Contact Us</Link>
+        <Link href="/Card" className={styles.navLink}>Card Details</Link>
+        <Link href="/checkout" className={styles.navLink}>Checkout</Link>
       </div>
 
       {/* User Actions */}
