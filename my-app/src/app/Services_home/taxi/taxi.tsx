@@ -143,7 +143,7 @@ const TaxiDriverForm: React.FC = () => {
 
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:2000/api/addTaxiDriver', {
+      const res = await fetch('http://localhost:2000/api/taxi/addTaxiDriver', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),

@@ -291,7 +291,7 @@ const DoctorRegistration: React.FC = () => {
     setMessage('');
 
     try {
-      const response = await fetch('http://localhost:2000/api/addHelth', {
+      const response = await fetch('http://localhost:2000/api/health/addHelth', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -306,7 +306,7 @@ const DoctorRegistration: React.FC = () => {
       } else {
         if (responseData.errors && Array.isArray(responseData.errors)) {
           const backendErrors: FieldErrors = {};
-          responseData.errors.forEach((error: any) => {
+          responseData.errors.forEach((error: { field?: string; message: string }) => {
             if (error.field) {
               backendErrors[error.field] = error.message;
             }
@@ -317,7 +317,7 @@ const DoctorRegistration: React.FC = () => {
           setMessage(`Error: ${responseData.message || 'Failed to register doctor'}`);
         }
       }
-    } catch (error) {
+    } catch {
       setMessage('Error: Failed to connect to server');
     } finally {
       setLoading(false);

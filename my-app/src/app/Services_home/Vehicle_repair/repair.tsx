@@ -51,7 +51,7 @@ const VehicleRepairServiceForm: React.FC = () => {
 
   const serviceTypes = [
     'Garage',
-    'Mobile Mechanic', 
+    'Mobile Mechanic',
     '24/7 Roadside Assistance',
     'Specialized Service Center'
   ];
@@ -60,47 +60,78 @@ const VehicleRepairServiceForm: React.FC = () => {
 
   const coverageAreas = [
     'Colombo', 'Gampaha', 'Kalutara', 'Kandy', 'Matale', 'Nuwara Eliya',
-    'Galle', 'Matara', 'Hambantota', 'Jaffna', 'Kurunegala', 'Puttalam', 
+    'Galle', 'Matara', 'Hambantota', 'Jaffna', 'Kurunegala', 'Puttalam',
     'Anuradhapura', 'Polonnaruwa', 'Badulla', 'Ratnapura', 'Kegalle', 'Nationwide'
   ];
 
-  const validate = (step: number) => {
+  /**
+   * Validates form fields based on the current step or all steps.
+   * @param step - The step number to validate. If null, all steps are validated.
+   * @returns An object containing validation errors.
+   */
+  const validate = (step: number | null = null) => {
     const newErrors: Record<string, string> = {};
-    
-    if (step === 1) {
-      if (!formData.ownerName.trim()) newErrors.ownerName = "Owner name is required";
-      if (!formData.garageName.trim()) newErrors.garageName = "Garage name is required";
-      if (!formData.emailAddress.trim()) newErrors.emailAddress = "Email is required";
-      if (!formData.registrationOrLicenseNumber.trim()) newErrors.registrationOrLicenseNumber = "License number is required";
-      if (!formData.yearsInOperation.trim()) newErrors.yearsInOperation = "Years in operation is required";
-      else if (parseInt(formData.yearsInOperation) < 0) newErrors.yearsInOperation = "Years cannot be negative";
+
+    // Step 1 Validation: Basic Information
+    if (step === 1 || step === null) {
+      if (!formData.ownerName.trim()) {
+        newErrors.ownerName = "Owner name is required";
+      } else if (formData.ownerName.trim().length <= 3) {
+        newErrors.ownerName = "Owner name must be more than 3 characters";
+      }
+
+      if (!formData.garageName.trim()) {
+        newErrors.garageName = "Garage name is required";
+      }
+
+      if (!formData.emailAddress.trim()) {
+        newErrors.emailAddress = "Email is required";
+      } else if (!/^\S+@\S+\.\S+$/.test(formData.emailAddress)) {
+        newErrors.emailAddress = "Please enter a valid email address";
+      }
+
+      if (!formData.registrationOrLicenseNumber.trim()) {
+        newErrors.registrationOrLicenseNumber = "License number is required";
+      } else if (!/^[A-Z]{2,3}-\d{4}$/i.test(formData.registrationOrLicenseNumber)) {
+        // Validates formats like WP-1234 or ABC-1234 (case-insensitive)
+        newErrors.registrationOrLicenseNumber = "License number must be in the format XX-1234 or XXX-1234";
+      }
+
+      if (!formData.yearsInOperation.trim()) {
+        newErrors.yearsInOperation = "Years in operation is required";
+      } else if (parseInt(formData.yearsInOperation) < 1) {
+        newErrors.yearsInOperation = "Years in operation must be at least 1";
+      }
     }
-    
-    if (step === 2) {
+
+    // Step 2 Validation: Service Details
+    if (step === 2 || step === null) {
       if (!formData.typeOfService) newErrors.typeOfService = "Service type is required";
       if (!formData.serviceCoverageArea) newErrors.serviceCoverageArea = "Coverage area is required";
       if (!formData.weekdayWeekendSchedule.trim()) newErrors.weekdayWeekendSchedule = "Schedule is required";
-      if (formData.vehicleTypesSupported.length === 0) newErrors.vehicleTypesSupported = "At least one vehicle type is required";
+      if (formData.vehicleTypesSupported.length === 0) newErrors.vehicleTypesSupported = "At least one vehicle type must be selected";
     }
-    
-    if (step === 3) {
+
+    // Step 3 Validation: Languages & Availability
+    if (step === 3 || step === null) {
       const { sinhala, tamil, english } = formData.languagesAvailable;
-      if (!sinhala && !tamil && !english) newErrors.languagesAvailable = "At least one language is required";
+      if (!sinhala && !tamil && !english) newErrors.languagesAvailable = "At least one language must be selected";
     }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+
+    return newErrors;
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
 
+    // Clear the error for the field being changed
     if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
 
     if (name.includes('.')) {
       const [parent, child] = name.split('.');
       if (parent === 'languagesAvailable') {
+        if (errors.languagesAvailable) setErrors(prev => ({ ...prev, languagesAvailable: '' }));
         setFormData(prev => ({
           ...prev,
           languagesAvailable: { ...prev.languagesAvailable, [child]: checked }
@@ -112,8 +143,9 @@ const VehicleRepairServiceForm: React.FC = () => {
   };
 
   const handleVehicleTypeChange = (vehicleType: string) => {
+    // Clear the error for vehicle types when an option is changed
     if (errors.vehicleTypesSupported) setErrors(prev => ({ ...prev, vehicleTypesSupported: '' }));
-    
+
     setFormData(prev => ({
       ...prev,
       vehicleTypesSupported: prev.vehicleTypesSupported.includes(vehicleType)
@@ -123,24 +155,30 @@ const VehicleRepairServiceForm: React.FC = () => {
   };
 
   const nextStep = () => {
-    if (validate(currentStep)) {
+    const stepErrors = validate(currentStep);
+    if (Object.keys(stepErrors).length === 0) {
       setCurrentStep(prev => Math.min(prev + 1, 3));
       setMessage('');
+      setErrors({}); // Clear previous step errors
     } else {
-      setMessage('Please fix the errors below.');
+      setErrors(stepErrors);
+      setMessage('Please fix the errors below to continue.');
     }
   };
 
   const prevStep = () => {
     setCurrentStep(prev => Math.max(prev - 1, 1));
     setMessage('');
-    setErrors({});
+    setErrors({}); // Clear errors when going back
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!validate(1) || !validate(2) || !validate(3)) {
+    // Validate all fields before submission
+    const allErrors = validate(null);
+    if (Object.keys(allErrors).length > 0) {
+      setErrors(allErrors);
       setMessage('Please fix all errors before submitting.');
       return;
     }
@@ -154,7 +192,7 @@ const VehicleRepairServiceForm: React.FC = () => {
         yearsInOperation: parseInt(formData.yearsInOperation)
       };
 
-      const response = await fetch('http://localhost:2000/api/addVehicleRepairService', {
+      const response = await fetch('http://localhost:2000/api/vehiclerepair/createVehicleRepairService', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(cleanedData),
@@ -177,7 +215,7 @@ const VehicleRepairServiceForm: React.FC = () => {
         }
       }
     } catch {
-      setMessage('Error: Failed to connect to server.');
+      setMessage('Error: Failed to connect to the server. Please try again later.');
     } finally {
       setLoading(false);
     }
@@ -230,7 +268,7 @@ const VehicleRepairServiceForm: React.FC = () => {
         {/* Progress Bar */}
         <div className={styles.progressContainer}>
           <div className={styles.progressBar}>
-            <div className={styles.progressFill} style={{ width: `${(currentStep / 3) * 100}%` }}></div>
+            <div className={styles.progressFill} style={{ width: `${((currentStep - 1) / 2) * 100}%` }}></div>
           </div>
           <div className={styles.stepIndicators}>
             {[1, 2, 3].map(step => (
@@ -249,12 +287,12 @@ const VehicleRepairServiceForm: React.FC = () => {
         <h1 className={styles.title}>Vehicle Repair Service Registration</h1>
         
         {message && (
-          <div className={`${styles.message} ${message.includes('Error') ? styles.error : styles.warning}`}>
+          <div className={`${styles.message} ${message.toLowerCase().includes('error') || message.toLowerCase().includes('fix') ? styles.error : styles.warning}`}>
             {message}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className={styles.form}>
+        <form onSubmit={handleSubmit} className={styles.form} noValidate>
           {/* Step 1: Basic Information */}
           {currentStep === 1 && (
             <div className={styles.step}>
@@ -268,7 +306,7 @@ const VehicleRepairServiceForm: React.FC = () => {
                     value={formData.ownerName}
                     onChange={handleInputChange}
                     className={`${styles.input} ${errors.ownerName ? styles.inputError : ''}`}
-                    placeholder="Enter owner name"
+                    placeholder="Enter owner's full name"
                   />
                   {errors.ownerName && <p className={styles.fieldError}>{errors.ownerName}</p>}
                 </div>
@@ -295,7 +333,7 @@ const VehicleRepairServiceForm: React.FC = () => {
                     value={formData.emailAddress}
                     onChange={handleInputChange}
                     className={`${styles.input} ${errors.emailAddress ? styles.inputError : ''}`}
-                    placeholder="Enter email"
+                    placeholder="example@email.com"
                   />
                   {errors.emailAddress && <p className={styles.fieldError}>{errors.emailAddress}</p>}
                 </div>
@@ -307,7 +345,7 @@ const VehicleRepairServiceForm: React.FC = () => {
                     value={formData.registrationOrLicenseNumber}
                     onChange={handleInputChange}
                     className={`${styles.input} ${errors.registrationOrLicenseNumber ? styles.inputError : ''}`}
-                    placeholder="Registration/License number"
+                    placeholder="e.g., WP-1234 or ABC-1234"
                   />
                   {errors.registrationOrLicenseNumber && <p className={styles.fieldError}>{errors.registrationOrLicenseNumber}</p>}
                 </div>
@@ -321,8 +359,8 @@ const VehicleRepairServiceForm: React.FC = () => {
                   value={formData.yearsInOperation}
                   onChange={handleInputChange}
                   className={`${styles.input} ${errors.yearsInOperation ? styles.inputError : ''}`}
-                  placeholder="Enter years in operation"
-                  min="0"
+                  placeholder="Enter number of years"
+                  min="1"
                 />
                 {errors.yearsInOperation && <p className={styles.fieldError}>{errors.yearsInOperation}</p>}
               </div>
@@ -357,7 +395,7 @@ const VehicleRepairServiceForm: React.FC = () => {
                     onChange={handleInputChange}
                     className={`${styles.select} ${errors.serviceCoverageArea ? styles.inputError : ''}`}
                   >
-                    <option value="">Select Area</option>
+                    <option value="">Select Coverage Area</option>
                     {coverageAreas.map(area => <option key={area} value={area}>{area}</option>)}
                   </select>
                   {errors.serviceCoverageArea && <p className={styles.fieldError}>{errors.serviceCoverageArea}</p>}
@@ -365,13 +403,13 @@ const VehicleRepairServiceForm: React.FC = () => {
               </div>
 
               <div className={styles.field}>
-                <label className={styles.label}>Schedule *</label>
+                <label className={styles.label}>Operating Hours *</label>
                 <input
                   name="weekdayWeekendSchedule"
                   value={formData.weekdayWeekendSchedule}
                   onChange={handleInputChange}
                   className={`${styles.input} ${errors.weekdayWeekendSchedule ? styles.inputError : ''}`}
-                  placeholder="e.g., Mon-Fri: 8AM-6PM, Sat: 8AM-4PM"
+                  placeholder="e.g., Mon-Fri: 8AM-6PM, Sat: 9AM-4PM"
                 />
                 {errors.weekdayWeekendSchedule && <p className={styles.fieldError}>{errors.weekdayWeekendSchedule}</p>}
               </div>
@@ -421,7 +459,7 @@ const VehicleRepairServiceForm: React.FC = () => {
               </div>
 
               <div className={styles.field}>
-                <label className={styles.checkboxLabel}>
+                <label className={styles.checkboxLabel} style={{ marginTop: '1rem', display: 'flex', alignItems: 'center' }}>
                   <input
                     type="checkbox"
                     name="isAvailable24_7"
@@ -429,7 +467,7 @@ const VehicleRepairServiceForm: React.FC = () => {
                     onChange={handleInputChange}
                     className={styles.checkbox}
                   />
-                  Available 24/7
+                  Available 24/7 (Optional)
                 </label>
               </div>
             </div>

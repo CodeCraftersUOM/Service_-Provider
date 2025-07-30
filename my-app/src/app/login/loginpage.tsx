@@ -27,7 +27,7 @@ export default function LoginPage() {
           // User is already logged in, redirect them
           router.push(redirectUrl);
         }
-      } catch (error) {
+      } catch {
         // User is not logged in, stay on login page
         console.log("User not authenticated");
       }
@@ -174,7 +174,7 @@ export default function LoginPage() {
         <button onClick={handleLogin} className={styles.button}>LOG IN</button>
 
         <p className={styles.footer}>
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <Link href="/signup" className={styles.link}>Sign up</Link>
         </p>
       </div>

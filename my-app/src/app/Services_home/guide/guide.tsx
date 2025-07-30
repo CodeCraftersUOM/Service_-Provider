@@ -265,7 +265,7 @@ const GuideRegistrationForm: React.FC = () => {
     setMessage('');
 
     try {
-      const response = await fetch('http://localhost:2000/api/addGuide', {
+      const response = await fetch('http://localhost:2000/api/guides/addGuide', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

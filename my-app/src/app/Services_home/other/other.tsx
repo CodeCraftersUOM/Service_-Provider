@@ -201,7 +201,7 @@ const ServiceForm: React.FC = () => {
       
       console.log('Sending data:', requestData); // Debug log
       
-      const response = await fetch('http://localhost:2000/api/other-services', {
+      const response = await fetch('http://localhost:2000/api/other/other-services', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestData),
