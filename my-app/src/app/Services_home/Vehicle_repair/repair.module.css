@@ -189,6 +189,12 @@
   font-size: 1rem;
 }
 
+.helpText {
+  font-weight: 400;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
 .input,
 .select,
 .textarea {
@@ -255,11 +261,6 @@
   height: 1.25rem;
   accent-color: #3b82f6;
   cursor: pointer;
-}
-
-.checkboxText {
-  font-size: 1rem;
-  color: #1e40af;
 }
 
 /* Button Styles */
@@ -433,6 +434,19 @@
 }
 
 /* Form Validation Styles */
+.inputError {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 1px #ef4444;
+}
+
+.fieldError {
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
 .input:invalid:not(:placeholder-shown),
 .select:invalid:not(:placeholder-shown),
 .textarea:invalid:not(:placeholder-shown) {
@@ -446,25 +460,11 @@
   border-color: #059669;
 }
 
-/* Error styling for inputs */
-.inputError {
-  border-color: #ef4444 !important;
-  box-shadow: 0 0 0 1px #ef4444;
-}
-
-/* Error message styling */
-.fieldError {
-  color: #ef4444;
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
-  margin-bottom: 0.5rem;
-  display: block;
-}
-
 /* Responsive Design */
 @media (max-width: 768px) {
   .container {
     padding: 1rem;
+    margin-left: 0;
   }
 
   .formWrapper,

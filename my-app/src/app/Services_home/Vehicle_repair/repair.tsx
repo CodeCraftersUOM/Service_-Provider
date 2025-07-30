@@ -5,255 +5,219 @@ import styles from './repair.module.css';
 import { useRouter } from 'next/navigation';
 
 interface FormData {
-  businessName: string;
-  ownerFullName: string;
-  businessPhoneNumber: string;
-  businessEmailAddress: string;
-  businessWebsite: string;
-  businessDescription: string;
-  locationAddress: string;
-  googleMapsLink: string;
-  servicesOffered: string[];
-  workingHours: { daysOpen: string[]; openingTime: string; closingTime: string; };
-  businessRegistrationNumber: string;
-  licenseDocumentUrl: string;
-  termsAgreed: boolean;
+  ownerName: string;
+  garageName: string;
+  typeOfService: string;
+  registrationOrLicenseNumber: string;
+  yearsInOperation: string;
+  emailAddress: string;
+  serviceCoverageArea: string;
+  weekdayWeekendSchedule: string;
+  isAvailable24_7: boolean;
+  vehicleTypesSupported: string[];
+  languagesAvailable: {
+    sinhala: boolean;
+    tamil: boolean;
+    english: boolean;
+  };
 }
 
-const VehicleRepairForm: React.FC = () => {
-  const [step, setStep] = useState(1);
-  const [success, setSuccess] = useState(false);
-  const [data, setData] = useState<FormData>({
-    businessName: '', ownerFullName: '', businessPhoneNumber: '', businessEmailAddress: '',
-    businessWebsite: '', businessDescription: '', locationAddress: '', googleMapsLink: '',
-    servicesOffered: [], workingHours: { daysOpen: [], openingTime: '', closingTime: '' },
-    businessRegistrationNumber: '', licenseDocumentUrl: '', termsAgreed: false
-  });
-  const [errors, setErrors] = useState<{[key: string]: string}>({});
+interface ApiResponse {
+  message?: string;
+  errors?: Array<{ field: string; message: string; }>;
+}
+
+const VehicleRepairServiceForm: React.FC = () => {
+  const [currentStep, setCurrentStep] = useState(1);
+  const [isSuccess, setIsSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const router = useRouter();
 
-  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-  const services = [
-    'Engine Repair', 'Brake Service', 'Transmission Repair', 'Oil Change', 'Tire Service',
-    'Battery Service', 'Air Conditioning', 'Electrical Repair', 'Body Work', 'Paint Service',
-    'Windshield Repair', 'Suspension Repair', 'Exhaust Service', 'Diagnostic Service', 'Towing Service'
+  const [formData, setFormData] = useState<FormData>({
+    ownerName: '',
+    garageName: '',
+    typeOfService: '',
+    registrationOrLicenseNumber: '',
+    yearsInOperation: '',
+    emailAddress: '',
+    serviceCoverageArea: '',
+    weekdayWeekendSchedule: '',
+    isAvailable24_7: false,
+    vehicleTypesSupported: [],
+    languagesAvailable: { sinhala: false, tamil: false, english: false },
+  });
+
+  const serviceTypes = [
+    'Garage',
+    'Mobile Mechanic', 
+    '24/7 Roadside Assistance',
+    'Specialized Service Center'
   ];
 
-  // ✅ CONSOLIDATED VALIDATION with Sri Lankan requirements
-  const validate = (): {[key: string]: string} => {
-    const e: {[key: string]: string} = {};
+  const vehicleTypes = ['Cars', 'Vans', 'Buses', 'Motorbikes', 'Trucks'];
+
+  const coverageAreas = [
+    'Colombo', 'Gampaha', 'Kalutara', 'Kandy', 'Matale', 'Nuwara Eliya',
+    'Galle', 'Matara', 'Hambantota', 'Jaffna', 'Kurunegala', 'Puttalam', 
+    'Anuradhapura', 'Polonnaruwa', 'Badulla', 'Ratnapura', 'Kegalle', 'Nationwide'
+  ];
+
+  const validate = (step: number) => {
+    const newErrors: Record<string, string> = {};
     
-    // Required fields
-    if (!data.businessName.trim()) e.businessName = "Business name required";
-    if (!data.ownerFullName.trim()) e.ownerFullName = "Owner name required";
-    if (!data.businessEmailAddress.trim()) e.businessEmailAddress = "Email required";
-    if (!data.businessDescription.trim()) e.businessDescription = "Description required";
-    if (!data.locationAddress.trim()) e.locationAddress = "Address required";
-    if (!data.servicesOffered.length) e.servicesOffered = "Select at least one service";
-    if (!data.workingHours.daysOpen.length) e.workingDays = "Select at least one day";
-    if (!data.workingHours.openingTime) e.openingTime = "Opening time required";
-    if (!data.workingHours.closingTime) e.closingTime = "Closing time required";
-    if (!data.termsAgreed) e.termsAgreed = "Must agree to terms";
-
-    // ✅ Sri Lankan phone validation (10 digits, specific patterns)
-    if (!data.businessPhoneNumber.trim()) {
-      e.businessPhoneNumber = "Phone number required";
-    } else {
-      const phone = data.businessPhoneNumber.replace(/\D/g, '');
-      if (phone.length !== 10) {
-        e.businessPhoneNumber = "Must be exactly 10 digits";
-      } else if (!/^(07[0-9]{8}|0[1-9][0-9]{8})$/.test(phone)) {
-        e.businessPhoneNumber = "Invalid Sri Lankan phone (07XXXXXXXX for mobile, 0XXXXXXXXX for landline)";
-      }
+    if (step === 1) {
+      if (!formData.ownerName.trim()) newErrors.ownerName = "Owner name is required";
+      if (!formData.garageName.trim()) newErrors.garageName = "Garage name is required";
+      if (!formData.emailAddress.trim()) newErrors.emailAddress = "Email is required";
+      if (!formData.registrationOrLicenseNumber.trim()) newErrors.registrationOrLicenseNumber = "License number is required";
+      if (!formData.yearsInOperation.trim()) newErrors.yearsInOperation = "Years in operation is required";
+      else if (parseInt(formData.yearsInOperation) < 0) newErrors.yearsInOperation = "Years cannot be negative";
     }
-
-    // Email validation
-    if (data.businessEmailAddress && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.businessEmailAddress)) {
-      e.businessEmailAddress = "Invalid email format";
+    
+    if (step === 2) {
+      if (!formData.typeOfService) newErrors.typeOfService = "Service type is required";
+      if (!formData.serviceCoverageArea) newErrors.serviceCoverageArea = "Coverage area is required";
+      if (!formData.weekdayWeekendSchedule.trim()) newErrors.weekdayWeekendSchedule = "Schedule is required";
+      if (formData.vehicleTypesSupported.length === 0) newErrors.vehicleTypesSupported = "At least one vehicle type is required";
     }
-
-    // ✅ Google Maps link validation (must be Google Maps URL)
-    if (data.googleMapsLink.trim()) {
-      try {
-        const url = new URL(data.googleMapsLink);
-        const validDomains = ['maps.google.com', 'maps.google.', 'goo.gl', 'maps.app.goo.gl'];
-        if (!validDomains.some(domain => url.hostname.includes(domain) || url.href.includes('maps.google'))) {
-          e.googleMapsLink = "Must be a valid Google Maps link (maps.google.com, goo.gl/maps, or maps.app.goo.gl)";
-        }
-      } catch {
-        e.googleMapsLink = "Invalid Google Maps URL format";
-      }
+    
+    if (step === 3) {
+      const { sinhala, tamil, english } = formData.languagesAvailable;
+      if (!sinhala && !tamil && !english) newErrors.languagesAvailable = "At least one language is required";
     }
-
-    // Optional validations
-    if (data.businessWebsite && data.businessWebsite.trim()) {
-      try { new URL(data.businessWebsite); } catch { e.businessWebsite = "Invalid website URL"; }
-    }
-
-    if (data.businessDescription && (data.businessDescription.length < 10 || data.businessDescription.length > 1000)) {
-      e.businessDescription = "Description: 10-1000 characters";
-    }
-
-    if (data.locationAddress && (data.locationAddress.length < 10 || data.locationAddress.length > 200)) {
-      e.locationAddress = "Address: 10-200 characters";
-    }
-
-    // Time validation
-    if (data.workingHours.openingTime && data.workingHours.closingTime) {
-      const open = new Date(`1970-01-01T${data.workingHours.openingTime}`);
-      const close = new Date(`1970-01-01T${data.workingHours.closingTime}`);
-      if (close <= open) e.closingTime = "Closing time must be after opening time";
-    }
-
-    // ✅ Sri Lankan business registration (optional)
-    if (data.businessRegistrationNumber.trim()) {
-      const reg = data.businessRegistrationNumber.trim().toUpperCase();
-      if (!/^(PV|HS|SP|PQ)[0-9]+$|^[0-9]+$/.test(reg)) {
-        e.businessRegistrationNumber = "Invalid Sri Lankan business registration (use PV12345, HS12345, SP12345, PQ12345, or numeric format)";
-      }
-    }
-
-    return e;
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
-    
-    if (errors[name]) setErrors(prev => ({ ...prev, [name]: "" }));
-    
-    if (name.startsWith('workingHours.')) {
-      const key = name.split('.')[1];
-      setData(prev => ({ ...prev, workingHours: { ...prev.workingHours, [key]: value } }));
+
+    if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
+
+    if (name.includes('.')) {
+      const [parent, child] = name.split('.');
+      if (parent === 'languagesAvailable') {
+        setFormData(prev => ({
+          ...prev,
+          languagesAvailable: { ...prev.languagesAvailable, [child]: checked }
+        }));
+      }
     } else {
-      setData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+      setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
     }
   };
 
-  const toggleArray = (field: 'servicesOffered' | 'daysOpen', value: string) => {
-    const errorField = field === 'daysOpen' ? 'workingDays' : field;
-    if (errors[errorField]) setErrors(prev => ({ ...prev, [errorField]: "" }));
-
-    if (field === 'daysOpen') {
-      setData(prev => ({
-        ...prev,
-        workingHours: {
-          ...prev.workingHours,
-          daysOpen: prev.workingHours.daysOpen.includes(value)
-            ? prev.workingHours.daysOpen.filter(d => d !== value)
-            : [...prev.workingHours.daysOpen, value]
-        }
-      }));
-    } else {
-      setData(prev => ({
-        ...prev,
-        servicesOffered: prev.servicesOffered.includes(value)
-          ? prev.servicesOffered.filter(s => s !== value)
-          : [...prev.servicesOffered, value]
-      }));
-    }
+  const handleVehicleTypeChange = (vehicleType: string) => {
+    if (errors.vehicleTypesSupported) setErrors(prev => ({ ...prev, vehicleTypesSupported: '' }));
+    
+    setFormData(prev => ({
+      ...prev,
+      vehicleTypesSupported: prev.vehicleTypesSupported.includes(vehicleType)
+        ? prev.vehicleTypesSupported.filter(type => type !== vehicleType)
+        : [...prev.vehicleTypesSupported, vehicleType]
+    }));
   };
 
-  const next = () => {
-    const stepErrors = validate();
-    const stepFields = {
-      1: ['businessName', 'ownerFullName', 'businessPhoneNumber', 'businessEmailAddress', 'businessWebsite', 'businessDescription'],
-      2: ['locationAddress', 'googleMapsLink', 'servicesOffered']
-    };
-    
-    const currentErrors = Object.keys(stepErrors).filter(key => 
-      stepFields[step as keyof typeof stepFields]?.includes(key)
-    );
-    
-    if (currentErrors.length === 0) {
-      setStep(prev => Math.min(prev + 1, 3));
+  const nextStep = () => {
+    if (validate(currentStep)) {
+      setCurrentStep(prev => Math.min(prev + 1, 3));
       setMessage('');
     } else {
-      const filtered: {[key: string]: string} = {};
-      currentErrors.forEach(key => filtered[key] = stepErrors[key]);
-      setErrors(filtered);
-      setMessage('Fix errors below.');
+      setMessage('Please fix the errors below.');
     }
   };
 
-  const submit = async () => {
-    const allErrors = validate();
-    if (Object.keys(allErrors).length > 0) {
-      setErrors(allErrors);
-      setMessage('Fix all errors before submitting.');
+  const prevStep = () => {
+    setCurrentStep(prev => Math.max(prev - 1, 1));
+    setMessage('');
+    setErrors({});
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validate(1) || !validate(2) || !validate(3)) {
+      setMessage('Please fix all errors before submitting.');
       return;
     }
 
     setLoading(true);
+    setMessage('');
+
     try {
-      const response = await fetch('http://localhost:2000/api/addRepair', {
+      const cleanedData = {
+        ...formData,
+        yearsInOperation: parseInt(formData.yearsInOperation)
+      };
+
+      const response = await fetch('http://localhost:2000/api/addVehicleRepairService', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify(cleanedData),
       });
-      const result = await response.json();
-      if (response.ok && result.success) {
-        setSuccess(true);
+
+      const data: ApiResponse = await response.json();
+
+      if (response.ok) {
+        setIsSuccess(true);
       } else {
-        setMessage(`Error: ${result.message || 'Registration failed'}`);
+        if (data.errors) {
+          const backendErrors: Record<string, string> = {};
+          data.errors.forEach(err => {
+            backendErrors[err.field] = err.message;
+          });
+          setErrors(backendErrors);
+          setMessage('Please fix the validation errors below.');
+        } else {
+          setMessage(`Error: ${data.message || 'Failed to register service'}`);
+        }
       }
     } catch {
-      setMessage('Error: Server connection failed');
+      setMessage('Error: Failed to connect to server.');
     } finally {
       setLoading(false);
     }
   };
 
-  const reset = () => {
-    setSuccess(false);
-    setStep(1);
+  const resetForm = () => {
+    setIsSuccess(false);
+    setCurrentStep(1);
     setErrors({});
     setMessage('');
-    setData({
-      businessName: '', ownerFullName: '', businessPhoneNumber: '', businessEmailAddress: '',
-      businessWebsite: '', businessDescription: '', locationAddress: '', googleMapsLink: '',
-      servicesOffered: [], workingHours: { daysOpen: [], openingTime: '', closingTime: '' },
-      businessRegistrationNumber: '', licenseDocumentUrl: '', termsAgreed: false
+    setFormData({
+      ownerName: '', garageName: '', typeOfService: '', registrationOrLicenseNumber: '',
+      yearsInOperation: '', emailAddress: '', serviceCoverageArea: '', weekdayWeekendSchedule: '',
+      isAvailable24_7: false, vehicleTypesSupported: [],
+      languagesAvailable: { sinhala: false, tamil: false, english: false },
     });
   };
 
-  const Field = ({ name, label, type = 'text', required = false, placeholder = '', rows = 0 }: any) => (
-    <div className={styles.field}>
-      <label className={styles.label}>
-        {label} {required && '*'}
-        {name.includes('Phone') && <span style={{fontSize: '0.8em', color: '#666'}}> (0*********)</span>}
-        {name === 'googleMapsLink' && <span style={{fontSize: '0.8em', color: '#666'}}> (Google Maps only)</span>}
-        {name === 'businessRegistrationNumber' && <span style={{fontSize: '0.8em', color: '#666'}}> (PV12345, etc.)</span>}
-      </label>
-      {rows > 0 ? (
-        <textarea name={name} value={data[name as keyof FormData] as string} onChange={handleChange}
-                  className={`${styles.textarea} ${errors[name] ? styles.inputError : ''}`} 
-                  rows={rows} placeholder={placeholder} />
-      ) : (
-        <input type={type} name={name} value={data[name as keyof FormData] as string} onChange={handleChange}
-               className={`${styles.input} ${errors[name] ? styles.inputError : ''}`} placeholder={placeholder} />
-      )}
-      {errors[name] && <p className={styles.fieldError}>{errors[name]}</p>}
-    </div>
-  );
-
-  if (success) {
+  if (isSuccess) {
     return (
       <div className={styles.container}>
         <div className={styles.successWrapper}>
-          <div className={styles.successIcon}>✓</div>
-          <h1 className={styles.successTitle}>Vehicle Repair Business Registered!</h1>
+          <div className={styles.successIcon}>
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22,4 12,14.01 9,11.01"></polyline>
+            </svg>
+          </div>
+          <h1 className={styles.successTitle}>Vehicle Repair Service Successfully Registered!</h1>
           <p className={styles.successMessage}>
-            <strong>{data.businessName}</strong> has been registered successfully.
+            <strong>{formData.garageName}</strong> has been registered successfully.
           </p>
           <div className={styles.successDetails}>
-            <p><strong>Owner:</strong> {data.ownerFullName}</p>
-            <p><strong>Phone:</strong> {data.businessPhoneNumber}</p>
-            <p><strong>Services:</strong> {data.servicesOffered.length} selected</p>
+            <p><strong>Garage:</strong> {formData.garageName}</p>
+            <p><strong>Owner:</strong> {formData.ownerName}</p>
+            <p><strong>Service Type:</strong> {formData.typeOfService}</p>
+            <p><strong>Coverage:</strong> {formData.serviceCoverageArea}</p>
+            <p><strong>Experience:</strong> {formData.yearsInOperation} years</p>
           </div>
-          <button onClick={reset} className={styles.newRegistrationButton}>Register Another</button>
+          <button onClick={resetForm} className={styles.newRegistrationButton}>Register Another</button>
           <button onClick={() => router.push('/Dashboard')} className={styles.newRegistrationButton}>Dashboard</button>
         </div>
       </div>
@@ -263,131 +227,231 @@ const VehicleRepairForm: React.FC = () => {
   return (
     <div className={styles.container}>
       <div className={styles.formWrapper}>
-        {/* Progress */}
+        {/* Progress Bar */}
         <div className={styles.progressContainer}>
           <div className={styles.progressBar}>
-            <div className={styles.progressFill} style={{ width: `${(step / 3) * 100}%` }}></div>
+            <div className={styles.progressFill} style={{ width: `${(currentStep / 3) * 100}%` }}></div>
           </div>
           <div className={styles.stepIndicators}>
-            {[1, 2, 3].map(s => (
-              <div key={s} className={`${styles.stepIndicator} ${step >= s ? styles.active : ''}`}>
-                <div className={styles.stepNumber}>{s}</div>
+            {[1, 2, 3].map(step => (
+              <div key={step} className={`${styles.stepIndicator} ${currentStep >= step ? styles.active : ''}`}>
+                <div className={styles.stepNumber}>{step}</div>
                 <div className={styles.stepLabel}>
-                  {s === 1 ? 'Business' : s === 2 ? 'Location' : 'Schedule'}
+                  {step === 1 && 'Basic Info'}
+                  {step === 2 && 'Service Details'}
+                  {step === 3 && 'Languages & Availability'}
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        <h1 className={styles.title}>Vehicle Repair Registration</h1>
-        {message && <div className={`${styles.message} ${message.includes('Error') ? styles.error : styles.warning}`}>{message}</div>}
+        <h1 className={styles.title}>Vehicle Repair Service Registration</h1>
+        
+        {message && (
+          <div className={`${styles.message} ${message.includes('Error') ? styles.error : styles.warning}`}>
+            {message}
+          </div>
+        )}
 
-        <div className={styles.form}>
-          {/* Step 1: Business Info */}
-          {step === 1 && (
+        <form onSubmit={handleSubmit} className={styles.form}>
+          {/* Step 1: Basic Information */}
+          {currentStep === 1 && (
             <div className={styles.step}>
-              <h2 className={styles.stepTitle}>Business Information</h2>
-              <div className={styles.row}>
-                <Field name="businessName" label="Business Name" required placeholder="Your repair shop name" />
-                <Field name="ownerFullName" label="Owner Name" required placeholder="Full name of owner" />
-              </div>
-              <div className={styles.row}>
-                <Field name="businessPhoneNumber" label="Phone Number" type="tel" required placeholder="Sri Lankan phone (0********* )" />
-                <Field name="businessEmailAddress" label="Email" type="email" required placeholder="Business email address" />
-              </div>
-              <Field name="businessWebsite" label="Website (Optional)" type="url" placeholder="https://yourwebsite.com" />
-              <Field name="businessDescription" label="Description" required rows={4} placeholder="Describe your services, experience, and specialties (10-1000 chars)" />
-            </div>
-          )}
-
-          {/* Step 2: Location & Services */}
-          {step === 2 && (
-            <div className={styles.step}>
-              <h2 className={styles.stepTitle}>Location & Services</h2>
-              <Field name="locationAddress" label="Address" required placeholder="Full business address (10-200 chars)" />
-              <Field name="googleMapsLink" label="Google Maps Link (Optional)" type="url" placeholder="Google Maps URL to your location" />
+              <h2 className={styles.stepTitle}>Basic Information</h2>
               
-              <div className={styles.field}>
-                <label className={styles.label}>Services Offered * (Select services you provide)</label>
-                <div className={styles.checkboxGrid}>
-                  {services.map(service => (
-                    <label key={service} className={styles.checkboxLabel}>
-                      <input type="checkbox" checked={data.servicesOffered.includes(service)}
-                             onChange={() => toggleArray('servicesOffered', service)} className={styles.checkbox} />
-                      {service}
-                    </label>
-                  ))}
+              <div className={styles.row}>
+                <div className={styles.field}>
+                  <label className={styles.label}>Owner Name *</label>
+                  <input
+                    name="ownerName"
+                    value={formData.ownerName}
+                    onChange={handleInputChange}
+                    className={`${styles.input} ${errors.ownerName ? styles.inputError : ''}`}
+                    placeholder="Enter owner name"
+                  />
+                  {errors.ownerName && <p className={styles.fieldError}>{errors.ownerName}</p>}
                 </div>
-                {errors.servicesOffered && <p className={styles.fieldError}>{errors.servicesOffered}</p>}
-              </div>
-            </div>
-          )}
 
-          {/* Step 3: Schedule & Legal */}
-          {step === 3 && (
-            <div className={styles.step}>
-              <h2 className={styles.stepTitle}>Schedule & Legal</h2>
-              
-              <div className={styles.field}>
-                <label className={styles.label}>Working Days * (Select operating days)</label>
-                <div className={styles.checkboxGrid}>
-                  {days.map(day => (
-                    <label key={day} className={styles.checkboxLabel}>
-                      <input type="checkbox" checked={data.workingHours.daysOpen.includes(day)}
-                             onChange={() => toggleArray('daysOpen', day)} className={styles.checkbox} />
-                      {day}
-                    </label>
-                  ))}
+                <div className={styles.field}>
+                  <label className={styles.label}>Garage Name *</label>
+                  <input
+                    name="garageName"
+                    value={formData.garageName}
+                    onChange={handleInputChange}
+                    className={`${styles.input} ${errors.garageName ? styles.inputError : ''}`}
+                    placeholder="Enter garage name"
+                  />
+                  {errors.garageName && <p className={styles.fieldError}>{errors.garageName}</p>}
                 </div>
-                {errors.workingDays && <p className={styles.fieldError}>{errors.workingDays}</p>}
               </div>
 
               <div className={styles.row}>
                 <div className={styles.field}>
-                  <label className={styles.label}>Opening Time *</label>
-                  <input type="time" name="workingHours.openingTime" value={data.workingHours.openingTime}
-                         onChange={handleChange} className={`${styles.input} ${errors.openingTime ? styles.inputError : ''}`} />
-                  {errors.openingTime && <p className={styles.fieldError}>{errors.openingTime}</p>}
+                  <label className={styles.label}>Email Address *</label>
+                  <input
+                    type="email"
+                    name="emailAddress"
+                    value={formData.emailAddress}
+                    onChange={handleInputChange}
+                    className={`${styles.input} ${errors.emailAddress ? styles.inputError : ''}`}
+                    placeholder="Enter email"
+                  />
+                  {errors.emailAddress && <p className={styles.fieldError}>{errors.emailAddress}</p>}
                 </div>
+
                 <div className={styles.field}>
-                  <label className={styles.label}>Closing Time *</label>
-                  <input type="time" name="workingHours.closingTime" value={data.workingHours.closingTime}
-                         onChange={handleChange} className={`${styles.input} ${errors.closingTime ? styles.inputError : ''}`} />
-                  {errors.closingTime && <p className={styles.fieldError}>{errors.closingTime}</p>}
+                  <label className={styles.label}>License Number *</label>
+                  <input
+                    name="registrationOrLicenseNumber"
+                    value={formData.registrationOrLicenseNumber}
+                    onChange={handleInputChange}
+                    className={`${styles.input} ${errors.registrationOrLicenseNumber ? styles.inputError : ''}`}
+                    placeholder="Registration/License number"
+                  />
+                  {errors.registrationOrLicenseNumber && <p className={styles.fieldError}>{errors.registrationOrLicenseNumber}</p>}
                 </div>
               </div>
 
+              <div className={styles.field}>
+                <label className={styles.label}>Years in Operation *</label>
+                <input
+                  type="number"
+                  name="yearsInOperation"
+                  value={formData.yearsInOperation}
+                  onChange={handleInputChange}
+                  className={`${styles.input} ${errors.yearsInOperation ? styles.inputError : ''}`}
+                  placeholder="Enter years in operation"
+                  min="0"
+                />
+                {errors.yearsInOperation && <p className={styles.fieldError}>{errors.yearsInOperation}</p>}
+              </div>
+            </div>
+          )}
+
+          {/* Step 2: Service Details */}
+          {currentStep === 2 && (
+            <div className={styles.step}>
+              <h2 className={styles.stepTitle}>Service Details</h2>
+              
               <div className={styles.row}>
-                <Field name="businessRegistrationNumber" label="Business Registration (Optional)" placeholder="Sri Lankan registration number" />
-                <Field name="licenseDocumentUrl" label="License Document URL (Optional)" type="url" placeholder="License document link" />
+                <div className={styles.field}>
+                  <label className={styles.label}>Type of Service *</label>
+                  <select
+                    name="typeOfService"
+                    value={formData.typeOfService}
+                    onChange={handleInputChange}
+                    className={`${styles.select} ${errors.typeOfService ? styles.inputError : ''}`}
+                  >
+                    <option value="">Select Service Type</option>
+                    {serviceTypes.map(type => <option key={type} value={type}>{type}</option>)}
+                  </select>
+                  {errors.typeOfService && <p className={styles.fieldError}>{errors.typeOfService}</p>}
+                </div>
+
+                <div className={styles.field}>
+                  <label className={styles.label}>Coverage Area *</label>
+                  <select
+                    name="serviceCoverageArea"
+                    value={formData.serviceCoverageArea}
+                    onChange={handleInputChange}
+                    className={`${styles.select} ${errors.serviceCoverageArea ? styles.inputError : ''}`}
+                  >
+                    <option value="">Select Area</option>
+                    {coverageAreas.map(area => <option key={area} value={area}>{area}</option>)}
+                  </select>
+                  {errors.serviceCoverageArea && <p className={styles.fieldError}>{errors.serviceCoverageArea}</p>}
+                </div>
+              </div>
+
+              <div className={styles.field}>
+                <label className={styles.label}>Schedule *</label>
+                <input
+                  name="weekdayWeekendSchedule"
+                  value={formData.weekdayWeekendSchedule}
+                  onChange={handleInputChange}
+                  className={`${styles.input} ${errors.weekdayWeekendSchedule ? styles.inputError : ''}`}
+                  placeholder="e.g., Mon-Fri: 8AM-6PM, Sat: 8AM-4PM"
+                />
+                {errors.weekdayWeekendSchedule && <p className={styles.fieldError}>{errors.weekdayWeekendSchedule}</p>}
+              </div>
+
+              <div className={styles.field}>
+                <label className={styles.label}>Vehicle Types Supported *</label>
+                <div className={styles.checkboxGrid}>
+                  {vehicleTypes.map(type => (
+                    <label key={type} className={styles.checkboxLabel}>
+                      <input
+                        type="checkbox"
+                        checked={formData.vehicleTypesSupported.includes(type)}
+                        onChange={() => handleVehicleTypeChange(type)}
+                        className={styles.checkbox}
+                      />
+                      {type}
+                    </label>
+                  ))}
+                </div>
+                {errors.vehicleTypesSupported && <p className={styles.fieldError}>{errors.vehicleTypesSupported}</p>}
+              </div>
+            </div>
+          )}
+
+          {/* Step 3: Languages & Availability */}
+          {currentStep === 3 && (
+            <div className={styles.step}>
+              <h2 className={styles.stepTitle}>Languages & Availability</h2>
+              
+              <div className={styles.field}>
+                <label className={styles.label}>Languages Available *</label>
+                <div className={styles.checkboxRow}>
+                  {['sinhala', 'tamil', 'english'].map(lang => (
+                    <label key={lang} className={styles.checkboxLabel}>
+                      <input
+                        type="checkbox"
+                        name={`languagesAvailable.${lang}`}
+                        checked={formData.languagesAvailable[lang as keyof typeof formData.languagesAvailable]}
+                        onChange={handleInputChange}
+                        className={styles.checkbox}
+                      />
+                      {lang.charAt(0).toUpperCase() + lang.slice(1)}
+                    </label>
+                  ))}
+                </div>
+                {errors.languagesAvailable && <p className={styles.fieldError}>{errors.languagesAvailable}</p>}
               </div>
 
               <div className={styles.field}>
                 <label className={styles.checkboxLabel}>
-                  <input type="checkbox" name="termsAgreed" checked={data.termsAgreed} onChange={handleChange} className={styles.checkbox} />
-                  <span>I agree to the Terms & Conditions and Privacy Policy *</span>
+                  <input
+                    type="checkbox"
+                    name="isAvailable24_7"
+                    checked={formData.isAvailable24_7}
+                    onChange={handleInputChange}
+                    className={styles.checkbox}
+                  />
+                  Available 24/7
                 </label>
-                {errors.termsAgreed && <p className={styles.fieldError}>{errors.termsAgreed}</p>}
               </div>
             </div>
           )}
 
           {/* Navigation */}
           <div className={styles.buttonContainer}>
-            {step > 1 && <button type="button" onClick={() => setStep(step - 1)} className={styles.prevButton}>Previous</button>}
-            {step < 3 ? (
-              <button type="button" onClick={next} className={styles.nextButton}>Next</button>
+            {currentStep > 1 && (
+              <button type="button" onClick={prevStep} className={styles.prevButton}>Previous</button>
+            )}
+            {currentStep < 3 ? (
+              <button type="button" onClick={nextStep} className={styles.nextButton}>Next</button>
             ) : (
-              <button type="button" onClick={submit} disabled={loading} className={styles.submitButton}>
-                {loading ? 'Registering...' : 'Register Business'}
+              <button type="submit" className={styles.submitButton} disabled={loading}>
+                {loading ? 'Registering...' : 'Register Service'}
               </button>
             )}
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );
 };
 
-export default VehicleRepairForm;
+export default VehicleRepairServiceForm;

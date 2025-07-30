@@ -188,27 +188,39 @@ const ServiceForm: React.FC = () => {
 
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:2000/api/addService', {
+      const requestData = {
+        ...data,
+        yearsOfExperience: data.yearsOfExperience ? parseInt(data.yearsOfExperience) : 0,
+        availability: {
+          availableDays: data.availableDays,
+          availableTimeSlots: data.availableTimeSlots,
+          is24x7Available: data.is24x7Available,
+          emergencyOrOnCallAvailable: data.emergencyOrOnCallAvailable,
+        }
+      };
+      
+      console.log('Sending data:', requestData); // Debug log
+      
+      const response = await fetch('http://localhost:2000/api/other-services', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...data,
-          yearsOfExperience: data.yearsOfExperience ? parseInt(data.yearsOfExperience) : 0,
-          availability: {
-            availableDays: data.availableDays,
-            availableTimeSlots: data.availableTimeSlots,
-            is24x7Available: data.is24x7Available,
-            emergencyOrOnCallAvailable: data.emergencyOrOnCallAvailable,
-          }
-        }),
+        body: JSON.stringify(requestData),
       });
       if (response.ok) {
         setSuccess(true);
       } else {
         const result = await response.json();
-        setMessage(`Error: ${result.message || 'Registration failed'}`);
+        console.log('Error response:', result); // Debug log
+        if (result.errors && Array.isArray(result.errors)) {
+          // Handle validation errors
+          const errorMessages = result.errors.map((err: any) => `${err.field}: ${err.message}`).join(', ');
+          setMessage(`Validation errors: ${errorMessages}`);
+        } else {
+          setMessage(`Error: ${result.message || result.error || 'Registration failed'}`);
+        }
       }
-    } catch {
+    } catch (error) {
+      console.error('Network error:', error); // Debug log
       setMessage('Error: Server connection failed');
     } finally {
       setLoading(false);
