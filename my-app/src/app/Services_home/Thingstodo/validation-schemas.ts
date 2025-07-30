@@ -4,7 +4,10 @@ import { z } from "zod"
 export const basePublisherSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(100, "Name too long"),
   email: z.string().email("Please enter a valid email address"),
-  phone: z.string().regex(/^\+?[\d\s\-()]{10,}$/, "Please enter a valid phone number"),
+  phone: z
+  .string()
+  .regex(/^07\d{8}$/, "Enter a valid 10-digit Sri Lankan mobile number starting with 07"),
+
   address: z.string().min(10, "Address must be at least 10 characters"),
 })
 

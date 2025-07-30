@@ -1,5 +1,6 @@
 'use client';
 
+
 import React, { useState } from 'react';
 import styles from './restaurent.module.css';
 import { useRouter } from 'next/navigation';
@@ -220,7 +221,7 @@ const RestaurantRegistrationForm: React.FC = () => {
 
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:2000/api/addResturent', {
+      const response = await fetch('http://localhost:2000/api/addRestaurant', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -228,6 +229,7 @@ const RestaurantRegistrationForm: React.FC = () => {
 
       if (response.ok) {
         setIsSuccess(true);
+        console.log("✅ Submission successful:", formData);
       } else {
         const data = await response.json();
         setMessage(`Error: ${data.message || 'Failed to register restaurant'}`);
