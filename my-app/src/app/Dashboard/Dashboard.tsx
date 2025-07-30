@@ -139,22 +139,21 @@ const Dashboard = () => {
   };
 
   const handleMenuClick = (menuName: string, route: string) => {
+    console.log('Menu clicked:', menuName, 'Route:', route); // Debug log
+    
     if (menuName === 'Log Out') {
       handleLogout();
       return;
     }
-    if (menuName === 'Services') {
+    
+    // Navigate to specific pages
+    if (menuName === 'Services' || menuName === 'Help' || menuName === 'Payments') {
+      console.log(`Navigating to ${menuName} page:`, route);
       router.push(route);
       return;
     }
-    if (menuName === 'Help') {
-      router.push(route);
-      return;
-    }
-    if (menuName === 'Payments') {
-      router.push(route);
-      return;
-    }
+    
+    console.log('Setting active menu item:', menuName);
     setActiveMenuItem(menuName);
     // Uncomment to enable navigation for other pages
     // router.push(route);

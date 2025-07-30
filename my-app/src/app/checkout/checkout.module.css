@@ -12,14 +12,15 @@
     align-items: flex-start; /* Change from center to flex-start */
     padding: 40px 20px;
     padding-top: 150px; /* Increased padding-top to push the box down */
+    padding-left: 120px; /* Increased left padding to move form more to the right */
 }
 
 .form {
     background-color: rgba(255, 255, 255, 0.9);
     padding: 30px; /* Increased padding inside the box for better spacing */
     border-radius: 16px;
-    /* Removed fixed negative margins. Use a controlled margin-left for spacing from edge */
-    margin-left: 50px; /* Adjust this value to move it further left or right */
+    /* Increased margin-left for better positioning from the left edge */
+    margin-left: 80px; /* Increased margin to move form further right */
     /* margin-top: 100px; <--- Removed, controlled by container padding-top now */
 
     /* Adjusted width for better responsiveness and visibility */
@@ -128,6 +129,7 @@
     background-color: #f9f9f9;
     cursor: pointer;
     transition: background-color 0.2s ease;
+    position: relative;
 }
 
 .cardOption:hover {
@@ -138,11 +140,79 @@
     margin: 0;
 }
 
+.cardOption input[type="radio"]:checked + .cardPreview {
+    color: #007bff;
+    font-weight: 600;
+}
+
+.cardOption:has(input[type="radio"]:checked) {
+    background-color: #e3f2fd;
+    border-color: #007bff;
+    border-width: 2px;
+}
+
 .cardPreview {
     font-family: monospace;
     font-weight: 500;
     color: #333;
     cursor: pointer;
+    flex: 1;
+}
+
+.cardActions {
+    display: flex;
+    gap: 5px;
+    margin-left: auto;
+}
+
+.viewCardBtn {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+    color: #007bff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+}
+
+.viewCardBtn:hover {
+    background-color: #e3f2fd;
+    transform: scale(1.1);
+}
+
+.viewCardBtn:active {
+    transform: scale(0.95);
+}
+
+.removeCardBtn {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+    color: #dc3545;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+}
+
+.removeCardBtn:hover {
+    background-color: #f8d7da;
+    transform: scale(1.1);
+}
+
+.removeCardBtn:active {
+    transform: scale(0.95);
 }
 
 .subheading {
@@ -189,4 +259,271 @@
 
 .checkbox input[type="checkbox"] {
     margin: 0;
+}
+
+/* Modal Styles */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modalContent {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    max-width: 400px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px 16px 24px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.modalTitle {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+}
+
+.modalCloseBtn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #666;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modalCloseBtn:hover {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+.modalBody {
+    padding: 20px 24px;
+}
+
+.cardDetailRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.cardDetailRow:last-child {
+    border-bottom: none;
+}
+
+.cardDetailLabel {
+    font-weight: 500;
+    color: #555;
+    font-size: 14px;
+}
+
+.cardDetailValue {
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+    font-family: monospace;
+}
+
+.modalFooter {
+    padding: 16px 24px 20px 24px;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.modalOkBtn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.modalOkBtn:hover {
+    background-color: #0056b3;
+}
+
+.modalCancelBtn {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    border: 1px solid #dee2e6;
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.modalCancelBtn:hover {
+    background-color: #e9ecef;
+    border-color: #adb5bd;
+    color: #495057;
+}
+
+.modalDeleteBtn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.modalDeleteBtn:hover {
+    background-color: #c82333;
+}
+
+/* Selected Card Info Styles */
+.selectedCardInfo {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #e8f5e8;
+    border: 2px solid #28a745;
+    border-radius: 8px;
+}
+
+.selectedCardDisplay {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.selectedCardText {
+    font-family: monospace;
+    font-weight: 600;
+    color: #28a745;
+    font-size: 16px;
+}
+
+.changeCardBtn {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+}
+
+.changeCardBtn:hover {
+    background-color: #5a6268;
+}
+
+/* Error and Success Messages */
+.errorMessage {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 12px 16px;
+    border: 1px solid #f5c6cb;
+    border-radius: 6px;
+    margin: 16px 0;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.successMessage {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 12px 16px;
+    border: 1px solid #c3e6cb;
+    border-radius: 6px;
+    margin: 16px 0;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Processing State */
+.processingText {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #ffffff;
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Payment Info */
+.paymentInfo {
+    margin-top: 20px;
+    text-align: center;
+    border-top: 1px solid #eee;
+    padding-top: 16px;
+}
+
+.secureText {
+    color: #28a745;
+    font-size: 14px;
+    margin: 8px 0;
+    font-weight: 500;
+}
+
+.testModeText {
+    color: #6c757d;
+    font-size: 12px;
+    margin: 4px 0;
+    font-style: italic;
 }

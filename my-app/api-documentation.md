@@ -52,6 +52,47 @@ You need to implement these API endpoints in your backend server (running on loc
 }
 ```
 
+### 3. Delete a Saved Card
+**DELETE** `/api/cards/{cardId}`
+
+**Headers:**
+- Include cookies for authentication
+
+**URL Parameters:**
+- `cardId`: The ID of the card to delete
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Card deleted successfully"
+}
+```
+
+### 4. Process Payment with Saved Card
+**POST** `/api/process-saved-card-payment`
+
+**Headers:**
+- Content-Type: application/json
+- Include cookies for authentication
+
+**Request Body:**
+```json
+{
+  "cardId": "card-id-1",
+  "amount": 2400000
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Payment processed successfully",
+  "transactionId": "txn-12345"
+}
+```
+
 ## Database Schema
 
 ### Cards Table
