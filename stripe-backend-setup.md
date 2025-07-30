@@ -5,9 +5,11 @@
 Add these environment variables to your backend (Node.js/Express):
 
 ```env
-STRIPE_PUBLISHABLE_KEY=pk_test_51RlV0ULm4wWgyhyBvv0KqRNtKgvbBZVv1Z0uwHhygxjbiXmRuEWic2jFgR8TgcyoeGmWVsZWwWlSxYPEXPflA9o300udbmpj4W
-STRIPE_SECRET_KEY=sk_test_51RlV0ULm4wWgyhyB4yaTQgFCrMFmkcQABSGcBVixxJMigWcmxiAhlkD2PjzPYv4qnz1dNap01BwC2E6WWUqt2hC200yChfPYYI
+STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_publishable_key_here
+STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key_here
 ```
+
+**Note**: Replace the placeholder values above with your actual Stripe test keys from your Stripe Dashboard.
 
 ## Required Dependencies
 
