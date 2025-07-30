@@ -56,7 +56,7 @@ const VehicleRepairServiceForm: React.FC = () => {
     'Specialized Service Center'
   ];
 
-  const vehicleTypes = ['Cars', 'Vans', 'Buses', 'Motorbikes', 'Trucks'];
+  const vehicleTypes = ['Cars', 'Vans', 'Buses', 'Motorbikes', 'Trucks', 'Other'];
 
   const coverageAreas = [
     'Colombo', 'Gampaha', 'Kalutara', 'Kandy', 'Matale', 'Nuwara Eliya',
