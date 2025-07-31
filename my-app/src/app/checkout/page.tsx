@@ -1,5 +1,5 @@
-import Checkout from './checkout';
+import Card from './checkout';
 
-export default function CheckoutPage() {
-  return <Checkout />;
+export default function CardPage() {
+  return <Card />;
 }

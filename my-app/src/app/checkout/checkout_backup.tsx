@@ -230,7 +230,7 @@ const CheckoutForm = () => {
     e.preventDefault();
     
     // If a saved card is selected, process payment with that card
-    if (selectedSavedCard) {
+    if (selectedSavedCard && selectedSavedCard !== 'new-card') {
       const selectedCard = savedCards.find(card => card.id === selectedSavedCard);
       if (selectedCard) {
         await processPaymentWithSavedCard(selectedCard);
@@ -409,13 +409,31 @@ const CheckoutForm = () => {
               </div>
             </div>
           ))}
+          
+          {/* Add New Card Option */}
+          <div className={styles.cardOption} onClick={() => handleCardSelection('new-card')}>
+            <input
+              type="radio"
+              id="card-new"
+              name="selectedCard"
+              value="new-card"
+              checked={selectedSavedCard === 'new-card'}
+              readOnly
+            />
+            <label htmlFor="card-new" className={styles.cardPreview}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style={{marginRight: '8px', verticalAlign: 'middle'}}>
+                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+              </svg>
+              Add New Card
+            </label>
+          </div>
         </>
       ) : (
         <div className={styles.noCards}>No saved cards found. Please add a new card below.</div>
       )}
 
       {/* Show selected card confirmation */}
-      {selectedSavedCard && (
+      {selectedSavedCard && selectedSavedCard !== 'new-card' && (
         <div className={styles.selectedCardInfo}>
           <div className={styles.subheading}>Selected Payment Method</div>
           {(() => {
@@ -441,10 +459,12 @@ const CheckoutForm = () => {
         </div>
       )}
 
-      {/* Only show new card form if no saved card is selected */}
-      {!selectedSavedCard && (
+      {/* Only show new card form if no saved card is selected OR "new-card" is selected */}
+      {(!selectedSavedCard || selectedSavedCard === 'new-card') && (
         <>
-          <div className={styles.subheading}>Pay with Another Card</div>
+          <div className={styles.subheading}>
+            {savedCards.length > 0 ? 'Add New Card' : 'Pay with Card'}
+          </div>
           <p className={styles.label}>Card Details</p>
 
           <label className={styles.label}>Cardholder Name</label>
@@ -491,13 +511,13 @@ const CheckoutForm = () => {
       {error && <div className={styles.errorMessage}>⚠️ {error}</div>}
       {success && <div className={styles.successMessage}>✅ Payment completed!</div>}
 
-      <button type="submit" className={styles.submitButton} disabled={processing || (!stripe && !selectedSavedCard) || (!selectedSavedCard && !cardholderName.trim())}>
+      <button type="submit" className={styles.submitButton} disabled={processing || (!stripe && !selectedSavedCard) || ((!selectedSavedCard || selectedSavedCard === 'new-card') && !cardholderName.trim())}>
         {processing ? (
           <span className={styles.processingText}>
             <span className={styles.spinner}></span>
             Processing...
           </span>
-        ) : selectedSavedCard ? 'Pay Rs.24,000.00 with Saved Card' : 'Pay Rs.24,000.00 with New Card'}
+        ) : (selectedSavedCard && selectedSavedCard !== 'new-card') ? 'Pay Rs.24,000.00 with Saved Card' : 'Pay Rs.24,000.00 with New Card'}
       </button>
 
       {/* Payment Info */}
