@@ -142,8 +142,7 @@ const Navbar = () => {
         </button>
         <Link href="../aboutus" className={styles.navLink}>About Us</Link>
         <Link href="../contactUs" className={styles.navLink}>Contact Us</Link>
-        <Link href="/Card" className={styles.navLink}>Card Details</Link>
-        <Link href="/checkout" className={styles.navLink}>Checkout</Link>
+      
       </div>
 
       {/* User Actions */}
