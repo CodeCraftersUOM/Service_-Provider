@@ -92,4 +92,31 @@
   .submitButton:hover {
     background-color: #0a0db0;
   }
+
+  .submitButton:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+  
+  .error {
+    background-color: #ffebee;
+    color: #c62828;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ef5350;
+    margin-bottom: 10px;
+    text-align: center;
+    font-size: 14px;
+  }
+  
+  .success {
+    background-color: #e8f5e8;
+    color: #2e7d32;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #4caf50;
+    margin-bottom: 10px;
+    text-align: center;
+    font-size: 14px;
+  }
   

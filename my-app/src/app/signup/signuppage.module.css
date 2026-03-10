@@ -1,71 +1,105 @@
 .container {
-    background-image: url('/background04.png'); /* Replace with your actual image */
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start; 
-    padding-left: 50px; 
+  background-image: url('/background04.png');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 40px;
+  max-width: 450px;
+  width: 100%;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  text-align: center;
+}
+
+.title {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #003366;
+}
+
+.subtitle {
+  color: #555;
+  font-size: 16px;
+  margin-bottom: 24px;
+}
+
+.input {
+  width: 100%;
+  padding: 12px 14px;
+  margin-bottom: 18px;
+  border: 1px solid #ccd6e0;
+  border-radius: 8px;
+  font-size: 15px;
+  outline: none;
+  transition: border 0.2s;
+}
+
+.input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+}
+
+.button {
+  width: 100%;
+  padding: 12px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.button:hover {
+  background-color: #0056b3;
+}
+
+.footer {
+  margin-top: 20px;
+  font-size: 14px;
+  color: #666;
+}
+
+.link {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.error {
+  color: #ff3333;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+@media (max-width: 768px) {
+  .card {
+    padding: 30px 20px;
+    max-width: 90%;
   }
-  
-    
-    .card {
-      background: #ffffff;
-      padding: 50px;
-      width: 600px;
-      text-align: center;
-      
-    }
-    
-    .title {
-      font-size: 40px;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-    
-    .subtitle {
-      color: #666;
-      margin-bottom: 40px;
-    }
-    
-    .input {
-      width: 60%;
-      padding: 10px;
-      margin-bottom: 15px;
-      border: 1px solid #ccc;
-      border-radius: 20px;
-      font-size: 16px;
-    }
-    
-    .button {
-      width: 40%;
-      background-color: #007bff;
-      color: white;
-      padding: 10px;
-      border: none;
-      border-radius: 25px;
-      font-size: 16px;
-      cursor: pointer;
-      margin: 10px;
-    }
-    
-    .button:hover {
-      background-color: #0056b3;
-    }
-    
-    .footer {
-      margin-top: 15px;
-      color: #666;
-    }
-    
-    .link {
-      color: #007bff;
-      text-decoration: none;
-    }
-    
-    .link:hover {
-      text-decoration: underline;
-    }
-    
+
+  .title {
+    font-size: 28px;
+  }
+
+  .subtitle {
+    font-size: 15px;
+  }
+}
